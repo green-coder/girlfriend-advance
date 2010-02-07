@@ -2,6 +2,7 @@ package gfa.time;
 
 import gfa.memory.*;
 import gfa.gfx.*;
+import gfa.dma.Dma;
 
 /**
   * This class symbolize the time notion.
@@ -39,6 +40,26 @@ public class Time
     renderTimer.connectToLcd(lcd);
   }
 
+  public void connectToDma0(Dma dma0)
+  {
+    renderTimer.connectToDma0(dma0);
+  }
+  
+  public void connectToDma1(Dma dma1)
+  {
+    renderTimer.connectToDma1(dma1);
+  }
+  
+  public void connectToDma2(Dma dma2)
+  {
+    renderTimer.connectToDma2(dma2);
+  }
+  
+  public void connectToDma3(Dma dma3)
+  {
+    renderTimer.connectToDma3(dma3);
+  }
+  
   public void reset()
   {
     currentCPUCycle = 0;

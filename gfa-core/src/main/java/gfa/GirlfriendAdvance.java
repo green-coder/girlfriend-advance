@@ -23,7 +23,12 @@ public class GirlfriendAdvance
 
   public GirlfriendAdvance()
   {
-    cpu  = new Arm7Tdmi();
+    this(new Arm7TdmiGen2());
+  }
+
+  public GirlfriendAdvance(Arm7Tdmi cpu)
+  {
+    this.cpu  = cpu;
     mem  = new GfaMMU();
     dma0 = new Dma0();
     dma1 = new Dma1();
@@ -32,6 +37,26 @@ public class GirlfriendAdvance
     time = new Time();
     lcd  = new Lcd();
     
+    setupConnections();
+    reset();
+    
+    // Needed for handle the keyboard
+    ioMem = (IORegisterSpace_8_16_32) mem.getMemoryBank(0x04);
+  }
+
+  public void reset()
+  {
+    getTime().reset();
+    getCpu().reset();
+    getDma0().reset();
+    getDma1().reset();
+    getDma2().reset();
+    getDma3().reset();
+    getMemory().reset();
+  }
+  
+  protected void setupConnections()
+  {
     cpu.connectToMemory(mem);
     cpu.connectToTime(time);
     mem.connectToTime(time);
@@ -44,19 +69,24 @@ public class GirlfriendAdvance
     dma1.connectToMemory(mem);
     dma2.connectToMemory(mem);
     dma3.connectToMemory(mem);
+    /* $$$ for debug purpose */ Arm7Tdmi.cpu = cpu;
     time.connectToMemory(mem);
     time.connectToLcd(lcd);
+    time.connectToDma0(dma0);
+    time.connectToDma1(dma1);
+    time.connectToDma2(dma2);
+    time.connectToDma3(dma3);
     lcd.connectToMemory(mem);
-    
-    cpu.reset();
-    
-    // Needed for handle the input of gfa from the keyboard.
-    ioMem = (IORegisterSpace_8_16_32) mem.getMemoryBank(0x04);
   }
 
-  public Arm7Tdmi getCpu() {return cpu;}
-  public GfaMMU   getMem() {return mem;}
-  public Lcd      getLcd() {return lcd;}
+  public Arm7Tdmi getCpu()    {return cpu;}
+  public GfaMMU   getMemory() {return mem;}
+  public Dma      getDma0()   {return dma0;}
+  public Dma      getDma1()   {return dma1;}
+  public Dma      getDma2()   {return dma2;}
+  public Dma      getDma3()   {return dma3;}
+  public Lcd      getLcd()    {return lcd;}
+  public Time     getTime()   {return time;}
 
 
   protected IORegisterSpace_8_16_32 ioMem;
@@ -64,7 +94,7 @@ public class GirlfriendAdvance
 
   public void keyPressed(KeyEvent e)
   {
-      System.out.println("keyPressed(KeyEvent e)");
+    //System.out.println("keyPressed(KeyEvent e)");
 
     int keyCode = e.getKeyCode();
     
@@ -88,7 +118,7 @@ public class GirlfriendAdvance
 
   public void keyReleased(KeyEvent e)
   {
-    System.out.println("keyReleased(KeyEvent e)");
+    //System.out.println("keyReleased(KeyEvent e)");
 
     int keyCode = e.getKeyCode();
     

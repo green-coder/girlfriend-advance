@@ -5,30 +5,37 @@ public class MemoryManagementUnit_8_16_32
 {
   protected byte[] memory;
   protected int size;
-  protected int sizeMask;
+  protected int mirrorMask;
 
   public MemoryManagementUnit_8_16_32(String name, int size)
   {
     super(name);
-    setInternalArray(new byte[size]);
+    createInternalArray(size);
   }
 
-  public void setInternalArray(byte[] byteArray)
+  public byte[] createInternalArray(int s)
   {
-    size = byteArray.length;
-    if (size == 0) size = 1;
-    sizeMask = size - 1;
-    memory = byteArray;
+    size = s;
+    int i = 1;
+    while (i < size) i <<= 1;
+    size = i;
+    mirrorMask = size - 1;
+    memory = new byte[size];
+    return memory;
+  }
+
+  public void reset()
+  {
+    for (int i = 0; i < memory.length; i++)
+      memory[i] = 0;
   }
 
   public byte loadByte(int offset)
-    throws MemAccessException
   {
     return read(offset);
   }
 
   public short loadHalfWord(int offset)
-    throws MemAccessException
   {
     offset &= 0xfffffffe;
     return (short) ((read(offset + 1) << 8) |
@@ -36,7 +43,6 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public int loadWord(int offset)
-    throws MemAccessException
   {
     offset &= 0xfffffffc;
     return ((read(offset + 3) << 24) |
@@ -46,13 +52,11 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public void storeByte(int offset, byte value)
-    throws MemAccessException
   {
     write(offset, value);
   }
 
   public void storeHalfWord(int offset, short value)
-    throws MemAccessException
   {
     offset &= 0xfffffffe;
     write(offset + 1, (byte) (value >> 8));
@@ -60,7 +64,6 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public void storeWord(int offset, int value)
-    throws MemAccessException
   {
     offset &= 0xfffffffc;
     write(offset + 3, (byte) (value >> 24));
@@ -70,7 +73,6 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public byte swapByte(int offset, byte value)
-    throws MemAccessException
   {
     byte result = read(offset);
     write(offset, value);
@@ -78,7 +80,6 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public short swapHalfWord(int offset, short value)
-    throws MemAccessException
   {
     offset &= 0xfffffffe;
     short result = (short) ((read(offset + 1) << 8) |
@@ -89,7 +90,6 @@ public class MemoryManagementUnit_8_16_32
   }
 
   public int swapWord(int offset, int value)
-    throws MemAccessException
   {
     offset &= 0xfffffffc;
     int result = ((read(offset + 3) << 24) |
@@ -105,12 +105,19 @@ public class MemoryManagementUnit_8_16_32
 
   protected byte read(int offset)
   {
-    return memory[offset % size];
+    offset = getInternalOffset(offset);
+    return memory[offset];
   }
 
   protected void write(int offset, byte value)
   {
-    memory[offset % size] = value;
+    offset = getInternalOffset(offset);
+    memory[offset] = value;
+  }
+
+  public int getInternalOffset(int offset)
+  {
+    return offset & mirrorMask;
   }
 
 }

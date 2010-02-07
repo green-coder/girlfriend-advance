@@ -16,10 +16,12 @@ public class ObjectAttributMemory_16_32
     return (memory[base + 5] & SpritePriorityMask) >>> 2;
   }
 
-  public final int SpriteHiSizeMask = 0xc0;
-  public final int SpriteLoSizeMask = 0xc0;
+  public final int SpriteHiSizeMask = 0x000000c0;
+  public final int SpriteLoSizeMask = 0x000000c0;
 
-  // Return the number of tile which horizontally compose this sprite.
+  /**
+   * Return the number of tile which horizontally compose this sprite.
+   */
   public int getSpriteNumberXTile(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
@@ -54,19 +56,19 @@ public class ObjectAttributMemory_16_32
   public int getSpriteXPos(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
-    return ((0xff & memory[base + 2]) | ((memory[base + 3] & 0x01) << 8));
+    return (0x000000ff & memory[base + 2]) | ((memory[base + 3] << 31) >> 23);
   }
 
   public int getSpriteYPos(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
-    return (0xff & memory[base + 0]);
+    return (0x000000ff & memory[base + 0]);
   }
 
   public int getTileNumber(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
-    return ((memory[base + 5] & 0x03) << 8) | (memory[base + 4] & 0xff);
+    return ((memory[base + 5] & 0x00000003) << 8) | (memory[base + 4] & 0x000000ff);
   }
 
   public boolean is256Color(int spriteNumber)
@@ -78,7 +80,7 @@ public class ObjectAttributMemory_16_32
   public int getPal16Number(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
-    return ((memory[base + 5] & 0xf0) >>> 4);
+    return ((memory[base + 5] & 0x000000f0) >>> 4);
   }
 
   public boolean isRotScalEnabled(int spriteNumber)
@@ -114,29 +116,29 @@ public class ObjectAttributMemory_16_32
   public int getRotScalIndex(int spriteNumber)
   {
     int base = spriteNumber * 4 * 2;
-    return ((memory[base + 3] & 0x3e) >>> 1);
+    return ((memory[base + 3] & 0x0000003e) >>> 1);
   }
 
   public short getPA(int index)
   {
     int base = index * 4 * 2 * 4 + 6;
-    return (short) ((memory[base + 1] << 8) | (memory[base] & 0xff));
+    return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
 
   public short getPB(int index)
   {
     int base = index * 4 * 2 * 4 + 6 + 8;
-    return (short) ((memory[base + 1] << 8) | (memory[base] & 0xff));
+    return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
 
   public short getPC(int index)
   {
     int base = index * 4 * 2 * 4 + 6 + 8 + 8;
-    return (short) ((memory[base + 1] << 8) | (memory[base] & 0xff));
+    return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
   public short getPD(int index)
   {
     int base = index * 4 * 2 * 4 + 6 + 8 + 8 + 8;
-    return (short) ((memory[base + 1] << 8) | (memory[base] & 0xff));
+    return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
 }

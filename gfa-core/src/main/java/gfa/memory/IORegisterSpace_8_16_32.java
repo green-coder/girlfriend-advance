@@ -4,13 +4,14 @@ import gfa.cpu.*;
 import gfa.time.*;
 import gfa.dma.*;
 import gfa.gfx.*;
-import gfa.debug.*;
+//import gfa.ui.*;
 import gfa.util.*;
 
 public class IORegisterSpace_8_16_32
   extends MemoryManagementUnit
 {
   protected byte[] memory;
+  protected int mirrorMask;
   protected Timer timer0;
   protected Timer timer1;
   protected Timer timer2;
@@ -21,13 +22,14 @@ public class IORegisterSpace_8_16_32
   protected Dma dma3;
   protected Lcd lcd;
 
-  public IORegisterSpace_8_16_32(String name)
+  public IORegisterSpace_8_16_32(String name, int size)
   {
     super(name);
-    memory = new byte[1024]; // I'm not sure of this size.
+    memory = new byte[size];
+    mirrorMask = size - 1;
 
     // For now, all keys are released.
-    setReg16(0x0130, (short) 0xffff);
+    setReg16(KeyAddress, (short) 0xffff);
   }
 
   public void connectToTime(Time time)
@@ -63,26 +65,29 @@ public class IORegisterSpace_8_16_32
     this.lcd = lcd;
   }
 
-  public byte loadByte(int offset)
-    throws MemAccessException
+  public void reset()
   {
-    //throw new MemReadException(getName(), "load byte", offset);
+    for (int i = 0; i < memory.length; i++)
+      memory[i] = 0;
+
+    // For now, all keys are released.
+    setReg16(KeyAddress, (short) 0xffff);
+  }
+
+  public byte loadByte(int offset)
+  {
     return read(offset);
   }
 
   public short loadHalfWord(int offset)
-    throws MemAccessException
   {
-    //throw new MemReadException(getName(), "load halfWord", offset);
     offset &= 0xfffffffe;
     return (short) ((read(offset + 1) << 8) |
                     (0xff & read(offset)));
   }
 
   public int loadWord(int offset)
-    throws MemAccessException
   {
-    //throw new MemReadException(getName(), "load word", offset);
     offset &= 0xfffffffc;
     return ((read(offset + 3) << 24) |
             ((0xff & read(offset + 2)) << 16) |
@@ -91,25 +96,19 @@ public class IORegisterSpace_8_16_32
   }
 
   public void storeByte(int offset, byte value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "store byte", offset, value);
     write(offset, value);
   }
 
   public void storeHalfWord(int offset, short value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "store halfWord", offset, value);
     offset &= 0xfffffffe;
     write(offset, (byte) value);
     write(offset + 1, (byte) (value >> 8));
   }
 
   public void storeWord(int offset, int value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "store word", offset, value);
     offset &= 0xfffffffc;
     write(offset, (byte) value);
     write(offset + 1, (byte) (value >> 8));
@@ -118,18 +117,14 @@ public class IORegisterSpace_8_16_32
   }
 
   public byte swapByte(int offset, byte value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "swap byte", offset, value);
     byte result = read(offset);
     write(offset, value);
     return result;
   }
 
   public short swapHalfWord(int offset, short value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "swap halfWord", offset, value);
     offset &= 0xfffffffe;
     short result = (short) ((read(offset + 1) << 8) |
                              read(offset));
@@ -139,9 +134,7 @@ public class IORegisterSpace_8_16_32
   }
 
   public int swapWord(int offset, int value)
-    throws MemAccessException
   {
-    //throw new MemWriteException(getName(), "swap word", offset, value);
     offset &= 0xfffffffc;
     int result = ((read(offset + 3) << 24) |
                   ((0xff & read(offset + 2)) << 16) |
@@ -183,8 +176,8 @@ public class IORegisterSpace_8_16_32
   public final static int DMA3CrAddress   = 0x000000de;
 
   protected byte read(int offset)
-    throws MemReadException
   {
+    offset = getInternalOffset(offset);
     int off16 = offset & 0xfffffffe; // Offset aligned on halfWords.
     switch (off16)
     {
@@ -227,13 +220,17 @@ public class IORegisterSpace_8_16_32
   }
 
   protected void write(int offset, byte value)
-    throws MemWriteException
   {
+    offset = getInternalOffset(offset);
+
     int off16 = offset & 0xfffffffe; // Offset aligned on halfWords.
     int off8  = offset & 1;          // The rest of alignment.
-
+    
     short val16 = getReg16(off16);
-
+    
+    if (off8 == 0) val16 = (short) ((val16 & 0x0000ff00) | (value & 0x000000ff));
+    else val16 = (short) ((val16 & 0x000000ff) | ((value & 0x000000ff) << 8));
+    
     switch (off16)
     {
       case Timer0DataAdress: timer0.setTime(val16); break;
@@ -310,15 +307,27 @@ public class IORegisterSpace_8_16_32
         dma3.setCrRegister(val16);
         break;
 	
-      case BG2XOriginLAddress: lcd.updateBG2XOriginL(value); break;
-      case BG2XOriginHAddress: lcd.updateBG2XOriginH(value); break;
-      case BG2YOriginLAddress: lcd.updateBG2YOriginL(value); break;
-      case BG2YOriginHAddress: lcd.updateBG2YOriginH(value); break;
+      case BG2XOriginLAddress: lcd.updateBG2XOriginL(val16); break;
+      case BG2XOriginHAddress: lcd.updateBG2XOriginH(val16); break;
+      case BG2YOriginLAddress: lcd.updateBG2YOriginL(val16); break;
+      case BG2YOriginHAddress: lcd.updateBG2YOriginH(val16); break;
       
-      case BG3XOriginLAddress: lcd.updateBG3XOriginL(value); break;
-      case BG3XOriginHAddress: lcd.updateBG3XOriginH(value); break;
-      case BG3YOriginLAddress: lcd.updateBG3YOriginL(value); break;
-      case BG3YOriginHAddress: lcd.updateBG3YOriginH(value); break;
+      case BG3XOriginLAddress: lcd.updateBG3XOriginL(val16); break;
+      case BG3XOriginHAddress: lcd.updateBG3XOriginH(val16); break;
+      case BG3YOriginLAddress: lcd.updateBG3YOriginL(val16); break;
+      case BG3YOriginHAddress: lcd.updateBG3YOriginH(val16); break;
+      
+      case KeyAddress: return;
+      case KeyAddress+1: return;
+
+      case IFRegisterAddress:
+	//System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
+	memory[offset] &= ~value;
+	return;
+
+      case IERegisterAddress:
+	//System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
+	break;
       
       default:
     }
@@ -359,11 +368,10 @@ public class IORegisterSpace_8_16_32
   public final static int videoFramBufSelBit = 0x00000010;
   public final static int videoOAMHBlankBit  = 0x00000020;
   public final static int video1DMappingBit  = 0x00000040;
-  public final static int videoBG0Bit        = 0x00000100;
-  public final static int videoBG1Bit        = 0x00000200;
-  public final static int videoBG2Bit        = 0x00000400;
-  public final static int videoBG3Bit        = 0x00000800;
   public final static int videoOAMBit        = 0x00001000;
+
+  public final static int[] videoBGBit =
+  {0x00000100, 0x00000200, 0x00000400, 0x00000800};
 
   public final static int DispSrAddress     = 0x00000004;
   public final static int DispSrInVBlankBit = 0x00000001;
@@ -371,10 +379,8 @@ public class IORegisterSpace_8_16_32
 
   public final static int LCYRegisterAddress = 0x00000006; // Current Y of the raytrace
 
-  public final static int BG0FormatRegisterAddress  = 0x00000008;
-  public final static int BG1FormatRegisterAddress  = 0x0000000a;
-  public final static int BG2FormatRegisterAddress  = 0x0000000c;
-  public final static int BG3FormatRegisterAddress  = 0x0000000e;
+  public final static int[] BGFormatRegisterAddress =
+  {0x00000008, 0x0000000a, 0x0000000c, 0x0000000e};
 
   public final static int BGXPriorityMask           = 0x0003; // the priority of the background
   public final static int BGXTileDataAdressMask     = 0x000c; // the tile data address (0x6000000 + S * 0x4000)
@@ -384,14 +390,14 @@ public class IORegisterSpace_8_16_32
   public final static int BGXFormatXNumberOfTileBit = 0x4000; // if set : horizontally {64 tiles} else {only 32}
   public final static int BGXFormatYNumberOfTileBit = 0x8000; // if set : vertically {64 tiles} else {only 32}
 
-  public final static int BG0SCX = 0x00000010; // xScroll coordinate for BG0
-  public final static int BG0SCY = 0x00000012; // yScroll coordinate for BG0
-  public final static int BG1SCX = 0x00000014; // xScroll coordinate for BG1
-  public final static int BG1SCY = 0x00000016; // yScroll coordinate for BG1
-  public final static int BG2SCX = 0x00000018; // xScroll coordinate for BG2
-  public final static int BG2SCY = 0x0000001a; // yScroll coordinate for BG2
-  public final static int BG3SCX = 0x0000001c; // xScroll coordinate for BG3
-  public final static int BG3SCY = 0x0000001e; // yScroll coordinate for BG3
+  // xScroll coordinate for BG
+  public final static int[] BGSCX =
+  {0x00000010, 0x00000014, 0x00000018, 0x0000001c};
+
+  // yScroll coordinate for BG
+  public final static int[] BGSCY =
+  {0x00000012, 0x00000016, 0x0000001a, 0x0000001e};
+
   public final static int BGXScrollValueMask = 0x000003ff;
 
   public int getGfxMode()
@@ -414,236 +420,62 @@ public class IORegisterSpace_8_16_32
     return ((getReg16(LCDRegisterAddress) & videoFramBufSelBit) != 0);
   }
 
-  public boolean isBG0Enabled()
+  public boolean isBGEnabled(int bgNumber)
   {
-    return ((getReg16(LCDRegisterAddress) & videoBG0Bit) != 0);
+    return ((getReg16(LCDRegisterAddress) & videoBGBit[bgNumber]) != 0);
   }
 
-  public int getBG0Priority()
+  public int getBGPriority(int bgNumber)
   {
-    return (getReg16(BG0FormatRegisterAddress) & BGXPriorityMask);
+    return (getReg16(BGFormatRegisterAddress[bgNumber]) & BGXPriorityMask);
   }
 
-  public boolean isBG0_256Color()
+  public boolean isBG_256Color(int bgNumber)
   {
-    return ((getReg16(BG0FormatRegisterAddress) & BGXFormatPalette256Color) != 0);
+    return ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXFormatPalette256Color) != 0);
   }
 
-  public boolean isBG0MosaicEnabled()
+  public boolean isBGMosaicEnabled(int bgNumber)
   {
-    return ((getReg16(BG0FormatRegisterAddress) & BGXMosaicEnabledBit) != 0);
+    return ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXMosaicEnabledBit) != 0);
   }
 
-  public int getBG0TileMapAddress()
+  public int getBGTileMapAddress(int bgNumber)
   {
     // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG0FormatRegisterAddress) & BGXTileMapAdressMask) >>> 8) * 0x800;
+    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileMapAdressMask) >>> 8) * 0x800;
   }
 
-  public int getBG0TileDataAddress()
+  public int getBGTileDataAddress(int bgNumber)
   {
     // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG0FormatRegisterAddress) & BGXTileDataAdressMask) >>> 2) * 0x4000;
+    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileDataAdressMask) >>> 2) * 0x4000;
   }
 
-  public int getBG0XNumberOfTile()
+  public int getBGXNumberOfTile(int bgNumber)
   {
-    if ((getReg16(BG0FormatRegisterAddress) & BGXFormatXNumberOfTileBit) != 0)
+    if ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXFormatXNumberOfTileBit) != 0)
       return 64;
     else
       return 32;
   }
 
-  public int getBG0YNumberOfTile()
+  public int getBGYNumberOfTile(int bgNumber)
   {
-    if ((getReg16(BG0FormatRegisterAddress) & BGXFormatYNumberOfTileBit) != 0)
+    if ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXFormatYNumberOfTileBit) != 0)
       return 64;
     else
       return 32;
   }
 
-  public int getBG0SCX()
+  public int getBGSCX(int bgNumber)
   {
-    return (getReg16(BG0SCX) & BGXScrollValueMask);
+    return (getReg16(BGSCX[bgNumber]) & BGXScrollValueMask);
   }
 
-  public int getBG0SCY()
+  public int getBGSCY(int bgNumber)
   {
-    return (getReg16(BG0SCY) & BGXScrollValueMask);
-  }
-
-  public boolean isBG1Enabled()
-  {
-    return ((getReg16(LCDRegisterAddress) & videoBG1Bit) != 0);
-  }
-
-  public int getBG1Priority()
-  {
-    return (getReg16(BG1FormatRegisterAddress) & BGXPriorityMask);
-  }
-
-  public boolean isBG1_256Color()
-  {
-    return ((getReg16(BG1FormatRegisterAddress) & BGXFormatPalette256Color) != 0);
-  }
-
-  public boolean isBG1MosaicEnabled()
-  {
-    return ((getReg16(BG1FormatRegisterAddress) & BGXMosaicEnabledBit) != 0);
-  }
-
-  public int getBG1TileMapAddress()
-  {
-    // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG1FormatRegisterAddress) & BGXTileMapAdressMask) >>> 8) * 0x800;
-  }
-
-  public int getBG1TileDataAddress()
-  {
-    // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG1FormatRegisterAddress) & BGXTileDataAdressMask) >>> 2) * 0x4000;
-  }
-
-  public int getBG1XNumberOfTile()
-  {
-    if ((getReg16(BG1FormatRegisterAddress) & BGXFormatXNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG1YNumberOfTile()
-  {
-    if ((getReg16(BG1FormatRegisterAddress) & BGXFormatYNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG1SCX()
-  {
-    return (getReg16(BG1SCX) & BGXScrollValueMask);
-  }
-
-  public int getBG1SCY()
-  {
-    return (getReg16(BG1SCY) & BGXScrollValueMask);
-  }
-
-  public boolean isBG2Enabled()
-  {
-    return ((getReg16(LCDRegisterAddress) & videoBG2Bit) != 0);
-  }
-
-  public int getBG2Priority()
-  {
-    return (getReg16(BG2FormatRegisterAddress) & BGXPriorityMask);
-  }
-
-  public boolean isBG2_256Color()
-  {
-    return ((getReg16(BG2FormatRegisterAddress) & BGXFormatPalette256Color) != 0);
-  }
-
-  public boolean isBG2MosaicEnabled()
-  {
-    return ((getReg16(BG2FormatRegisterAddress) & BGXMosaicEnabledBit) != 0);
-  }
-
-  public int getBG2TileMapAddress()
-  {
-    // Direct Hardware Access : no need of an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG2FormatRegisterAddress) & BGXTileMapAdressMask) >>> 8) * 0x800;
-  }
-
-  public int getBG2TileDataAddress()
-  {
-    // Direct Hardware Access : no need of an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG2FormatRegisterAddress) & BGXTileDataAdressMask) >>> 2) * 0x4000;
-  }
-
-  public int getBG2XNumberOfTile()
-  {
-    if ((getReg16(BG2FormatRegisterAddress) & BGXFormatXNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG2YNumberOfTile()
-  {
-    if ((getReg16(BG2FormatRegisterAddress) & BGXFormatYNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG2SCX()
-  {
-    return (getReg16(BG2SCX) & BGXScrollValueMask);
-  }
-
-  public int getBG2SCY()
-  {
-    return (getReg16(BG2SCY) & BGXScrollValueMask);
-  }
-
-  public boolean isBG3Enabled()
-  {
-    return ((getReg16(LCDRegisterAddress) & videoBG3Bit) != 0);
-  }
-
-  public int getBG3Priority()
-  {
-    return (getReg16(BG3FormatRegisterAddress) & BGXPriorityMask);
-  }
-
-  public boolean isBG3_256Color()
-  {
-    return ((getReg16(BG3FormatRegisterAddress) & BGXFormatPalette256Color) != 0);
-  }
-
-  public boolean isBG3MosaicEnabled()
-  {
-    return ((getReg16(BG3FormatRegisterAddress) & BGXMosaicEnabledBit) != 0);
-  }
-
-  public int getBG3TileMapAddress()
-  {
-    // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG3FormatRegisterAddress) & BGXTileMapAdressMask) >>> 8) * 0x800;
-  }
-
-  public int getBG3TileDataAddress()
-  {
-    // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BG3FormatRegisterAddress) & BGXTileDataAdressMask) >>> 2) * 0x4000;
-  }
-
-  public int getBG3XNumberOfTile()
-  {
-    if ((getReg16(BG3FormatRegisterAddress) & BGXFormatXNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG3YNumberOfTile()
-  {
-    if ((getReg16(BG3FormatRegisterAddress) & BGXFormatYNumberOfTileBit) != 0)
-      return 64;
-    else
-      return 32;
-  }
-
-  public int getBG3SCX()
-  {
-    return (getReg16(BG3SCX) & BGXScrollValueMask);
-  }
-
-  public int getBG3SCY()
-  {
-    return (getReg16(BG3SCY) & BGXScrollValueMask);
+    return (getReg16(BGSCY[bgNumber]) & BGXScrollValueMask);
   }
 
   public boolean isSpriteEnabled()
@@ -693,7 +525,7 @@ public class IORegisterSpace_8_16_32
   
   public int getBG2RotScalNumberOfTile()
   {
-    switch ((getReg16(BG2FormatRegisterAddress) &
+    switch ((getReg16(BGFormatRegisterAddress[2]) &
 	     (BGXFormatXNumberOfTileBit |
 	      BGXFormatYNumberOfTileBit)) >>> 14)
     {
@@ -746,7 +578,7 @@ public class IORegisterSpace_8_16_32
   
   public int getBG3RotScalNumberOfTile()
   {
-    switch ((getReg16(BG3FormatRegisterAddress) &
+    switch ((getReg16(BGFormatRegisterAddress[3]) &
 	     (BGXFormatXNumberOfTileBit |
 	      BGXFormatYNumberOfTileBit)) >>> 14)
     {
@@ -761,12 +593,12 @@ public class IORegisterSpace_8_16_32
   
   public boolean isBG2RotScalWrapAround()
   {
-    return ((getReg16(BG2FormatRegisterAddress) & BGXWrapAroundBit) != 0);
+    return ((getReg16(BGFormatRegisterAddress[2]) & BGXWrapAroundBit) != 0);
   }
   
   public boolean isBG3RotScalWrapAround()
   {
-    return ((getReg16(BG3FormatRegisterAddress) & BGXWrapAroundBit) != 0);
+    return ((getReg16(BGFormatRegisterAddress[3]) & BGXWrapAroundBit) != 0);
   }
 
   public final static int MosaicSizeRegisterAddress = 0x0000004c;
@@ -795,7 +627,8 @@ public class IORegisterSpace_8_16_32
     return ((getReg16(MosaicSizeRegisterAddress) & MosaicRegisterOBJYMask) >>> 12) + 1;
   }
 
-  public final static int KEYRegisterAddress      = 0x00000098; // The input register
+  public final static int KeyAddress              = 0x00000130;
+  public final static int KeyRegisterAddress      = 0x00000098; // The input register
   public final static int nAButtonBit             = 0x00000001;
   public final static int nBButtonBit             = 0x00000002;
   public final static int nSelectButtonBit        = 0x00000004;
@@ -852,6 +685,16 @@ public class IORegisterSpace_8_16_32
     setReg16(DispSrAddress, val);
   }
 
+  public int getVCountSetting()
+  {
+    return getReg16(DispSrAddress) >>> 8;
+  }
+
+  public boolean isVCountMatchInterruptEnabled()
+  {
+    return ((getReg16(DispSrAddress) & 0x0020) != 0);
+  }
+
   public void setYScanline(int vValue)
   {
     //System.out.println("YScanline.set(" + vValue + ");");
@@ -869,13 +712,13 @@ public class IORegisterSpace_8_16_32
   public final static short timer1InterruptBit = 0x0010;
   public final static short timer2InterruptBit = 0x0020;
   public final static short timer3InterruptBit = 0x0040;
-  //public final static short unknownButUsedBit1 = 0x0080;
+  public final static short commInterruptBit   = 0x0080;
   public final static short dma0InterruptBit   = 0x0100;
   public final static short dma1InterruptBit   = 0x0200;
   public final static short dma2InterruptBit   = 0x0400;
   public final static short dma3InterruptBit   = 0x0800;
   public final static short keyInterruptBit    = 0x1000;
-  //public final static short unknownButUsedBit2 = 0x2000;
+  //public final static short unknownButUsedBit  = 0x2000;
   
   protected boolean isInterruptMasterEnabled()
   {
@@ -889,8 +732,25 @@ public class IORegisterSpace_8_16_32
 
   public void genInterrupt(short interruptBit)
   {
+    /*
     if (isInterruptMasterEnabled() &&
 	isInterruptEnabled(interruptBit))
+    {
+      System.out.print("genInterrupt(" + Hex.toString(interruptBit) + ");");
+      System.out.println(" SET !");
       setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) | interruptBit));
+    }
+    else
+      System.out.println(" failed .... IE=" + Hex.toString(getReg16(IERegisterAddress)) + "... IME=" + isInterruptMasterEnabled());
+    */
+
+    setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) |
+					 (getReg16(IERegisterAddress) & interruptBit)));
   }
+
+  public int getInternalOffset(int offset)
+  {
+    return offset & mirrorMask;
+  }
+
 }

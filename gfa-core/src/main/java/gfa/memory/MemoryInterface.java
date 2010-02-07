@@ -2,15 +2,17 @@ package gfa.memory;
 
 public interface MemoryInterface
 {
-  public byte  loadByte(int offset)     throws AbortException;
-  public short loadHalfWord(int offset) throws AbortException;
-  public int   loadWord(int offset)     throws AbortException;
+  public void reset();
 
-  public void storeByte(int offset, byte value)      throws AbortException;
-  public void storeHalfWord(int offset, short value) throws AbortException;
-  public void storeWord(int offset, int value)       throws AbortException;
+  public byte  loadByte     (int offset);
+  public short loadHalfWord (int offset);
+  public int   loadWord     (int offset);
 
-  public byte  swapByte(int offset, byte value)      throws AbortException;
-  public short swapHalfWord(int offset, short value) throws AbortException;
-  public int   swapWord(int offset, int value)       throws AbortException;
+  public void storeByte     (int offset, byte  value);
+  public void storeHalfWord (int offset, short value);
+  public void storeWord     (int offset, int   value);
+
+  public byte  swapByte     (int offset, byte  value);
+  public short swapHalfWord (int offset, short value);
+  public int   swapWord     (int offset, int   value);
 }

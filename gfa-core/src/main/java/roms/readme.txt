@@ -1,1 +1,1 @@
-You can put your roms in this directory for example.
+You have to put the gba rom file in this directory, with the name "gba.rom".

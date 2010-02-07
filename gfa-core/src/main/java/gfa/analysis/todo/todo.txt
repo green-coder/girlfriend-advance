@@ -1,0 +1,2 @@
+Utiliser un listener sourd par defaut.
+Simplifier les expressions constantes SYSTEMATIQUEMENT.

@@ -9,8 +9,8 @@ public class SystemROM_8_16_32
 
     // BIOS emulation.
     // It comes from mappy. I don't really know what it should do,
-    // but I know that it's better than having memory all cleared
-    // when a SWI occurs.
+    // but I know that it's better than having a memory all cleared
+    // with zeros when a SWI occurs.
     // Copyright Joat (it's written in ASCII format in the words just below).
     setReg32(0x00000000, 0xea000015);
     setReg32(0x00000004, 0xea000016);
@@ -53,7 +53,8 @@ public class SystemROM_8_16_32
 
   protected void setReg32(int offset, int value)
   {
-    offset %= size;
+    offset = getInternalOffset(offset);
+    offset &= 0xfffffffc; // offset is now word-aligned
     memory[offset + 0] = (byte) value;
     memory[offset + 1] = (byte) (value >>> 8);
     memory[offset + 2] = (byte) (value >>> 16);
@@ -62,13 +63,18 @@ public class SystemROM_8_16_32
 
   protected byte read(int offset)
   {
-    return memory[offset % size];
+    offset = getInternalOffset(offset);
+    return memory[offset];
   }
 
   protected void write(int offset, byte value)
   {
-    if (offset < size)
-      memory[offset] = value;
+    //System.out.println("Ecriture dans la rom system a l'offset " + gfa.util.Hex.toString(offset) + " !!!");
+    //gfa.debug.StepFrame.BREAK();
+    //memory[offset] = value;
   }
 
+  public void reset()
+  {
+  }
 }

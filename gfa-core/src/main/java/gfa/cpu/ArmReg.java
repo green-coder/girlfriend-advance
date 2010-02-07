@@ -13,7 +13,7 @@ public class ArmReg
 
   public ArmReg(ArmReg reg)
   {
-    val = reg.val;
+    this(reg.get());
   }
 
   public int get()
@@ -26,29 +26,34 @@ public class ArmReg
     val = v;
   }
 
+  public boolean equals(ArmReg reg)
+  {
+    return get() == reg.get();
+  }
+
   public void set(ArmReg reg)
   {
-    val = reg.val;
+    set(reg.get());
   }
 
   public void add(int v)
   {
-    val += v;
+    set(get() + v);
   }
 
   public void sub(int v)
   {
-    val -= v;
+    set(get() - v);
   }
 
   public void setOn(int bitMask)
   {
-    val |= bitMask;
+    set(get() | bitMask);
   }
 
   public void setOff(int bitMask)
   {
-    val &= ~bitMask;
+    set(get() & ~bitMask);
   }
 
   public void setBit(int bitMask, boolean isOn)
@@ -59,12 +64,12 @@ public class ArmReg
 
   public boolean isBitSet(int bitMask)
   {
-    return ((val & bitMask) != 0);
+    return ((get() & bitMask) != 0);
   }
 
   public String toString()
   {
-    return Hex.toString(val);
+    return Hex.toString(get());
   }
 
   // Code adapted from the elogba emu (from eloist) : from the file opcodes.c

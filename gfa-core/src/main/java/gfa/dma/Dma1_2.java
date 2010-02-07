@@ -1,7 +1,6 @@
 package gfa.dma;
 
 import gfa.memory.*;
-import gfa.debug.*;
 import gfa.util.*;
 
 public class Dma1_2

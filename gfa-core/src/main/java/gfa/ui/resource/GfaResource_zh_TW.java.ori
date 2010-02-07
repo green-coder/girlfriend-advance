@@ -1,0 +1,164 @@
+package gfa.ui.resource;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
+
+public class GfaResource_zh_TW
+    extends ListResourceBundle
+{
+    public Object[][] getContents()
+    {
+	return list;
+    }
+    
+    static Object[][] list =
+    {
+	// The resources for menu titles in the menu bar.
+	
+	{"FileMenuAction.NAME",
+	 "檔案"},
+	
+	{"ExecutionMenuAction.NAME",
+	 "執行指令"},
+	
+	{"InternationalMenuAction.NAME",
+	 "多國版本"},
+	
+	{"HelpMenuAction.NAME",
+	 "說明"},
+	
+	// The resources for the various action of gfa.
+	
+	{"LoadRomAction.NAME",
+	 "載入Rom ..."},
+	{"LoadRomAction.SHORT_DESCRIPTION",
+	 "載入rom到記憶體中並且重置cpu的狀態"},
+	{"LoadRomAction.LONG_DESCRIPTION",
+	 "開啟檔案選擇介面讓使用者選擇檔案" +
+	 "載入rom到記憶體中並且重置cpu的狀態"},
+	{"LoadRomAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK)},
+	
+	{"ExitAction.NAME",
+	 "離開"},
+	{"ExitAction.SHORT_DESCRIPTION",
+	 "離開程式"},
+	
+	{"ResetAction.NAME",
+	 "重置"},
+	{"ResetAction.SHORT_DESCRIPTION",
+	 "重置cpu."},
+	{"ResetAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK)},
+	
+	{"RunAction.NAME",
+	 "執行"},
+	{"RunAction.SHORT_DESCRIPTION",
+	 "開始執行程式"},
+	{"RunAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0)},
+	
+	{"StopAction.NAME",
+	 "停止"},
+	{"StopAction.SHORT_DESCRIPTION",
+	 "停止執行中的程式"},
+	{"StopAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0)},
+	
+	{"StepAction.NAME",
+	 "單步"},
+	{"StepAction.SHORT_DESCRIPTION",
+	 "執行目前的指令"},
+	{"StepAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0)},
+	
+	{"UndoAction.NAME",
+	 "回復"},
+	{"UndoAction.SHORT_DESCRIPTION",
+	 "取消上一指令的執行"},
+	{"UndoAction.LONG_DESCRIPTION",
+	 "取消上一指令的執行" +
+	 "這個功能會明確地將相關的備份資料還原" +
+	 "必然會使執行速度變得很慢"},
+	{"UndoAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)},
+	
+	{"NextAction.NAME",
+	 "下一步"},
+	{"NextAction.SHORT_DESCRIPTION",
+	 "執行下一個指令"},
+	{"NextAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)},
+	
+	{"FrenchLanguageAction.NAME",
+	 "法文"},
+	
+	{"TwChineseLanguageAction.NAME",
+	 "BIG5中文"},
+	
+	{"JapaneseLanguageAction.NAME",
+	 "日本話"},
+	
+	{"VietnameseLanguageAction.NAME",
+	 "越南語"},
+	
+	{"ThaiLanguageAction.NAME",
+	 "泰國文"},
+	
+	{"ChineseLanguageAction.NAME",
+	 "GB中文"},
+	
+	{"EnglishLanguageAction.NAME",
+	 "英文"},
+	
+	{"DocumentationAction.NAME",
+	 "文件"},
+	{"DocumentationAction.SHORT_DESCRIPTION",
+	 "模擬器相關文件"},
+	{"DocumentationAction.LONG_DESCRIPTION",
+	 "顯示模擬器相關文件"},
+	{"DocumentationAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0)},
+	
+	{"AboutAction.NAME",
+	 "關於"},
+	{"AboutAction.SHORT_DESCRIPTION",
+	 "模擬器相關資訊"},
+	{"AboutAction.LONG_DESCRIPTION",
+	 "顯示模擬器和作者的相關資訊" +
+	 "Vincent Cantin, also known as \"karma of revelation\"."},
+	
+	{"HomeDisasmAction.NAME",
+	 "回家"},
+	{"HomeDisasmAction.SHORT_DESCRIPTION",
+	 "回到目前指令列"},
+	{"HomeDisasmAction.LONG_DESCRIPTION",
+	 "反組譯元件顯示區會指到目前指令列"},
+	{"HomeDisasmAction.ACCELERATOR_KEY",
+	 KeyStroke.getKeyStroke(KeyEvent.VK_HOME, Event.CTRL_MASK)},
+	
+	// The resources for tables.
+	
+	{"CodeViewerTable.column_0", "Offset"},
+	{"CodeViewerTable.column_1", "Opcode"},
+	{"CodeViewerTable.column_2", "Instruction"},
+	
+	{"RegisterViewerTable.column_0", "Name"},
+	{"RegisterViewerTable.column_1", "Value"},
+	
+	// The resources for misc componants.
+	
+	{"InputPanel.up", "Up"},
+	{"InputPanel.down", "Down"},
+	{"InputPanel.left", "Left"},
+	{"InputPanel.right", "Right"},
+	{"InputPanel.select", "Select"},
+	{"InputPanel.start", "Start"},
+	{"InputPanel.a", "A"},
+	{"InputPanel.b", "B"},
+	{"InputPanel.l", "L"},
+	{"InputPanel.r", "R"}
+    };
+}
