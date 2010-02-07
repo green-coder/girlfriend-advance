@@ -1,0 +1,1 @@
+You can put your roms in this directory for example.
