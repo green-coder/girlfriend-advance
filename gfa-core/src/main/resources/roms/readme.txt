@@ -1,0 +1,1 @@
+You have to put the gba rom file in this directory, with the name "bios.gba".

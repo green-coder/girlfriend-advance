@@ -1,11 +1,9 @@
 package gfa.ui.action;
 
-import gfa.*;
 import gfa.ui.*;
+import java.net.URL;
 
 import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 public abstract class InternationalAction
@@ -31,8 +29,12 @@ public abstract class InternationalAction
 	
 	try {putValue(LONG_DESCRIPTION, resource.getString(actionKey + ".LONG_DESCRIPTION"));}
 	catch(MissingResourceException e) {putValue(LONG_DESCRIPTION, "");}
-	
-	try {putValue(SMALL_ICON, new ImageIcon(resource.getString(actionKey + ".SMALL_ICON")));}
+
+	try {
+          String iconFileName = resource.getString(actionKey + ".SMALL_ICON");
+          URL url = getClass().getClassLoader().getResource(iconFileName);
+          putValue(SMALL_ICON, new ImageIcon(url));
+        }
 	catch(MissingResourceException e) {putValue(SMALL_ICON, null);}
 	
 	try {putValue(MNEMONIC_KEY, new Integer((int) resource.getString(actionKey + ".MNEMONIC_KEY").charAt(0)));}

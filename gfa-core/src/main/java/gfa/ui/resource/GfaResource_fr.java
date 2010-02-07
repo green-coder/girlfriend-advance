@@ -23,7 +23,7 @@ public class GfaResource_fr
 	 "f"},
 	
 	{"ExecutionMenuAction.NAME",
-	 "Exécution"},
+	 "ExÃ©cution"},
 	{"ExecutionMenuAction.MNEMONIC_KEY",
 	 "e"},
 	
@@ -42,10 +42,10 @@ public class GfaResource_fr
 	{"LoadRomAction.NAME",
 	 "Charger Rom ..."},
 	{"LoadRomAction.SHORT_DESCRIPTION", 
-	 "Charge un fichier de rom en mémoire et réinitialise l'état du processeur."},
+	 "Charge un fichier de rom en mÃ©moire et rÃ©initialise l'Ã©tat du processeur."},
 	{"LoadRomAction.LONG_DESCRIPTION",
-	 "Ouvre une fenêtre dans laquelle l'utilisateur pourra choisir la rom à " +
-	 "charger en mémoire. Cette opération réinitialise l'état du processeur."},
+	 "Ouvre une fenÃªtre dans laquelle l'utilisateur pourra choisir la rom Ã  " +
+	 "charger en mÃ©moire. Cette opÃ©ration rÃ©initialise l'Ã©tat du processeur."},
 	{"LoadRomAction.MNEMONIC_KEY",
 	 "c"},
 	{"LoadRomAction.ACCELERATOR_KEY",
@@ -59,18 +59,18 @@ public class GfaResource_fr
 	 "q"},
 	
 	{"ResetAction.NAME",
-	 "Réinitialise"},
+	 "RÃ©initialise"},
 	{"ResetAction.SHORT_DESCRIPTION",
-	 "Réinitialise le processeur."},
+	 "RÃ©initialise le processeur."},
 	{"ResetAction.MNEMONIC_KEY",
 	 "i"},
 	{"ResetAction.ACCELERATOR_KEY",
 	 KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK)},
 	
 	{"RunAction.NAME",
-	 "Exécute"},
+	 "ExÃ©cute"},
 	{"RunAction.SHORT_DESCRIPTION",
-	 "Lance l'exécution du programme."},
+	 "Lance l'exÃ©cution du programme."},
 	{"RunAction.MNEMONIC_KEY",
 	 "e"},
 	{"RunAction.ACCELERATOR_KEY",
@@ -79,7 +79,7 @@ public class GfaResource_fr
 	{"StopAction.NAME",
 	 "Stop"},
 	{"StopAction.SHORT_DESCRIPTION",
-	 "Stoppe l'exécution du programme."},
+	 "Stoppe l'exÃ©cution du programme."},
 	{"StopAction.MNEMONIC_KEY",
 	 "t"},
 	{"StopAction.ACCELERATOR_KEY",
@@ -88,7 +88,7 @@ public class GfaResource_fr
 	{"StepAction.NAME",
 	 "Marche"},
 	{"StepAction.SHORT_DESCRIPTION",
-	 "Exécute l'instruction courante."},
+	 "ExÃ©cute l'instruction courante."},
 	{"StepAction.MNEMONIC_KEY",
 	 "m"},
 	{"StepAction.ACCELERATOR_KEY",
@@ -97,12 +97,12 @@ public class GfaResource_fr
 	{"UndoAction.NAME",
 	 "Revient"},
 	{"UndoAction.SHORT_DESCRIPTION",
-	 "Annule la dernière instruction."},
+	 "Annule la derniÃ¨re instruction."},
 	{"UndoAction.LONG_DESCRIPTION",
-	 "Annule l'effet de l'exécution de la dernière instruction. " +
-	 "Cette option doit être activée explicitement parcequ'elle cause beaucoup " +
-	 "de sauvegardes de l'état de l'émulateur, et par conséquent elle ralentit " +
-	 "considérablement l'exécution du programme émulé."},
+	 "Annule l'effet de l'exÃ©cution de la derniÃ¨re instruction. " +
+	 "Cette option doit Ãªtre activÃ©e explicitement parcequ'elle cause beaucoup " +
+	 "de sauvegardes de l'Ã©tat de l'Ã©mulateur, et par consÃ©quent elle ralentit " +
+	 "considÃ©rablement l'exÃ©cution du programme Ã©mulÃ©."},
 	{"UndoAction.MNEMONIC_KEY",
 	 "r"},
 	{"UndoAction.ACCELERATOR_KEY",
@@ -111,7 +111,7 @@ public class GfaResource_fr
 	{"NextAction.NAME",
 	 "Suivante"},
 	{"NextAction.SHORT_DESCRIPTION",
-	 "Exécute le programme jusqu'à l'instruction suivante."},
+	 "ExÃ©cute le programme jusqu'Ã  l'instruction suivante."},
 	{"NextAction.MNEMONIC_KEY",
 	 "s"},
 	{"NextAction.ACCELERATOR_KEY",
@@ -120,15 +120,15 @@ public class GfaResource_fr
 	{"BreakNextAction.NAME",
 	 "Break Next"},
 	{"BreakNextAction.SHORT_DESCRIPTION",
-	 "Exécute jusqu'à ce que la condition spécifiée soit vraie."},
+	 "ExÃ©cute jusqu'Ã  ce que la condition spÃ©cifiÃ©e soit vraie."},
 	
 	{"BreakPrevAction.NAME",
 	 "Break Prev"},
 	{"BreakPrevAction.SHORT_DESCRIPTION",
-	 "Revient au dernier moment où la condition spécifiée était vraie."},
+	 "Revient au dernier moment oÃ¹ la condition spÃ©cifiÃ©e Ã©tait vraie."},
 	
 	{"FrenchLanguageAction.NAME",
-	 "Français"},
+	 "FranÃ§ais"},
 	
 	{"TwChineseLanguageAction.NAME",
 	 "Chinois traditionel"},
@@ -140,20 +140,20 @@ public class GfaResource_fr
 	 "Vietnamien"},
 	
 	{"ThaiLanguageAction.NAME",
-	 "Thaïlandais"},
+	 "ThaÃ¯landais"},
 	
 	{"ChineseLanguageAction.NAME",
-	 "Chinois simplifié"},
+	 "Chinois simplifiÃ©"},
 	
 	{"EnglishLanguageAction.NAME",
 	 "Anglais"},
 	
 	{"ScreenShotAction.NAME",
-	 "Photo d'écran"},
+	 "Photo d'Ã©cran"},
 	{"ScreenShotAction.SHORT_DESCRIPTION",
-	 "Prend une photo de l'écran au prochain rafraichissement."},
+	 "Prend une photo de l'Ã©cran au prochain rafraichissement."},
 	{"ScreenShotAction.LONG_DESCRIPTION",
-	 "Option pour se la jouer à la \"Loft Story\" sur les jeux"},
+	 "Option pour se la jouer Ã  la \"Loft Story\" sur les jeux"},
 	
 	{"DocumentationAction.NAME",
 	 "Documentation de Gfa"},
@@ -169,7 +169,7 @@ public class GfaResource_fr
 	{"AboutAction.NAME",
 	 "A propos"},
 	{"AboutAction.SHORT_DESCRIPTION",
-	 "Informations à propos de Girlfriend Advance."},
+	 "Informations Ã  propos de Girlfriend Advance."},
 	{"AboutAction.LONG_DESCRIPTION",
 	 "Affiche les informations concernant Girlfriend Advance et son auteur " +
 	 "Vincent Cantin, aussi connu sous le pseudonyme de \"karma of revelation\"."},
@@ -179,9 +179,9 @@ public class GfaResource_fr
 	{"HomeDisasmAction.NAME",
 	 "Maison"},
 	{"HomeDisasmAction.SHORT_DESCRIPTION",
-	 "Revient à l'instruction courante."},
+	 "Revient Ã  l'instruction courante."},
 	{"HomeDisasmAction.LONG_DESCRIPTION",
-	 "Rend l'instruction courante visible sur le composant du désassembleur."},
+	 "Rend l'instruction courante visible sur le composant du dÃ©sassembleur."},
 	{"HomeDisasmAction.ACCELERATOR_KEY",
 	 KeyStroke.getKeyStroke(KeyEvent.VK_HOME, Event.CTRL_MASK)},
 	
@@ -200,17 +200,17 @@ public class GfaResource_fr
 	{"BiosRomDisasmAction.NAME", "Rom du bios"},
 	{"ExternalRamDisasmAction.NAME", "Ram externe"},
 	{"WorkRamDisasmAction.NAME", "Ram de travail"},
-	{"IoRegDisasmAction.NAME", "Registres e/s matérielles"},
+	{"IoRegDisasmAction.NAME", "Registres e/s matÃ©rielles"},
 	{"PaletteRamDisasmAction.NAME", "Ram de la palette"},
-	{"VideoRamDisasmAction.NAME", "Ram vidéo"},
+	{"VideoRamDisasmAction.NAME", "Ram vidÃ©o"},
 	{"OamRamDisasmAction.NAME", "Ram d'attribut des sprites"},
 	{"GamepakRomDisasmAction.NAME", "Rom de la cartouche"},
 	{"CartRamDisasmAction.NAME", "Rom de sauvegarde"},
 	
 	{"TrackMenuDisasmAction.NAME", "Suivi"},
 	{"NoTrackingDisasmAction.NAME", "Pas de suivi"},
-	{"CenterTrackingDisasmAction.NAME", "Suivi centré"},
-	{"WindowTrackingDisasmAction.NAME", "Suivi fenêtré"},
+	{"CenterTrackingDisasmAction.NAME", "Suivi centrÃ©"},
+	{"WindowTrackingDisasmAction.NAME", "Suivi fenÃªtrÃ©"},
 	
 	// The resources for InputPanel.
 	

@@ -1,0 +1,22 @@
+syntax: glob
+
+# No bios file in the repository.
+*/bios.gba
+
+# No preview in the repository.
+*/.pics/*
+
+# No built files in the repository.
+*/target/*
+
+# No text backups in the repository.
+*~
+
+syntax: regexp
+
+\.orig$
+\.orig\..*$
+\.chg\..*$
+\.rej$
+\.conflict\~$
+

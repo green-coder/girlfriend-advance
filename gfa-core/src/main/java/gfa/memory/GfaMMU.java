@@ -116,7 +116,6 @@ public class GfaMMU
     protected InputStream openBrutDataInputStream(URL url, String name)
 	throws IOException
     {
-	url = new URL(url, name);
 	InputStream inputStream = url.openStream();
 	if (name.toLowerCase().endsWith(".zip"))
 	    {
@@ -151,8 +150,8 @@ public class GfaMMU
     
     public boolean loadBios(String name)
     {
-	try {return loadBios(new URL("file:"), name);}
-	catch (MalformedURLException e) {return false;}
+      URL url = getClass().getClassLoader().getResource(name);
+      return loadBios(url, name);
     }
     
     public boolean loadBios(URL url, String name)
@@ -180,8 +179,7 @@ public class GfaMMU
     
     public boolean loadRom(String name)
     {
-	try {return loadRom(new URL("file:"), name);}
-	catch (MalformedURLException e) {return false;}
+	return loadRom(getClass().getClassLoader().getResource(name), name);
     }
     
     public boolean loadRom(URL url, String name)

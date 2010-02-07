@@ -73,8 +73,8 @@ public class UserInterface
     
     public UserInterface(String romName)
     {
-	super("Girlfriend Advance - Blond edition - by karma " +
-	      "(I look for a job in Taiwan or in Japan)");
+	super("Girlfriend Advance - Blond edition - by Vincent Cantin " +
+	      "(I am looking for a job in Japan)");
 	
 	// Create an instance of the emulator.
 	gfa = new GirlfriendAdvance();
@@ -154,7 +154,7 @@ public class UserInterface
 	    });
 	
 	// Load the bios in the memory.
-	gfa.getMemory().loadBios("roms/gba.rom");
+	gfa.getMemory().loadBios("roms/bios.gba");
 	
 	// Load a rom into the memory.
 	if (romName != null)
