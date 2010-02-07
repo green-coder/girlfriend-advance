@@ -135,6 +135,7 @@ public abstract class Instruction
   protected void signalError(String errorMsg)
   {
     System.out.println("ERROR : " + errorMsg);
-    Arm7Tdmi.cpu.stopPlease();
+    // TODO ...
+    //Arm7Tdmi.cpu.stopPlease();
   }
 }

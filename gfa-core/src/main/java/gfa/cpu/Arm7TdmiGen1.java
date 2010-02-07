@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.io.*;
 import gfa.memory.*;
 import gfa.time.*;
-import gfa.debug.*;
 import gfa.util.*;
 
 public class Arm7TdmiGen1
@@ -45,7 +44,6 @@ public class Arm7TdmiGen1
   public void step()
   {
     int instructionTime;
-    GfaMMU memory = (GfaMMU) this.memory;
 
     // Handle IRQ
     if (!CPSR.isBitSet(iFlagBit) &&

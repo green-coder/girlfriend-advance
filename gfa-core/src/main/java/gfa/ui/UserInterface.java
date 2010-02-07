@@ -2,7 +2,6 @@ package gfa.ui;
 
 import gfa.*;
 import gfa.ui.action.*;
-import gfa.analysis.*;
 import gfa.gfx.*;
 
 import java.util.*;
@@ -36,10 +35,6 @@ public class UserInterface
     public Action stepAction;
     public Action undoAction;
     public Action nextAction;
-    public Action breakPrevAction;
-    public Action breakNextAction;
-    public JTextField breakCondTextField;
-    public Parser parser;
     
     public Action frenchLanguageAction;
     public Action twChineseLanguageAction;
@@ -100,10 +95,6 @@ public class UserInterface
 	stepAction  = new StepAction  (this, gfa);
 	undoAction  = new UndoAction  (this, gfa);
 	nextAction  = new NextAction  (this, gfa);
-	breakPrevAction = new BreakPrevAction(this, gfa);
-	breakNextAction = new BreakNextAction(this, gfa);
-    	breakCondTextField = new JTextField("(mem8written 0x04000000)");
-	parser = new Parser(gfa.getMemory(), gfa.getCpu());
 	
 	frenchLanguageAction     = new LocaleChangeAction(this, "FrenchLanguageAction", Locale.FRENCH);
 	twChineseLanguageAction  = new LocaleChangeAction(this, "TwChineseLanguageAction", Locale.TRADITIONAL_CHINESE);

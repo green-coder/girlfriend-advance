@@ -18,7 +18,7 @@ public class Hex
     {
 	StringBuffer sb = new StringBuffer(4);
 	for (int i = 3; i >= 0; i--)
-	    sb.append(digits[(int) (n >>> (i * 4)) & 0x0000000f]);
+	    sb.append(digits[(n >>> (i * 4)) & 0x0000000f]);
 	return sb.toString();
     }
     

@@ -1,19 +1,20 @@
 package gfa.gfx;
 
 import gfa.memory.*;
-//import gfa.ui.*;
 import gfa.util.*;
 
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.util.Vector;
 import java.awt.image.*;
+import java.util.List;
 
 public class Lcd
   implements ImageProducer
 {
   protected int[] rawPixels;
   protected DirectColorModel model;
-  protected Vector consumers;
+  protected List<ImageConsumer> consumers;
   protected Image image;
 
   public final int xScreenSize = 240;
@@ -29,7 +30,7 @@ public class Lcd
     rawPixels = new int[xScreenSize * yScreenSize];
     model = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff);
     image = Toolkit.getDefaultToolkit().createImage(this);
-    consumers = new Vector();
+    consumers = new Vector<ImageConsumer>();
   }
 
   public Image getImage()
@@ -75,7 +76,7 @@ public class Lcd
     //System.out.println("consumers.size() = " + consumers.size());
     for (int i = 0; i < consumers.size(); i++)
     {
-      ImageConsumer ic = (ImageConsumer) consumers.get(i);
+      ImageConsumer ic = consumers.get(i);
       ic.setPixels(0, 0, xScreenSize, yScreenSize, model, rawPixels, 0, xScreenSize);
       ic.imageComplete(ic.SINGLEFRAMEDONE);
     }

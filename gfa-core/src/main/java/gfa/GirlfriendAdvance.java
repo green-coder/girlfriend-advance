@@ -1,13 +1,19 @@
 package gfa;
 
-import gfa.cpu.*;
-import gfa.memory.*;
-import gfa.gfx.*;
-import gfa.dma.*;
-import gfa.time.*;
+import gfa.cpu.Arm7Tdmi;
+import gfa.cpu.Arm7TdmiGen2;
+import gfa.dma.Dma;
+import gfa.dma.Dma0;
+import gfa.dma.Dma1;
+import gfa.dma.Dma2;
+import gfa.dma.Dma3;
+import gfa.gfx.Lcd;
+import gfa.memory.GfaMMU;
+import gfa.memory.IORegisterSpace_8_16_32;
+import gfa.time.Time;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
-import java.net.*;
-import java.awt.event.*;
 
 public class GirlfriendAdvance
   implements KeyListener
@@ -69,7 +75,6 @@ public class GirlfriendAdvance
     dma1.connectToMemory(mem);
     dma2.connectToMemory(mem);
     dma3.connectToMemory(mem);
-    /* $$$ for debug purpose */ Arm7Tdmi.cpu = cpu;
     time.connectToMemory(mem);
     time.connectToLcd(lcd);
     time.connectToDma0(dma0);

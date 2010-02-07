@@ -13,9 +13,9 @@ public class Dma3
   }
 
   public void setSrcHRegister(short srcH)
-  {src = (src & 0x0000ffff) | ((int) (srcH & 0x0fff) << 16);}
+  {src = (src & 0x0000ffff) | ((srcH & 0x0fff) << 16);}
 
   public void setDstHRegister(short dstH)
-  {dst = (dst & 0x0000ffff) | ((int) (dstH & 0x0fff) << 16);}
+  {dst = (dst & 0x0000ffff) | ((dstH & 0x0fff) << 16);}
 
 }

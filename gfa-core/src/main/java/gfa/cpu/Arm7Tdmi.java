@@ -1,26 +1,14 @@
 package gfa.cpu;
 
 import gfa.memory.*;
-import gfa.analysis.*;
 import gfa.time.*;
 import gfa.util.*;
 
 import java.io.*;
 
-abstract public class Arm7Tdmi
+public abstract class Arm7Tdmi
+        implements Runnable
 {
-/*
-  static public PrintStream debug;
-  static
-  {
-      try {debug = new PrintStream(new FileOutputStream("debug.txt"));}
-      catch (Exception e) {debug = System.out;}
-      //debug = System.out;
-  }
-*/
-
-    /* $$$: For debug purpose */ static public Arm7Tdmi cpu;
-
   protected GfaMMU memory;
   protected Time time;
 
@@ -88,16 +76,6 @@ abstract public class Arm7Tdmi
   protected ArmReg newArmReg(int v)
   {
     return new ArmReg(v);
-  }
-  
-  public void removeAllRegListener()
-  {
-    for (int i = 0; i < allRegisters.length; i++)
-      if (allRegisters[i] != null)
-	for (int j = 0; j < allRegisters[i].length; j++)
-	  if (allRegisters[i][j] != null)
-	    if (allRegisters[i][j] instanceof ArmRegObserver)
-	      ((ArmRegObserver) allRegisters[i][j]).removeAllListener();
   }
   
   protected void initRegisters()
@@ -337,19 +315,18 @@ abstract public class Arm7Tdmi
 
   public void run()
   {
-    stopPolitelyRequested = false;
     while (!stopPolitelyRequested)
       step();
+  }
+  
+  public void start() {
+      stopPolitelyRequested = false;
+      new Thread(this).start();
   }
 
   public void stopPlease()
   {
-    stopPlease(true);
-  }
-  
-  public void stopPlease(boolean b)
-  {
-    stopPolitelyRequested = b;
+    stopPolitelyRequested = true;
   }
   
   public boolean isStopPolitelyRequested()

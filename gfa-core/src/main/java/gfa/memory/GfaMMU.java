@@ -4,9 +4,6 @@ import gfa.time.*;
 import gfa.dma.*;
 import gfa.gfx.*;
 import gfa.util.*;
-import gfa.analysis.MemoryObserver;
-import gfa.analysis.ReadMemoryListener;
-import gfa.analysis.WriteMemoryListener;
 
 import java.io.*;
 import java.net.*;
@@ -15,8 +12,6 @@ import java.util.zip.*;
 public class GfaMMU
     implements MemoryInterface
 {
-    protected MemoryInterface[] trueMemory;
-    protected MemoryInterface[] spyMemory;
     protected MemoryInterface[] memory;
     protected String biosFileName = "";
     protected String romFileName = "";
@@ -25,66 +20,54 @@ public class GfaMMU
     
     public GfaMMU()
     {
-	trueMemory = new MemoryInterface[16];
-	spyMemory = new MemoryInterface[16];
-	memory = trueMemory; // For no use of conditionnal breakpoints.
-	//memory = spyMemory; // For using conditionnal breakpoints.
+	memory = new MemoryInterface[16];
 	
-	trueMemory[0x00] = new SystemROM_8_16_32("System ROM", 0x4000);
-	trueMemory[0x01] = new MemoryManagementUnit_8_16_32("Dummy memory", 0x100);
-	trueMemory[0x02] = new MemoryManagementUnit_8_16_32("External RAM", 0x40000);
-	trueMemory[0x03] = new MemoryManagementUnit_8_16_32("Work RAM", 0x8000);
-	trueMemory[0x04] = new IORegisterSpace_8_16_32("I/O Register Space", 0x400);
-	trueMemory[0x05] = new MemoryManagementUnit_16_32("Palette RAM", 0x400);
-	trueMemory[0x06] = new VideoRam_16_32("Video RAM", 0x18000);
-	trueMemory[0x07] = new ObjectAttributMemory_16_32("OAM RAM", 0x400);
-	trueMemory[0x08] = new GameROM_8_16_32("GameRom Part 1", 0x1);
-	trueMemory[0x09] = new GameROM_8_16_32("GameRom Part 2", 0x1);
-	trueMemory[0x0a] = trueMemory[0x08];
-	trueMemory[0x0b] = trueMemory[0x09];
-	trueMemory[0x0c] = trueMemory[0x08];
-	trueMemory[0x0d] = trueMemory[0x09];
-	trueMemory[0x0e] = new MemoryManagementUnit_8("Cart RAM", 0x10000);
-	trueMemory[0x0f] = trueMemory[0x0e];
-	
-	for (int i = 0; i < 16; i++)
-	    spyMemory[i] = new MemoryObserver(trueMemory[i]);
-    }
-    
-    public void setSpyModeEnabled(boolean b)
-    {
-	if (b) memory = spyMemory;
-	else memory = trueMemory;
+	memory[0x00] = new SystemROM_8_16_32("System ROM", 0x4000);
+	memory[0x01] = new MemoryManagementUnit_8_16_32("Dummy memory", 0x100);
+	memory[0x02] = new MemoryManagementUnit_8_16_32("External RAM", 0x40000);
+	memory[0x03] = new MemoryManagementUnit_8_16_32("Work RAM", 0x8000);
+	memory[0x04] = new IORegisterSpace_8_16_32("I/O Register Space", 0x400);
+	memory[0x05] = new MemoryManagementUnit_16_32("Palette RAM", 0x400);
+	memory[0x06] = new VideoRam_16_32("Video RAM", 0x18000);
+	memory[0x07] = new ObjectAttributMemory_16_32("OAM RAM", 0x400);
+	memory[0x08] = new GameROM_8_16_32("GameRom Part 1", 0x1);
+	memory[0x09] = new GameROM_8_16_32("GameRom Part 2", 0x1);
+	memory[0x0a] = memory[0x08];
+	memory[0x0b] = memory[0x09];
+	memory[0x0c] = memory[0x08];
+	memory[0x0d] = memory[0x09];
+	memory[0x0e] = new MemoryManagementUnit_8("Cart RAM", 0x10000);
+	memory[0x0f] = memory[0x0e];
     }
     
     public void connectToTime(Time time)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToTime(time);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToTime(time);
     }
     
     public void connectToDma0(Dma dma0)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToDma0(dma0);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToDma0(dma0);
     }
     
     public void connectToDma1(Dma dma1)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToDma1(dma1);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToDma1(dma1);
     }
     
     public void connectToDma2(Dma dma2)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToDma2(dma2);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToDma2(dma2);
     }
     
     public void connectToDma3(Dma dma3)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToDma3(dma3);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToDma3(dma3);
     }
     
     public void connectToLcd(Lcd lcd)
     {
-	((IORegisterSpace_8_16_32) trueMemory[0x04]).connectToLcd(lcd);
+	((IORegisterSpace_8_16_32) memory[0x04]).connectToLcd(lcd);
     }
     
     static final protected int MemOffsetHiBitsMask = 0x0f000000;
@@ -118,13 +101,13 @@ public class GfaMMU
     {return memory[(offset & MemOffsetHiBitsMask) >>> 24].swapWord(offset, value);}
     
     public byte directLoadByte(int offset)
-    {return trueMemory[(offset & MemOffsetHiBitsMask) >>> 24].loadByte(offset);}
+    {return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadByte(offset);}
     
     public short directLoadHalfWord(int offset)
-    {return trueMemory[(offset & MemOffsetHiBitsMask) >>> 24].loadHalfWord(offset);}
+    {return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadHalfWord(offset);}
     
     public int directLoadWord(int offset)
-    {return trueMemory[(offset & MemOffsetHiBitsMask) >>> 24].loadWord(offset);}
+    {return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadWord(offset);}
     
     /**
      * Return an inputStream from a file or from the first entry in a zip file
@@ -178,7 +161,7 @@ public class GfaMMU
 	    {
 		name = filterNameForJava(name);
 		InputStream inputStream = openBrutDataInputStream(url, name);
-		byte[] sys = ((MemoryManagementUnit_8_16_32) trueMemory[0x00]).createInternalArray(0x4000);
+		byte[] sys = ((MemoryManagementUnit_8_16_32) memory[0x00]).createInternalArray(0x4000);
 		readFully(inputStream, sys);
 		inputStream.close();
 		biosFileName = name;
@@ -236,8 +219,8 @@ public class GfaMMU
 		
 		romFileName = name;
 		romFileUrl  = url;
-		byte[] part1 = ((GameROM_8_16_32) trueMemory[0x08]).createInternalArray((int) size1);
-		byte[] part2 = ((GameROM_8_16_32) trueMemory[0x09]).createInternalArray((int) size2);
+		byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) size1);
+		byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) size2);
 		readFully(inputStream, part1);
 		readFully(inputStream, part2);
 		inputStream.close();
@@ -282,78 +265,18 @@ public class GfaMMU
     
     public void reset()
     {
-	for (int i = 0; i < trueMemory.length; i++)
-	    if (trueMemory[i] != null)
-		trueMemory[i].reset();
+	for (int i = 0; i < memory.length; i++)
+	    if (memory[i] != null)
+		memory[i].reset();
     }
     
     public MemoryManagementUnit getMemoryBank(int bankNumber)
     {
-	return (MemoryManagementUnit) trueMemory[bankNumber];
-    }
-    
-    public void setObserverEnabled(boolean letSpy)
-    {
-	if (letSpy) memory = spyMemory;
-	else memory = trueMemory;
-    }
-    
-    public void addReadMemoryListener(ReadMemoryListener obj)
-    {
-	for (int i = 0; i < 16; i++)
-	    ((MemoryObserver) spyMemory[i]).addReadMemoryListener(obj);
-    }
-    
-    public void removeReadMemoryListener(ReadMemoryListener obj)
-    {
-	for (int i = 0; i < 16; i++)
-	    ((MemoryObserver) spyMemory[i]).removeReadMemoryListener(obj);
-    }
-    
-    public void addWriteMemoryListener(WriteMemoryListener obj)
-    {
-	for (int i = 0; i < 16; i++)
-	    ((MemoryObserver) spyMemory[i]).addWriteMemoryListener(obj);
-    }
-    
-    public void removeWriteMemoryListener(WriteMemoryListener obj)
-    {
-	for (int i = 0; i < 16; i++)
-	    ((MemoryObserver) spyMemory[i]).removeWriteMemoryListener(obj);
-    }
-    
-    public void addReadMemoryListener(ReadMemoryListener obj, int offset)
-    {
-	MemoryObserver mo = (MemoryObserver) spyMemory[(offset & MemOffsetHiBitsMask) >>> 24];
-	mo.addReadMemoryListener(obj);
-    }
-    
-    public void removeReadMemoryListener(ReadMemoryListener obj, int offset)
-    {
-	MemoryObserver mo = (MemoryObserver) spyMemory[(offset & MemOffsetHiBitsMask) >>> 24];
-	mo.removeReadMemoryListener(obj);
-    }
-    
-    public void addWriteMemoryListener(WriteMemoryListener obj, int offset)
-    {
-	MemoryObserver mo = (MemoryObserver) spyMemory[(offset & MemOffsetHiBitsMask) >>> 24];
-	mo.addWriteMemoryListener(obj);
-    }
-    
-    public void removeWriteMemoryListener(WriteMemoryListener obj, int offset)
-    {
-	MemoryObserver mo = (MemoryObserver) spyMemory[(offset & MemOffsetHiBitsMask) >>> 24];
-	mo.removeWriteMemoryListener(obj);
-    }
-    
-    public void removeAllListener()
-    {
-	for (int i = 0; i < 16; i++)
-	    ((MemoryObserver) spyMemory[i]).removeAllListener();
+	return (MemoryManagementUnit) memory[bankNumber];
     }
     
     public int getInternalOffset(int offset)
     {
-	return ((MemoryManagementUnit) trueMemory[(offset & MemOffsetHiBitsMask) >>> 24]).getInternalOffset(offset) | (offset & MemOffsetHiBitsMask);
+	return ((MemoryManagementUnit) memory[(offset & MemOffsetHiBitsMask) >>> 24]).getInternalOffset(offset) | (offset & MemOffsetHiBitsMask);
     }
 }

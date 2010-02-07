@@ -25,10 +25,6 @@ public class GfaToolBar
 	add(new ToolBarButton(ui.stepAction));
 	add(new ToolBarButton(ui.nextAction));
 	addSeparator();
-	add(new ToolBarButton(ui.breakPrevAction));
-	add(new ToolBarButton(ui.breakNextAction));
-	add(ui.breakCondTextField);
-	addSeparator();
 	add(new ToolBarButton(ui.screenShotAction));
 	addSeparator();
 	watchMemButton = new JButton("Watch");

@@ -1,23 +1,56 @@
 package gfa.gfx;
 
-import gfa.*;
-
-import javax.swing.*;
-import java.awt.*;
+import gfa.GirlfriendAdvance;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import javax.swing.JComponent;
 
 public class GfaScreen
     extends JComponent
 {
+    private Dimension fixedDimension = new Dimension(240, 160);
     protected Image lcdImage;
+    
+    public GfaScreen() {
+        lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
+    }
     
     public GfaScreen(GirlfriendAdvance gfa)
     {
-	super();
 	setDoubleBuffered(false);
-	setPreferredSize(new Dimension(240, 160));
-	setMinimumSize(new Dimension(240, 160));
-	setMaximumSize(new Dimension(240, 160));
 	lcdImage = gfa.getLcd().getImage();
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return fixedDimension;
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return fixedDimension;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return fixedDimension;
+    }
+
+    @Override
+    public boolean isPreferredSizeSet() {
+        return true;
+    }
+
+    @Override
+    public boolean isMinimumSizeSet() {
+        return true;
+    }
+
+    @Override
+    public boolean isMaximumSizeSet() {
+        return true;
     }
     
     public void resfresh()
@@ -25,6 +58,7 @@ public class GfaScreen
 	repaint();
     }
     
+    @Override
     public void paint(Graphics g)
     {
 	g.drawImage(lcdImage, 0, 0, this);

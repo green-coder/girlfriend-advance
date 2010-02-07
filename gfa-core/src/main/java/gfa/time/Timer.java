@@ -49,7 +49,7 @@ public class Timer
 
   public void setTime(short n)
   {
-    value = (int) (0xffff & n);
+    value = (0xffff & n);
     rest = 0;
   }
 

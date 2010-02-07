@@ -4,7 +4,6 @@ import java.io.*;
 import gfa.memory.*;
 import gfa.time.*;
 import gfa.util.*;
-import gfa.analysis.ArmRegObserver;
 
 public class Arm7TdmiGen2
   extends Arm7Tdmi
@@ -42,8 +41,6 @@ public class Arm7TdmiGen2
   public void step()
   {
     int instructionTime;
-
-    GfaMMU memory = (GfaMMU) this.memory;
 
     // Handle IRQ
     if (!CPSR.isBitSet(iFlagBit) &&
