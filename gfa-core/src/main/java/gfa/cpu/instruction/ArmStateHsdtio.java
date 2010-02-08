@@ -1,11 +1,9 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateHsdtio
-  extends ArmStateInstruction
-{
+public class ArmStateHsdtio extends ArmStateInstruction {
 
   static final protected int PreIndexingBit  = 0x01000000;
   static final protected int UpDownBit       = 0x00800000;
@@ -22,16 +20,14 @@ public class ArmStateHsdtio
   static final protected int SignedByteBits  = 0x00000040;
   static final protected int SignedHalfBits  = 0x00000060;
 
-  public ArmStateHsdtio(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateHsdtio(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   /*
    * Halfword and Signed Data Transfert : Immediat Offset
    */
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     int offset = ((opcode & HiOffsetMask) >>> 4) | (opcode & LoOffsetMask);
@@ -47,11 +43,9 @@ public class ArmStateHsdtio
     if ((opcode & PreIndexingBit) != 0) // PreIndex
       address += offset;
     
-    if ((opcode & LoadStoreBit) == 0) // Store
-    {
+    if ((opcode & LoadStoreBit) == 0) { // Store
       int SHBits = opcode & SHMask;
-      if (SHBits == UnsignHalfBits)
-      {
+      if (SHBits == UnsignHalfBits) {
         int valueToStore = srcDstRegister.get();
 	if (srcDstRegister == PC) valueToStore += 8;
 	memory.storeHalfWord(address, (short) valueToStore);
@@ -61,8 +55,7 @@ public class ArmStateHsdtio
       else if (SHBits == SignedHalfBits)
 	signalError("Illegal combinaison : store signed halfword");
     }
-    else                                          // Load
-    {
+    else {                                         // Load
       int SHBits = opcode & SHMask;
       if (SHBits == UnsignHalfBits)
 	// $$$ : C'est pas dit, mais on suppose que la partie haute est remplie avec des zeros.
@@ -85,8 +78,7 @@ public class ArmStateHsdtio
       signalError("WriteBack and PostIndex are both selected !");
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instru = ((opcode & LoadStoreBit) == 0) ? "str" : "ldr";
     instru += preconditionToString(opcode);
@@ -105,8 +97,7 @@ public class ArmStateHsdtio
     String immOffset = "" + (((opcode & HiOffsetMask) >>> 4) | (opcode & LoOffsetMask));
     immOffset = (((opcode & UpDownBit) == 0) ? "-" : "+") + immOffset;
     String address;
-    if ((opcode & PreIndexingBit) != 0) // PreIndex
-    {
+    if ((opcode & PreIndexingBit) != 0) { // PreIndex
       address = ("[" + rn + ", " + immOffset + "]");
       if ((opcode & WriteBackBit) != 0) address += "!";
     }
@@ -115,4 +106,5 @@ public class ArmStateHsdtio
     
     return instru + " " + rd + ", " + address;
   }
+
 }

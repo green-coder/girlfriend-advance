@@ -1,19 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF4Mvn
-  extends ThumbStateF4
-{
+public class ThumbStateF4Mvn extends ThumbStateF4 {
 
-  public ThumbStateF4Mvn(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF4Mvn(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int operand2 = sourceRegister.get();
     if (sourceRegister == PC) operand2 += 2;
     int result = ~operand2;
@@ -22,8 +18,7 @@ public class ThumbStateF4Mvn
     CPSR.setBit(nFlagBit, (result < 0));
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "mvn";
   }
 

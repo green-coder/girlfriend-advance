@@ -15,9 +15,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 
-public class GirlfriendAdvance
-  implements KeyListener
-{
+public class GirlfriendAdvance implements KeyListener {
+
   protected Arm7Tdmi cpu;
   protected GfaMMU mem;
   protected Dma dma0;
@@ -27,13 +26,11 @@ public class GirlfriendAdvance
   protected Time time;
   protected Lcd lcd;
 
-  public GirlfriendAdvance()
-  {
+  public GirlfriendAdvance() {
     this(new Arm7TdmiGen2());
   }
 
-  public GirlfriendAdvance(Arm7Tdmi cpu)
-  {
+  public GirlfriendAdvance(Arm7Tdmi cpu) {
     this.cpu  = cpu;
     mem  = new GfaMMU();
     dma0 = new Dma0();
@@ -50,8 +47,7 @@ public class GirlfriendAdvance
     ioMem = (IORegisterSpace_8_16_32) mem.getMemoryBank(0x04);
   }
 
-  public void reset()
-  {
+  public void reset() {
     getTime().reset();
     getCpu().reset();
     getDma0().reset();
@@ -61,8 +57,7 @@ public class GirlfriendAdvance
     getMemory().reset();
   }
   
-  protected void setupConnections()
-  {
+  protected void setupConnections() {
     cpu.connectToMemory(mem);
     cpu.connectToTime(time);
     mem.connectToTime(time);
@@ -97,14 +92,12 @@ public class GirlfriendAdvance
   protected IORegisterSpace_8_16_32 ioMem;
   protected short keyConf = 0x03ff;
 
-  public void keyPressed(KeyEvent e)
-  {
+  public void keyPressed(KeyEvent e) {
     //System.out.println("keyPressed(KeyEvent e)");
 
     int keyCode = e.getKeyCode();
     
-    switch (keyCode)
-    {
+    switch (keyCode) {
       case KeyEvent.VK_A:     keyConf &= ~0x0001; break; // The A button
       case KeyEvent.VK_B:     keyConf &= ~0x0002; break; // The B button
       case KeyEvent.VK_SHIFT: keyConf &= ~0x0004; break; // The SELECT button
@@ -121,8 +114,7 @@ public class GirlfriendAdvance
     ioMem.setReg16(0x0130, keyConf);
   }
 
-  public void keyReleased(KeyEvent e)
-  {
+  public void keyReleased(KeyEvent e) {
     //System.out.println("keyReleased(KeyEvent e)");
 
     int keyCode = e.getKeyCode();
@@ -145,9 +137,9 @@ public class GirlfriendAdvance
     ioMem.setReg16(0x0130, keyConf);
   }
 
-  public void keyTyped(KeyEvent cookies)
-  {
+  public void keyTyped(KeyEvent cookies) {
     // Miam !
     cookies.consume();
   }
+
 }

@@ -1,21 +1,17 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateUndef
-  extends ArmStateInstruction
-{
+public class ArmStateUndef extends ArmStateInstruction {
 
-  public ArmStateUndef(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateUndef(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   static final protected int undefinedInstructionVectorAddress = 0x00000004;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     getRegister(14, undModeBits).set(PC);
@@ -25,9 +21,9 @@ public class ArmStateUndef
     setArmState();
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     return "undef" + preconditionToString(opcode);
   }
+
 }

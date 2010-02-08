@@ -1,80 +1,66 @@
 package gfa.cpu;
 
-import gfa.util.*;
+import gfa.util.Hex;
 
 public class ArmReg
 {
   protected int val;
 
-  public ArmReg(int v)
-  {
+  public ArmReg(int v) {
     val = v;
   }
 
-  public ArmReg(ArmReg reg)
-  {
+  public ArmReg(ArmReg reg) {
     this(reg.get());
   }
 
-  public int get()
-  {
+  public int get() {
     return val;
   }
 
-  public void set(int v)
-  {
+  public void set(int v) {
     val = v;
   }
 
-  public boolean equals(ArmReg reg)
-  {
+  public boolean equals(ArmReg reg) {
     return get() == reg.get();
   }
 
-  public void set(ArmReg reg)
-  {
+  public void set(ArmReg reg) {
     set(reg.get());
   }
 
-  public void add(int v)
-  {
+  public void add(int v) {
     set(get() + v);
   }
 
-  public void sub(int v)
-  {
+  public void sub(int v) {
     set(get() - v);
   }
 
-  public void setOn(int bitMask)
-  {
+  public void setOn(int bitMask) {
     set(get() | bitMask);
   }
 
-  public void setOff(int bitMask)
-  {
+  public void setOff(int bitMask) {
     set(get() & ~bitMask);
   }
 
-  public void setBit(int bitMask, boolean isOn)
-  {
+  public void setBit(int bitMask, boolean isOn) {
     if (isOn) setOn(bitMask);
     else setOff(bitMask);
   }
 
-  public boolean isBitSet(int bitMask)
-  {
+  public boolean isBitSet(int bitMask) {
     return ((get() & bitMask) != 0);
   }
 
-  public String toString()
-  {
+  public String toString() {
     return Hex.toString(get());
   }
 
   // Code adapted from the elogba emu (from eloist) : from the file opcodes.c
-  public void setCVFlagsForSub(int op1, int op2, int res)
-  {
+  public void setCVFlagsForSub(int op1, int op2, int res) {
     boolean a = (op1 < 0);
     boolean b = (op2 < 0);
     boolean c = (res < 0);
@@ -83,8 +69,7 @@ public class ArmReg
   }
 
   // Code adapted from the elogba emu (from eloist) : from the file opcodes.c
-  public void setCVFlagsForAdd(int op1, int op2, int res)
-  {
+  public void setCVFlagsForAdd(int op1, int op2, int res) {
     boolean a = (op1 < 0);
     boolean b = (op2 < 0);
     boolean c = (res < 0);

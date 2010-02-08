@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF1
-  extends ThumbStateInstruction
-{
+public class ThumbStateF1 extends ThumbStateInstruction {
 
-  public ThumbStateF1(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF1(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -20,8 +17,7 @@ public class ThumbStateF1
   static final protected int LsrBits    = 0x00000800;
   static final protected int AsrBits    = 0x00001000;
 
-  public void execute()
-  {
+  public void execute() {
     ArmReg sourceRegister = getRegister((opcode & RsMask) >>> 3);
     ArmReg destinationRegister = getRegister(opcode & RdMask);
     int shiftType = opcode & OpMask;
@@ -31,39 +27,31 @@ public class ThumbStateF1
     // $$$ : Verifier si c'est pas +4 plutot que +2 a cause du shift.
     if (sourceRegister == PC) sourceValue += 2;
     
-    if (shiftAmount == 0)
-    {
-      if (shiftType == LslBits)
-      {
+    if (shiftAmount == 0) {
+      if (shiftType == LslBits) {
 	// Do nothing : the old cFlagBit must be conserved.
 	// Ne fait rien : l'ancien cFlagBit doit etre conserve.
       }
-      else if (shiftType == LsrBits)
-      {
+      else if (shiftType == LsrBits) {
 	CPSR.setBit(cFlagBit, sourceValue < 0);
 	sourceValue = 0;
       }
-      else if (shiftType == AsrBits)
-      {
+      else if (shiftType == AsrBits) {
 	CPSR.setBit(cFlagBit, sourceValue < 0);
 	// fill all with the bit 31 of operand2.
 	sourceValue >>= 31;
       }
     }
-    else // ((shiftAmount > 0) && (shiftAmount < 32))
-    {
-      if (shiftType == LslBits)
-      {
+    else { // ((shiftAmount > 0) && (shiftAmount < 32))
+      if (shiftType == LslBits) {
         CPSR.setBit(cFlagBit, ((sourceValue & (1 << (32 - shiftAmount))) != 0));
 	sourceValue <<= shiftAmount;
       }
-      else if (shiftType == LsrBits)
-      {
+      else if (shiftType == LsrBits) {
         CPSR.setBit(cFlagBit, ((sourceValue & (1 << (shiftAmount - 1))) != 0));
 	sourceValue >>>= shiftAmount;
       }
-      else if (shiftType == AsrBits)
-      {
+      else if (shiftType == AsrBits) {
         CPSR.setBit(cFlagBit, ((sourceValue & (1 << (shiftAmount - 1))) != 0));
 	sourceValue >>= shiftAmount;
       }
@@ -75,8 +63,7 @@ public class ThumbStateF1
     CPSR.setBit(nFlagBit, (sourceValue < 0));
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru;
     int shiftType = opcode & OpMask;
@@ -89,4 +76,5 @@ public class ThumbStateF1
     int offset5 = (opcode & OffsetMask) >>> 6;
     return instru + " " + rd + ", " + rs + ", #" + offset5;
   }
+
 }

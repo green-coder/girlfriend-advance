@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF8
-  extends ThumbStateInstruction
-{
+public class ThumbStateF8 extends ThumbStateInstruction {
 
-  public ThumbStateF8(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF8(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -18,21 +15,18 @@ public class ThumbStateF8
   static final protected int RbMask          = 0x00000038;
   static final protected int RdMask          = 0x00000007;
 
-  public void execute()
-  {
+  public void execute() {
     int offset = getRegister((opcode & RoMask) >>> 6).get() +
 	         getRegister((opcode & RbMask) >>> 3).get();
     ArmReg srcDstRegister = getRegister(opcode & RdMask);
     
-    if ((opcode & SignExtendedBit) == 0)
-    {
+    if ((opcode & SignExtendedBit) == 0) {
       if ((opcode & HBit) == 0)
         memory.storeHalfWord(offset & 0xfffffffe, (short) srcDstRegister.get());
       else
         srcDstRegister.set(0x0000ffff & memory.loadHalfWord(offset & 0xfffffffe));
     }
-    else
-    {
+    else {
       if ((opcode & HBit) == 0)
         srcDstRegister.set(memory.loadByte(offset));
       else
@@ -40,17 +34,14 @@ public class ThumbStateF8
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru;
-    if ((opcode & SignExtendedBit) == 0)
-    {
+    if ((opcode & SignExtendedBit) == 0) {
       if ((opcode & HBit) == 0) instru = "strh";
       else instru = "ldrh";
     }
-    else
-    {
+    else {
       if ((opcode & HBit) == 0) instru = "ldsb";
       else instru = "ldsh";
     }

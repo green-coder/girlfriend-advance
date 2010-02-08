@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public abstract class ThumbStateF4
-  extends ThumbStateInstruction
-{
+public abstract class ThumbStateF4 extends ThumbStateInstruction {
 
-  public ThumbStateF4(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF4(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -17,8 +14,7 @@ public abstract class ThumbStateF4
   protected ArmReg sourceRegister;
   protected ArmReg destinationRegister;
 
-  public void execute()
-  {
+  public void execute() {
     sourceRegister = getRegister((opcode & RsMask) >>> 3);
     destinationRegister = getRegister(opcode & RdMask);
 
@@ -27,8 +23,7 @@ public abstract class ThumbStateF4
 
   protected abstract void applyOperation();
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String rd = getRegisterName(opcode & RdMask);
     String rs = getRegisterName((opcode & RsMask) >>> 3);
@@ -36,4 +31,5 @@ public abstract class ThumbStateF4
   }
 
   protected abstract String getInstructionName();
+
 }

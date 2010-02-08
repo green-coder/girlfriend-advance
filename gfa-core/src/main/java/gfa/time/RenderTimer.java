@@ -1,11 +1,12 @@
 package gfa.time;
 
-import gfa.gfx.*;
-import gfa.memory.*;
-import gfa.dma.*;
+import gfa.dma.Dma;
+import gfa.gfx.Lcd;
+import gfa.memory.GfaMMU;
+import gfa.memory.IORegisterSpace_8_16_32;
 
-public class RenderTimer
-{
+public class RenderTimer {
+
   private int hValue;
   private int vValue;
   private boolean oldIsHBlank;
@@ -17,56 +18,48 @@ public class RenderTimer
   private Dma dma2;
   private Dma dma3;
 
-  public RenderTimer()
-  {
+  public RenderTimer() {
     reset();
   }
 
-  public void connectToMemory(GfaMMU memory)
-  {
+  public void connectToMemory(GfaMMU memory) {
     ioMem = (IORegisterSpace_8_16_32) memory.getMemoryBank(0x04);
   }
 
-  public void connectToLcd(Lcd lcd)
-  {
+  public void connectToLcd(Lcd lcd) {
     this.lcd = lcd;
   }
   
-  public void connectToDma0(Dma dma0)
-  {
+  public void connectToDma0(Dma dma0) {
     this.dma0 = dma0;
   }
   
-  public void connectToDma1(Dma dma1)
-  {
+  public void connectToDma1(Dma dma1) {
     this.dma1 = dma1;
   }
   
-  public void connectToDma2(Dma dma2)
-  {
+  public void connectToDma2(Dma dma2) {
     this.dma2 = dma2;
   }
   
-  public void connectToDma3(Dma dma3)
-  {
+  public void connectToDma3(Dma dma3) {
     this.dma3 = dma3;
   }
   
-  public void reset()
-  {
+  public void reset() {
     hValue = 0;
     vValue = 0;
     oldIsHBlank = false;
     oldIsVBlank = false;
   }
 
-    /*public int getTime()
-  {
+  /*
+   public int getTime() {
     return vValue;
-    }*/
+   }
+   */
 
-  public void addTime(int nbCycles)
-  {
+  public void addTime(int nbCycles) {
     hValue += nbCycles;
 
     boolean isHBlank = (hValue >= 240 * 4);
@@ -75,8 +68,7 @@ public class RenderTimer
     ioMem.setHBlank(isHBlank);
     ioMem.setVBlank(isVBlank);
     
-    if (!oldIsHBlank && isHBlank)
-    {
+    if (!oldIsHBlank && isHBlank) {
       lcd.drawLine(vValue);
       dma0.notifyHBlank();
       dma1.notifyHBlank();
@@ -85,8 +77,7 @@ public class RenderTimer
       ioMem.genInterrupt(ioMem.hBlankInterruptBit);
     }
     
-    if (!oldIsVBlank && isVBlank)
-    {
+    if (!oldIsVBlank && isVBlank) {
       dma0.notifyVBlank();
       dma1.notifyVBlank();
       dma2.notifyVBlank();
@@ -97,8 +88,7 @@ public class RenderTimer
     oldIsHBlank = isHBlank;
     oldIsVBlank = isVBlank;
 
-    if (hValue >= 308 * 4)
-    {
+    if (hValue >= 308 * 4) {
       hValue -= 308 * 4;
       
       vValue++;

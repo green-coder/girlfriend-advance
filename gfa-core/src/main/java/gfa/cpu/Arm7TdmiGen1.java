@@ -1,55 +1,41 @@
 package gfa.cpu;
 
 import java.math.BigInteger;
-import java.io.*;
-import gfa.memory.*;
-import gfa.time.*;
-import gfa.util.*;
 
-public class Arm7TdmiGen1
-  extends Arm7Tdmi
-{
+public class Arm7TdmiGen1 extends Arm7Tdmi {
 
-  public Arm7TdmiGen1()
-  {
+  public Arm7TdmiGen1() {
     super();
   }
 
-  public ArmReg getSPSR()
-  {
+  public ArmReg getSPSR() {
     return currentRegisters[17];
   }
 
-  public ArmReg getSP()
-  {
+  public ArmReg getSP() {
     return currentRegisters[13];
   }
 
-  public ArmReg getLR()
-  {
+  public ArmReg getLR() {
     return currentRegisters[14];
   }
 
-  protected int getCurrentMode()
-  {
+  protected int getCurrentMode() {
     return (CPSR.get() & modeBitsMask);
   }
 
-  public int currentInstructionSize()
-  {
+  public int currentInstructionSize() {
     if (isInThumbState()) return 2;
     else return 4;
   }
 
-  public void step()
-  {
+  public void step() {
     int instructionTime;
 
     // Handle IRQ
     if (!CPSR.isBitSet(iFlagBit) &&
 	(memory.loadByte(REG_IME_Address) != 0) &&
-	(memory.loadHalfWord(REG_IF_Address) != 0))
-    {
+	(memory.loadHalfWord(REG_IF_Address) != 0)) {
       getRegister(14, irqModeBits).set(PC.get() + 4); // LR <- PC + 4
       SPSR_irq.set(CPSR);     // SPSR_irq <- CPSR
       setMode(irqModeBits);   // CPSR changed to mode irq
@@ -59,16 +45,14 @@ public class Arm7TdmiGen1
       instructionTime = 4;    // inaccurate
     }
     
-    else if (isInThumbState())
-    {
+    else if (isInThumbState()) {
       short halfWord = memory.loadHalfWord(PC.get());
       PC.add(currentInstructionSize());
       decodeThumbStateInstruction(halfWord);
       
       instructionTime = 2;
     }
-    else
-    {
+    else {
       int word = memory.loadWord(PC.get());
       PC.add(currentInstructionSize());
       if (decodeArmStateCondition(word))
@@ -97,15 +81,13 @@ public class Arm7TdmiGen1
   static final protected int armStateConditionLEBits   = 0xd0000000; // less than or equal
   static final protected int armStateConditionALBits   = 0xe0000000; // always
 
-  public boolean decodeArmStateCondition(int word)
-  {
+  public boolean decodeArmStateCondition(int word) {
     //debug.println("decodeArmStateCondition");
 
     int conditionBits = word & armStateConditionBitsMask;
     boolean conditionIsTrue;
 
-    switch (conditionBits)
-    {
+    switch (conditionBits) {
       case armStateConditionEQBits:
           conditionIsTrue = CPSR.isBitSet(zFlagBit);
         break;
@@ -343,12 +325,10 @@ public class Arm7TdmiGen1
   static final protected int armStateUndefInstructionMask = 0x0e000010;
   static final protected int armStateUndefInstructionBits = 0x06000010;
 
-  protected void decodeArmStateInstruction(int word)
-  {
+  protected void decodeArmStateInstruction(int word) {
     //debug.println("decodeArmStateInstruction word = 0x" + Hex.toString(word));
 
-    if ((word & armStateBXInstructionMask) == armStateBXInstructionBits)
-    {
+    if ((word & armStateBXInstructionMask) == armStateBXInstructionBits) {
       int registerNumber = word & armStateBXRnMask;
       int value = getRegister(registerNumber).get();
       PC.set(value & 0xfffffffe);
@@ -356,8 +336,7 @@ public class Arm7TdmiGen1
       else setThumbState();
     }
 
-    else if ((word & armStateBInstructionMask) == armStateBInstructionBits)
-    {
+    else if ((word & armStateBInstructionMask) == armStateBInstructionBits) {
       //debug.println("B instruction");
 
       int offset = ((word & armStateBOffsetMask) << 8) >> 6;
@@ -366,11 +345,9 @@ public class Arm7TdmiGen1
       PC.add(offset + 4);
     }
 
-    else if ((word & armStateMRSInstructionMask) == armStateMRSInstructionBits)
-    {
+    else if ((word & armStateMRSInstructionMask) == armStateMRSInstructionBits) {
       //debug.println("MRS instruction");
-      try
-      {
+      try {
         ArmReg srcReg = (((word & armStateMRSSourceBit) == 0) ? CPSR : getSPSR());
         ArmReg dstReg = getRegister((word & armStateMRSDestinationMask) >>> 12);
         dstReg.set(srcReg);
@@ -378,17 +355,14 @@ public class Arm7TdmiGen1
       catch (NullPointerException e) {/* $$$ : Usage de l'instruction en mode usr :-( */}
     }
 
-    else if ((word & armStateMSR1InstructionMask) == armStateMSR1InstructionBits)
-    {
+    else if ((word & armStateMSR1InstructionMask) == armStateMSR1InstructionBits) {
       //debug.println("MSR1 instruction");
-      try
-      {
+      try {
         ArmReg srcReg = getRegister(word & armStateMSR1SourceMask);
         ArmReg dstReg = (((word & armStateMSR1DestinationBit) == 0) ? CPSR : getSPSR());
         if (getCurrentMode() == usrModeBits)
           dstReg.set((dstReg.get() & ~armStateMSR1FlagsOnly) | (srcReg.get() & armStateMSR1FlagsOnly));
-        else
-        {
+        else {
           dstReg.set(srcReg);
           setMode(getCurrentMode()); // update the mode in case CPRS[4:0] is changed
         }
@@ -396,17 +370,14 @@ public class Arm7TdmiGen1
       catch (NullPointerException e) {/* $$$ : Usage de SPSR en mode usr :-( */}
     }
 
-    else if ((word & armStateMSR2InstructionMask) == armStateMSR2InstructionBits)
-    {
+    else if ((word & armStateMSR2InstructionMask) == armStateMSR2InstructionBits) {
       //debug.println("MSR2 instruction");
-      try
-      {
+      try {
         ArmReg dstReg = (((word & armStateMSR2DestinationBit) == 0) ? CPSR : getSPSR());
         int value;
         if ((word & armStateMSR2ImmediateBit) == 0)
           value = getRegister(word & armStateMSR2SourceMask).get();
-        else
-        {
+        else {
           int immValue = word & armStateMSR2ImmValueMask;
           int immRotate = (word & armStateMSR2ImmRotateMask) >>> 7;
           value = (immValue >> immRotate) | (immValue << (32 - immRotate));
@@ -416,8 +387,7 @@ public class Arm7TdmiGen1
       catch (NullPointerException e) {/* Usage de SPSR en mode usr :-( */}
     }
 
-    else if ((word & armStateMULInstructionMask) == armStateMULInstructionBits)
-    {
+    else if ((word & armStateMULInstructionMask) == armStateMULInstructionBits) {
       //debug.println("MUL instruction");
       ArmReg rd = getRegister((word & armStateMULRdMask) >>> 16);
       ArmReg rn = getRegister((word & armStateMULRnMask) >>> 12);
@@ -430,16 +400,14 @@ public class Arm7TdmiGen1
 
       rd.set(result);
 
-      if ((word & armStateMULSetConditionBit) != 0)
-      {
+      if ((word & armStateMULSetConditionBit) != 0) {
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
         //CPSR.setBit(cFlagBit, meaninglessCondition);
       }
     }
 
-    else if ((word & armStateMULLInstructionMask) == armStateMULLInstructionBits)
-    {
+    else if ((word & armStateMULLInstructionMask) == armStateMULLInstructionBits) {
       //debug.println("MULL instruction");
       ArmReg rdHi = getRegister((word & armStateMULLRdHiMask) >>> 16);
       ArmReg rdLo = getRegister((word & armStateMULLRdLoMask) >>> 12);
@@ -447,21 +415,19 @@ public class Arm7TdmiGen1
       ArmReg rm = getRegister(word & armStateMULLRmMask);
       long longResult;
 
-      if ((word & armStateMULLUnsignedBit) != 0) // signed multiplication
-      {
+      // signed multiplication
+      if ((word & armStateMULLUnsignedBit) != 0) {
         longResult = (long) rm.get() * (long) rs.get();
 
         if ((word & armStateMULLAccumulateBit) != 0)
           longResult += ((long) rdHi.get() << 32) | (0xffffffffL & (long) rdLo.get());
       }
-      else // unsigned multiplication 64 bits ... :-(
-      {
+      else { // unsigned multiplication 64 bits ... :-(
         BigInteger operand1 = new BigInteger(Long.toString(0xffffffffL & (long) rm.get()));
         BigInteger operand2 = new BigInteger(Long.toString(0xffffffffL & (long) rs.get()));
         BigInteger bigResult = operand1.multiply(operand2);
 
-        if ((word & armStateMULLAccumulateBit) != 0)
-        {
+        if ((word & armStateMULLAccumulateBit) != 0) {
           BigInteger hi = new BigInteger(Long.toString(0xffffffffL & (long) rdHi.get()));
           BigInteger lo = new BigInteger(Long.toString(0xffffffffL & (long) rdLo.get()));
           bigResult = bigResult.add(hi.shiftLeft(32).or(lo));
@@ -473,8 +439,7 @@ public class Arm7TdmiGen1
       rdLo.set((int) longResult);
       rdHi.set((int) (longResult >> 32));
 
-      if ((word & armStateMULLSetConditionBit) != 0)
-      {
+      if ((word & armStateMULLSetConditionBit) != 0) {
         CPSR.setBit(zFlagBit, (longResult == 0));
         CPSR.setBit(nFlagBit, (longResult < 0));
         //CPSR.setBit(cFlagBit, meaninglessCondition);
@@ -483,8 +448,7 @@ public class Arm7TdmiGen1
     }
 
     // Halfword and Signed Data Transfert : Register Offset
-    else if ((word & armStateHSDTROInstructionMask) == armStateHSDTROInstructionBits)
-    {
+    else if ((word & armStateHSDTROInstructionMask) == armStateHSDTROInstructionBits) {
       int offset = getRegister(word & armStateHSDTRORmMask).get();
       ArmReg baseRegister = getRegister((word & armStateHSDTRORnMask) >>> 16);
       ArmReg srcDstRegister = getRegister((word & armStateHSDTRORdMask) >>> 12);
@@ -498,11 +462,9 @@ public class Arm7TdmiGen1
       if ((word & armStateHSDTROPreIndexingBit) != 0) // PreIndex
         newAdress += offset;
 
-      if ((word & armStateHSDTROLoadStoreBit) == 0) // Store
-      {
+      if ((word & armStateHSDTROLoadStoreBit) == 0) { // Store
         int SHBits = word & armStateHSDTROSHMask;
-        if (SHBits == armStateHSDTROUnsignHalfBits)
-        {
+        if (SHBits == armStateHSDTROUnsignHalfBits) {
           int valueToStore = srcDstRegister.get();
           if (srcDstRegister == PC) valueToStore += 8;
           memory.storeHalfWord(newAdress, (short) valueToStore);
@@ -512,8 +474,7 @@ public class Arm7TdmiGen1
         else if (SHBits == armStateHSDTROSignedHalfBits)
           ;// unspecified
       }
-      else                                          // Load
-      {
+      else {                                         // Load
         int SHBits = word & armStateHSDTROSHMask;
         if (SHBits == armStateHSDTROUnsignHalfBits)
            // $$$ : C'est pas dit, mais on suppose que la partie haute est remplie avec des zeros.
@@ -533,8 +494,7 @@ public class Arm7TdmiGen1
     }
 
     // Halfword and Signed Data Transfert : Immediate Offset
-    else if ((word & armStateHSDTIOInstructionMask) == armStateHSDTIOInstructionBits)
-    {
+    else if ((word & armStateHSDTIOInstructionMask) == armStateHSDTIOInstructionBits) {
       int offset = ((word & armStateHSDTIOHiOffsetMask) >>> 4) | (word & armStateHSDTIOLoOffsetMask);
       ArmReg baseRegister = getRegister((word & armStateHSDTIORnMask) >>> 16);
       ArmReg srcDstRegister = getRegister((word & armStateHSDTIORdMask) >>> 12);
@@ -548,11 +508,9 @@ public class Arm7TdmiGen1
       if ((word & armStateHSDTIOPreIndexingBit) != 0) // PreIndex
         newAdress += offset;
 
-      if ((word & armStateHSDTIOLoadStoreBit) == 0) // Store
-      {
+      if ((word & armStateHSDTIOLoadStoreBit) == 0) { // Store
         int SHBits = word & armStateHSDTIOSHMask;
-        if (SHBits == armStateHSDTIOUnsignHalfBits)
-        {
+        if (SHBits == armStateHSDTIOUnsignHalfBits) {
           int valueToStore = srcDstRegister.get();
           if (srcDstRegister == PC) valueToStore += 8;
           memory.storeHalfWord(newAdress, (short) valueToStore);
@@ -562,8 +520,7 @@ public class Arm7TdmiGen1
         else if (SHBits == armStateHSDTIOSignedHalfBits)
           ;// non specifie
       }
-      else                                          // Load
-      {
+      else {                                         // Load
         int SHBits = word & armStateHSDTIOSHMask;
         if (SHBits == armStateHSDTIOUnsignHalfBits)
            // $$$ : C'est pas dit, mais on suppose que la partie haute est remplie avec des zeros.
@@ -582,8 +539,7 @@ public class Arm7TdmiGen1
         baseRegister.set(newAdress);
     }
 
-    else if ((word & armStateSWPInstructionMask) == armStateSWPInstructionBits)
-    {
+    else if ((word & armStateSWPInstructionMask) == armStateSWPInstructionBits) {
       ArmReg baseRegister = getRegister((word & armStateSWPRnMask) >>> 16);
       ArmReg destinationRegister = getRegister((word & armStateSWPRdMask) >>> 12);
       ArmReg sourceRegister = getRegister(word & armStateSWPRmMask);
@@ -595,8 +551,7 @@ public class Arm7TdmiGen1
         destinationRegister.set(memory.swapWord(swapAdress, sourceRegister.get()));
     }
 
-    else if ((word & armStateDataProcessingInstructionMask) == armStateDataProcessingInstructionBits)
-    {
+    else if ((word & armStateDataProcessingInstructionMask) == armStateDataProcessingInstructionBits) {
       //debug.println("Data Processing instruction");
 
       ArmReg tmpCPSR = new ArmReg(CPSR);
@@ -609,8 +564,7 @@ public class Arm7TdmiGen1
       int operand2;
       ArmReg destinationRegister = getRegister((word & armStateDataProcessingDestinationMask) >>> 12);
 
-      if ((word & armStateDataProcessingImmediateBit) == 0) // operand 2 is a register
-      {
+      if ((word & armStateDataProcessingImmediateBit) == 0) { // operand 2 is a register
         // Rm register
         ArmReg regOp2 = getRegister(word & armStateDataProcessingOp2RegisterMask);
         operand2 = regOp2.get();
@@ -619,30 +573,24 @@ public class Arm7TdmiGen1
         int shiftType = word & armStateDataProcessingShiftTypeMask;
         int shiftAmount;
 
-        if ((word & armStateDataProcessingShiftModeBit) == 0) // The shift amount is a value.
-        {
+        if ((word & armStateDataProcessingShiftModeBit) == 0) { // The shift amount is a value.
           shiftAmount = (word & armStateDataProcessingShiftAmountMask) >>> 7;
 
-          if (shiftAmount == 0)
-          {
-            if (shiftType == armStateDataProcessingLogicalLeftBits)
-            {
+          if (shiftAmount == 0) {
+            if (shiftType == armStateDataProcessingLogicalLeftBits) {
               // Do nothing : the old cFlagBit must be conserved.
               // Ne fait rien : l'ancien cFlagBit doit etre conserve.
             }
-            else if (shiftType == armStateDataProcessingLogicalRightBits)
-            {
+            else if (shiftType == armStateDataProcessingLogicalRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
               operand2 = 0;
             }
-            else if (shiftType == armStateDataProcessingArithmRightBits)
-            {
+            else if (shiftType == armStateDataProcessingArithmRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
               // fill all with the bit 31 of operand2.
               operand2 >>= 31;
             }
-            else if (shiftType == armStateDataProcessingRotateRightBits)
-            {
+            else if (shiftType == armStateDataProcessingRotateRightBits) {
               boolean isCFlagBit = tmpCPSR.isBitSet(cFlagBit);
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x00000001) != 0));
               operand2 >>>= 1;
@@ -651,30 +599,25 @@ public class Arm7TdmiGen1
           }
           else
           {
-            if (shiftType == armStateDataProcessingLogicalLeftBits)
-            {
+            if (shiftType == armStateDataProcessingLogicalLeftBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (32 - shiftAmount))) != 0));
               operand2 <<= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingLogicalRightBits)
-            {
+            else if (shiftType == armStateDataProcessingLogicalRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (shiftAmount - 1))) != 0));
               operand2 >>>= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingArithmRightBits)
-            {
+            else if (shiftType == armStateDataProcessingArithmRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (shiftAmount - 1))) != 0));
               operand2 >>= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingRotateRightBits)
-            {
+            else if (shiftType == armStateDataProcessingRotateRightBits) {
               operand2 = (operand2 >>> shiftAmount) | (operand2 << (32 - shiftAmount));
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
             }
           }
         }
-        else // Register specified shift amount.
-        {
+        else { // Register specified shift amount.
           ArmReg regToShift = getRegister((word & armStateDataProcessingShiftRegisterMask) >>> 8);
           shiftAmount = regToShift.get();
 	  if (shiftAmount < 0) shiftAmount = (shiftAmount & 0x0000001f) | 64; // avoid the case of a negative value.
@@ -682,70 +625,55 @@ public class Arm7TdmiGen1
 
           if (shiftAmount == 0)
             ; // Ne rien faire : conservation de l'ancien cFlag;
-          else if (shiftAmount < 32)
-          {
-            if (shiftType == armStateDataProcessingLogicalLeftBits)
-            {
+          else if (shiftAmount < 32) {
+            if (shiftType == armStateDataProcessingLogicalLeftBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (32 - shiftAmount))) != 0));
               operand2 <<= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingLogicalRightBits)
-            {
+            else if (shiftType == armStateDataProcessingLogicalRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (shiftAmount - 1))) != 0));
               operand2 >>>= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingArithmRightBits)
-            {
+            else if (shiftType == armStateDataProcessingArithmRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & (1 << (shiftAmount - 1))) != 0));
               operand2 >>= shiftAmount;
             }
-            else if (shiftType == armStateDataProcessingRotateRightBits)
-            {
+            else if (shiftType == armStateDataProcessingRotateRightBits) {
               operand2 = (operand2 >>> shiftAmount) | (operand2 << (32 - shiftAmount));
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
             }
           }
-          else if (shiftAmount == 32)
-          {
-            if (shiftType == armStateDataProcessingLogicalLeftBits)
-            {
+          else if (shiftAmount == 32) {
+            if (shiftType == armStateDataProcessingLogicalLeftBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x00000001) != 0));
               operand2 = 0;
             }
-            else if (shiftType == armStateDataProcessingLogicalRightBits)
-            {
+            else if (shiftType == armStateDataProcessingLogicalRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
               operand2 = 0;
             }
-            else if (shiftType == armStateDataProcessingArithmRightBits)
-            {
+            else if (shiftType == armStateDataProcessingArithmRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
               operand2 >>= 31;
             }
-            else if (shiftType == armStateDataProcessingRotateRightBits)
-            {
+            else if (shiftType == armStateDataProcessingRotateRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
             }
           }
-          else if (shiftAmount > 32)
-          {
-            if (shiftType == armStateDataProcessingLogicalLeftBits)
-            {
+          else if (shiftAmount > 32) {
+            if (shiftType == armStateDataProcessingLogicalLeftBits) {
               tmpCPSR.setOff(cFlagBit);
               operand2 = 0;
             }
-            else if (shiftType == armStateDataProcessingLogicalRightBits)
-            {
+            else if (shiftType == armStateDataProcessingLogicalRightBits) {
               tmpCPSR.setOff(cFlagBit);
               operand2 = 0;
             }
-            else if (shiftType == armStateDataProcessingArithmRightBits)
-            {
+            else if (shiftType == armStateDataProcessingArithmRightBits) {
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
               operand2 >>= 31;
             }
-            else if (shiftType == armStateDataProcessingRotateRightBits)
-            {
+            else if (shiftType == armStateDataProcessingRotateRightBits) {
 	      shiftAmount = ((shiftAmount - 1) & 0x0000001f) + 1; // put shiftAmount in the range [1..32]
               operand2 = (operand2 >>> shiftAmount) | (operand2 << (32 - shiftAmount));
               tmpCPSR.setBit(cFlagBit, ((operand2 & 0x80000000) != 0));
@@ -753,8 +681,7 @@ public class Arm7TdmiGen1
           }
         }
       }
-      else // operand 2 is an immediate value
-      {
+      else { // operand 2 is an immediate value
         int immediateValue = word & armStateDataProcessingOp2ImmediateMask;
         int twiceRotateValue = ((word & armStateDataProcessingOp2RotateMask) >>> 8) * 2;
         operand2 = (immediateValue >>> twiceRotateValue) | (immediateValue << (32 - twiceRotateValue));
@@ -762,46 +689,40 @@ public class Arm7TdmiGen1
 
       int opcodeBits = word & armStateDataProcessingOpcodeMask;
 
-      if (opcodeBits == armStateDataProcessingANDBits)
-      {
+      if (opcodeBits == armStateDataProcessingANDBits) {
         int result = operand1 & operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingEORBits)
-      {
+      else if (opcodeBits == armStateDataProcessingEORBits) {
         int result = operand1 ^ operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingSUBBits)
-      {
+      else if (opcodeBits == armStateDataProcessingSUBBits) {
         int result = operand1 - operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForSub(operand1, operand2, result);
       }
-      else if (opcodeBits == armStateDataProcessingRSBBits)
-      {
+      else if (opcodeBits == armStateDataProcessingRSBBits) {
         int result = operand2 - operand1;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForSub(operand2, operand1, result);
       }
-      else if (opcodeBits == armStateDataProcessingADDBits)
-      {
+      else if (opcodeBits == armStateDataProcessingADDBits) {
         int result = operand1 + operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForAdd(operand1, operand2, result);
       }
-      else if (opcodeBits == armStateDataProcessingADCBits)
-      {
+      else if (opcodeBits == armStateDataProcessingADCBits) {
         int cFlagValue = (CPSR.isBitSet(cFlagBit) ? 1 : 0);
         int result = operand1 + operand2 + cFlagValue;
         destinationRegister.set(result);
@@ -809,8 +730,7 @@ public class Arm7TdmiGen1
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForAdd(operand1, operand2, result);  // $$$ faire les tests pour savoir ou mettre la retenue.
       }
-      else if (opcodeBits == armStateDataProcessingSBCBits)
-      {
+      else if (opcodeBits == armStateDataProcessingSBCBits) {
         int notCFlagValue = (CPSR.isBitSet(cFlagBit) ? 0 : 1);
         int result = operand1 - (operand2 + notCFlagValue);
         destinationRegister.set(result);
@@ -818,8 +738,7 @@ public class Arm7TdmiGen1
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForSub(operand1, operand2, result);  // $$$ faire les tests pour savoir ou mettre la retenue.
       }
-      else if (opcodeBits == armStateDataProcessingRSCBits)
-      {
+      else if (opcodeBits == armStateDataProcessingRSCBits) {
         int notCFlagValue = (CPSR.isBitSet(cFlagBit) ? 0 : 1);
         int result = operand2 - (operand1 + notCFlagValue);
         destinationRegister.set(result);
@@ -827,65 +746,55 @@ public class Arm7TdmiGen1
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForSub(operand2, operand1, result);  // $$$ faire les tests pour savoir ou mettre la retenue.
       }
-      else if (opcodeBits == armStateDataProcessingTSTBits)
-      {
+      else if (opcodeBits == armStateDataProcessingTSTBits) {
         int result = operand1 & operand2;
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingTEQBits)
-      {
+      else if (opcodeBits == armStateDataProcessingTEQBits) {
         int result = operand1 ^ operand2;
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingCMPBits)
-      {
+      else if (opcodeBits == armStateDataProcessingCMPBits) {
         int result = operand1 - operand2;
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForSub(operand1, operand2, result);
       }
-      else if (opcodeBits == armStateDataProcessingCMNBits)
-      {
+      else if (opcodeBits == armStateDataProcessingCMNBits) {
         int result = operand1 + operand2;
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
         tmpCPSR.setCVFlagsForAdd(operand1, operand2, result);
       }
-      else if (opcodeBits == armStateDataProcessingORRBits)
-      {
+      else if (opcodeBits == armStateDataProcessingORRBits) {
         int result = operand1 | operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingMOVBits)
-      {
+      else if (opcodeBits == armStateDataProcessingMOVBits) {
         int result = operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingBICBits)
-      {
+      else if (opcodeBits == armStateDataProcessingBICBits) {
         int result = operand1 & ~operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (opcodeBits == armStateDataProcessingMVNBits)
-      {
+      else if (opcodeBits == armStateDataProcessingMVNBits) {
         int result = ~operand2;
         destinationRegister.set(result);
         tmpCPSR.setBit(zFlagBit, (result == 0));
         tmpCPSR.setBit(nFlagBit, (result < 0));
       }
 
-      if ((word & armStateDataProcessingSetConditionBit) != 0)
-      {
-        if (destinationRegister == PC)
-        {
+      if ((word & armStateDataProcessingSetConditionBit) != 0) {
+        if (destinationRegister == PC) {
           CPSR.set(getSPSR());
           setMode(getCurrentMode()); // Swap les banques de registre si besoin.
         }
@@ -894,8 +803,7 @@ public class Arm7TdmiGen1
       }
     }
 
-    else if ((word & armStateUndefInstructionMask) == armStateUndefInstructionBits)
-    {
+    else if ((word & armStateUndefInstructionMask) == armStateUndefInstructionBits) {
       undRegisters[14].set(PC);
       SPSR_und.set(CPSR);
       setMode(undModeBits);
@@ -903,16 +811,14 @@ public class Arm7TdmiGen1
       setArmState();
     }
 
-    else if ((word & armStateLDRSTRInstructionMask) == armStateLDRSTRInstructionBits)
-    {
+    else if ((word & armStateLDRSTRInstructionMask) == armStateLDRSTRInstructionBits) {
       ArmReg baseRegister = getRegister((word & armStateLDRSTRRnMask) >>> 16);
       ArmReg srcDstRegister = getRegister((word & armStateLDRSTRRdMask) >>> 12);
 
       int offset = 0;
       if ((word & armStateLDRSTRImmediateBit) == 0)
         offset = word & armStateLDRSTRImmediateMask;
-      else
-      {
+      else {
         int offsetValue = getRegister(word & armStateLDRSTRRmMask).get();
         int shiftAmount = (word & armStateLDRSTRShiftAmountMask) >>> 7;
         int shiftType = word & armStateLDRSTRShiftTypeMask;
@@ -943,23 +849,19 @@ public class Arm7TdmiGen1
           ((word & armStateLDRSTRPreIndexingBit) == 0)) //     PostIndex)
         System.out.println("Warning : A non-emulated instruction for an OS has been used !");
 
-      if ((word & armStateLDRSTRLoadStoreBit) == 0)  // Store
-      {
+      if ((word & armStateLDRSTRLoadStoreBit) == 0) { // Store
         int valueToStore = srcDstRegister.get();
         if (srcDstRegister == PC) valueToStore += 8;
 
-        if ((word & armStateLDRSTRByteWordBit) == 0) // Word
-        {
+        if ((word & armStateLDRSTRByteWordBit) == 0) { // Word
           int wordAlignedAdress = newAdress & 0xfffffffc;
           memory.storeWord(wordAlignedAdress, valueToStore);
         }
         else                                         // Byte
           memory.storeByte(newAdress, (byte) valueToStore);
       }
-      else                                           // Load
-      {
-        if ((word & armStateLDRSTRByteWordBit) == 0) // Word
-        {
+      else {                                          // Load
+        if ((word & armStateLDRSTRByteWordBit) == 0) { // Word
           int wordAlignedAdress = newAdress & 0xfffffffc;
           int rightRotate = (newAdress & 0x00000003) << 3;
           int value = memory.loadWord(wordAlignedAdress);
@@ -977,8 +879,7 @@ public class Arm7TdmiGen1
         baseRegister.set(newAdress);
     }
 
-    else if ((word & armStateLDMSTMInstructionMask) == armStateLDMSTMInstructionBits)
-    {
+    else if ((word & armStateLDMSTMInstructionMask) == armStateLDMSTMInstructionBits) {
       int baseRegisterNumber = (word & armStateLDMSTMRnMask) >>> 16;
       ArmReg baseRegister = getRegister(baseRegisterNumber);
       int stackAdress = baseRegister.get() & 0xfffffffc;
@@ -989,30 +890,26 @@ public class Arm7TdmiGen1
           nbRegistersToSaveOrToLoad++;
 
       int newBaseRegisterValue;
-      if ((word & armStateLDMSTMUpDownBit) != 0) // Up
-      {
+      if ((word & armStateLDMSTMUpDownBit) != 0) { // Up
         newBaseRegisterValue = stackAdress + nbRegistersToSaveOrToLoad * 4;
         if ((word & armStateLDMSTMPreIndexingBit) != 0) // Pre-increment
           stackAdress += 4;
       }
-      else                    // Down
-      {
+      else {                   // Down
         newBaseRegisterValue = stackAdress - nbRegistersToSaveOrToLoad * 4;
         stackAdress = newBaseRegisterValue;
         if ((word & armStateLDMSTMPreIndexingBit) == 0) // Post-decrement
           stackAdress += 4;
       }
 
-      if ((word & armStateLDMSTMLoadStoreBit) == 0) // Store
-      {
+      if ((word & armStateLDMSTMLoadStoreBit) == 0) { // Store
         ArmReg[] savedCurrentRegisters = currentRegisters;
         if ((word & armStateLDMSTMPSRBit) != 0)
           currentRegisters = usrRegisters;
 
         int i = 0;
         for (; i < 15; i++) // Empile le premier registre : debut du deuxieme cycle
-          if ((word & (1 << i)) != 0)
-          {
+          if ((word & (1 << i)) != 0) {
             memory.storeWord(stackAdress, getRegister(i).get());
             stackAdress += 4;
             i++;
@@ -1023,22 +920,19 @@ public class Arm7TdmiGen1
           baseRegister.set((baseRegister.get() & 0x00000003) | newBaseRegisterValue); // update
 
         for (; i < 15; i++) // Empile les autres registres jusqu'a 14
-          if ((word & (1 << i)) != 0)
-          {
+          if ((word & (1 << i)) != 0) {
             memory.storeWord(stackAdress, getRegister(i).get());
             stackAdress += 4;
           }
 
-        if ((word & armStateLDMSTMR15Bit) != 0) // Le cas de R15 + 12.
-        {
+        if ((word & armStateLDMSTMR15Bit) != 0) { // Le cas de R15 + 12.
           memory.storeWord(stackAdress, PC.get() + 8);
           stackAdress += 4;
         }
 
         currentRegisters = savedCurrentRegisters;
       }
-      else                            // Load
-      {
+      else {                           // Load
         if ((word & armStateLDMSTMWriteBackBit) != 0) // Write Back
           baseRegister.set((baseRegister.get() & 0x00000003) | newBaseRegisterValue);
 
@@ -1048,16 +942,14 @@ public class Arm7TdmiGen1
           currentRegisters = usrRegisters;
 
         for (int i = 0; i < 15; i++) // Depile les registres de 0 a 14
-          if ((word & (1 << i)) != 0)
-          {
+          if ((word & (1 << i)) != 0) {
             getRegister(i).set(memory.loadWord(stackAdress));
             stackAdress += 4;
           }
 
         currentRegisters = savedCurrentRegisters;
 
-        if ((word & armStateLDMSTMR15Bit) != 0)
-        {
+        if ((word & armStateLDMSTMR15Bit) != 0) {
           PC.set(memory.loadWord(stackAdress));
           if ((word & armStateLDMSTMPSRBit) != 0)
             CPSR.set(getSPSR());
@@ -1066,8 +958,7 @@ public class Arm7TdmiGen1
       }
     }
 
-    else if ((word & armStateSWIInstructionMask) == armStateSWIInstructionBits)
-    {
+    else if ((word & armStateSWIInstructionMask) == armStateSWIInstructionBits) {
       svcRegisters[14].set(PC);
       SPSR_svc.set(CPSR);
       setMode(svcModeBits);
@@ -1232,11 +1123,9 @@ public class Arm7TdmiGen1
   static final protected int thumbStateF19LowHiOffsetBit  = 0x00000800;
   static final protected int thumbStateF19OffsetMask      = 0x000007ff;
 
-  protected void decodeThumbStateInstruction(short halfWord)
-  {
+  protected void decodeThumbStateInstruction(short halfWord) {
     // Format 2
-    if ((halfWord & thumbStateF2InstructionMask) == thumbStateF2InstructionBits)
-    {
+    if ((halfWord & thumbStateF2InstructionMask) == thumbStateF2InstructionBits) {
       int sourceValue = getRegister((halfWord & thumbStateF2RsMask) >>> 3).get();
       ArmReg destinationRegister = getRegister(halfWord & thumbStateF2RdMask);
       int value = (halfWord & thumbStateF2RnMask) >>> 6;
@@ -1245,13 +1134,11 @@ public class Arm7TdmiGen1
         value = getRegister(value).get();
       
       int result;
-      if ((halfWord & thumbStateF2OpBit) != 0) // substraction
-      {
+      if ((halfWord & thumbStateF2OpBit) != 0) { // substraction
 	result = sourceValue - value;
 	CPSR.setCVFlagsForSub(sourceValue, value, result);
       }
-      else
-      {
+      else {
 	result = sourceValue + value;
 	CPSR.setCVFlagsForAdd(sourceValue, value, result);
       }
@@ -1262,46 +1149,37 @@ public class Arm7TdmiGen1
     }
 
     // Format 1
-    else if ((halfWord & thumbStateF1InstructionMask) == thumbStateF1InstructionBits)
-    {
+    else if ((halfWord & thumbStateF1InstructionMask) == thumbStateF1InstructionBits) {
       int sourceValue = getRegister((halfWord & thumbStateF1RsMask) >>> 3).get();
       ArmReg destinationRegister = getRegister(halfWord & thumbStateF1RdMask);
       int shiftType = halfWord & thumbStateF1OpMask;
       int shiftAmount = (halfWord & thumbStateF1OffsetMask) >>> 6;
 
-      if (shiftAmount == 0)
-      {
-        if (shiftType == thumbStateF1LslBits)
-        {
+      if (shiftAmount == 0) {
+        if (shiftType == thumbStateF1LslBits) {
 	  // Do nothing : the old cFlagBit must be conserved.
 	  // Ne fait rien : l'ancien cFlagBit doit etre conserve.
 	}
-        else if (shiftType == thumbStateF1LsrBits)
-        {
+        else if (shiftType == thumbStateF1LsrBits) {
 	  CPSR.setBit(cFlagBit, ((sourceValue & 0x80000000) != 0));
 	  sourceValue = 0;
         }
-        else if (shiftType == thumbStateF1AsrBits)
-        {
+        else if (shiftType == thumbStateF1AsrBits) {
 	  CPSR.setBit(cFlagBit, ((sourceValue & 0x80000000) != 0));
 	  // fill all with the bit 31 of operand2.
           sourceValue >>= 31;
         }
       }
-      else // ((shiftAmount > 0) && (shiftAmount < 32))
-      {
-        if (shiftType == thumbStateF1LslBits)
-        {
+      else { // ((shiftAmount > 0) && (shiftAmount < 32))
+        if (shiftType == thumbStateF1LslBits) {
           CPSR.setBit(cFlagBit, ((sourceValue & (1 << (32 - shiftAmount))) != 0));
           sourceValue <<= shiftAmount;
         }
-        else if (shiftType == thumbStateF1LsrBits)
-        {
+        else if (shiftType == thumbStateF1LsrBits) {
           CPSR.setBit(cFlagBit, ((sourceValue & (1 << (shiftAmount - 1))) != 0));
           sourceValue >>>= shiftAmount;
         }
-        else if (shiftType == thumbStateF1AsrBits)
-        {
+        else if (shiftType == thumbStateF1AsrBits) {
           CPSR.setBit(cFlagBit, ((sourceValue & (1 << (shiftAmount - 1))) != 0));
           sourceValue >>= shiftAmount;
         }
@@ -1314,20 +1192,17 @@ public class Arm7TdmiGen1
     }
 
     // Format 3
-    else if ((halfWord & thumbStateF3InstructionMask) == thumbStateF3InstructionBits)
-    {
+    else if ((halfWord & thumbStateF3InstructionMask) == thumbStateF3InstructionBits) {
       ArmReg srcDstRegister = getRegister((halfWord & thumbStateF3RdMask) >>> 8);
       int operation = halfWord & thumbStateF3OpMask;
       int immediateValue = halfWord & thumbStateF3OffsetMask;
-      if (operation == thumbStateF3MovBits)
-      {
+      if (operation == thumbStateF3MovBits) {
         srcDstRegister.set(immediateValue);
 
         CPSR.setBit(zFlagBit, (immediateValue == 0));
         CPSR.setBit(nFlagBit, (immediateValue < 0));
       }
-      else if (operation == thumbStateF3CmpBits)
-      {
+      else if (operation == thumbStateF3CmpBits) {
         int sourceValue = srcDstRegister.get();
         int result = sourceValue - immediateValue;
 
@@ -1335,8 +1210,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF3AddBits)
-      {
+      else if (operation == thumbStateF3AddBits) {
         int sourceValue = srcDstRegister.get();
         int result = sourceValue + immediateValue;
         srcDstRegister.set(result);
@@ -1345,8 +1219,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF3SubBits)
-      {
+      else if (operation == thumbStateF3SubBits) {
         int sourceValue = srcDstRegister.get();
         int result = sourceValue - immediateValue;
         srcDstRegister.set(result);
@@ -1358,46 +1231,39 @@ public class Arm7TdmiGen1
     }
 
     // Format 4
-    else if ((halfWord & thumbStateF4InstructionMask) == thumbStateF4InstructionBits)
-    {
+    else if ((halfWord & thumbStateF4InstructionMask) == thumbStateF4InstructionBits) {
       int operation = halfWord & thumbStateF4OpMask;
       ArmReg sourceRegister = getRegister((halfWord & thumbStateF4RsMask) >>> 3);
       ArmReg destinationRegister = getRegister(halfWord & thumbStateF4RdMask);
 
-      if (operation == thumbStateF4AndBits)
-      {
+      if (operation == thumbStateF4AndBits) {
         int result = destinationRegister.get() & sourceRegister.get();
         destinationRegister.set(result);
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF4EorBits)
-      {
+      else if (operation == thumbStateF4EorBits) {
         int result = destinationRegister.get() ^ sourceRegister.get();
         destinationRegister.set(result);
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF4LslBits)
-      {
+      else if (operation == thumbStateF4LslBits) {
 	int src = sourceRegister.get();
 	if (src < 0) src = (src & 0x0000001f) | 64; // avoid the case of a negative value.
 	int dst = destinationRegister.get();
 
 	if (src == 0)
 	  ; // Conservation of the old cFlagBit;
-	else if (src < 32)
-	{
+	else if (src < 32) {
 	  CPSR.setBit(cFlagBit, ((dst & (1 << (32 - src))) != 0));
 	  dst <<= src;
 	}
-	else if (src == 32)
-	{
+	else if (src == 32) {
 	  CPSR.setBit(cFlagBit, ((dst & 0x00000001) != 0));
 	  dst = 0;
 	}
-	else //if (src > 32)
-	{
+	else { //if (src > 32)
 	  CPSR.setOff(cFlagBit);
 	  dst = 0;
 	}
@@ -1406,26 +1272,22 @@ public class Arm7TdmiGen1
         CPSR.setBit(zFlagBit, (dst == 0));
         CPSR.setBit(nFlagBit, (dst < 0));
       }
-      else if (operation == thumbStateF4LsrBits)
-      {
+      else if (operation == thumbStateF4LsrBits) {
 	int src = sourceRegister.get();
 	if (src < 0) src = (src & 0x0000001f) | 64; // avoid the case of a negative value.
 	int dst = destinationRegister.get();
 
 	if (src == 0)
 	  ; // Conservation of the old cFlagBit;
-	else if (src < 32)
-	{
+	else if (src < 32) {
 	  CPSR.setBit(cFlagBit, ((dst & (1 << (src - 1))) != 0));
 	  dst >>>= src;
 	}
-	else if (src == 32)
-	{
+	else if (src == 32) {
 	  CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
 	  dst = 0;
 	}
-	else //if (src > 32)
-	{
+	else { //if (src > 32)
 	  CPSR.setOff(cFlagBit);
 	  dst = 0;
 	}
@@ -1434,21 +1296,18 @@ public class Arm7TdmiGen1
         CPSR.setBit(zFlagBit, (dst == 0));
         CPSR.setBit(nFlagBit, (dst < 0));
       }
-      else if (operation == thumbStateF4AsrBits)
-      {
+      else if (operation == thumbStateF4AsrBits) {
 	int src = sourceRegister.get();
 	if (src < 0) src = (src & 0x0000001f) | 64; // avoid the case of a negative value.
 	int dst = destinationRegister.get();
 
 	if (src == 0)
 	  ; // Conservation of the old cFlagBit;
-	else if (src < 32)
-	{
+	else if (src < 32) {
 	  CPSR.setBit(cFlagBit, ((dst & (1 << (src - 1))) != 0));
 	  dst >>= src;
 	}
-	else //if (src >= 32)
-	{
+	else { //if (src >= 32)
 	  CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
 	  dst >>= 31;
 	}
@@ -1457,8 +1316,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(zFlagBit, (dst == 0));
         CPSR.setBit(nFlagBit, (dst < 0));
       }
-      else if (operation == thumbStateF4AdcBits)
-      {
+      else if (operation == thumbStateF4AdcBits) {
         int operand1 = destinationRegister.get();
         int operand2 = sourceRegister.get();
         int cFlagValue = (CPSR.isBitSet(cFlagBit) ? 1 : 0);
@@ -1468,8 +1326,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (result < 0));
         CPSR.setCVFlagsForAdd(operand1, operand2, result);  // $$$ faire les tests pour savoir ou mettre la retenue.
       }
-      else if (operation == thumbStateF4SbcBits)
-      {
+      else if (operation == thumbStateF4SbcBits) {
         int operand1 = destinationRegister.get();
         int operand2 = sourceRegister.get();
         int notCFlagValue = (CPSR.isBitSet(cFlagBit) ? 0 : 1);
@@ -1479,25 +1336,21 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (result < 0));
         CPSR.setCVFlagsForSub(operand1, operand2, result);  // $$$ faire les tests pour savoir ou mettre la retenue.
       }
-      else if (operation == thumbStateF4RorBits)
-      {
+      else if (operation == thumbStateF4RorBits) {
 	int src = sourceRegister.get();
 	if (src < 0) src = (src & 0x0000001f) | 64; // avoid the case of a negative value.
 	int dst = destinationRegister.get();
 
 	if (src == 0)
 	  ; // Conservation of the old cFlagBit;
-	else if (src < 32)
-	{
+	else if (src < 32) {
 	  dst = (dst >>> src) | (dst << (32 - src));
 	  CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
 	}
-	else if (src == 32)
-	{
+	else if (src == 32) {
 	  CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
 	}
-	else if (src > 32)
-	{
+	else if (src > 32) {
 	  src = ((src - 1) & 0x0000001f) + 1; // put src in the range [1..32]
 	  dst = (dst >>> src) | (dst << (32 - src));
 	  CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
@@ -1507,14 +1360,12 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (dst < 0));
         destinationRegister.set(dst);
       }
-      else if (operation == thumbStateF4TstBits)
-      {
+      else if (operation == thumbStateF4TstBits) {
         int result = destinationRegister.get() & sourceRegister.get();
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF4NegBits)
-      {
+      else if (operation == thumbStateF4NegBits) {
 	int operand1 = sourceRegister.get();
 	int operand2 = 0;
         int result = operand2 - operand1;
@@ -1523,8 +1374,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (result < 0));
         CPSR.setCVFlagsForSub(operand2, operand1, result);
       }
-      else if (operation == thumbStateF4CmpBits)
-      {
+      else if (operation == thumbStateF4CmpBits) {
         int operand1 = destinationRegister.get();
         int operand2 = sourceRegister.get();
         int result = operand1 - operand2;
@@ -1532,8 +1382,7 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (result < 0));
 	CPSR.setCVFlagsForSub(operand1, operand2, result);
        }
-      else if (operation == thumbStateF4CmnBits)
-      {
+      else if (operation == thumbStateF4CmnBits) {
         int operand1 = destinationRegister.get();
         int operand2 = sourceRegister.get();
         int result = operand1 + operand2;
@@ -1541,30 +1390,26 @@ public class Arm7TdmiGen1
         CPSR.setBit(nFlagBit, (result < 0));
 	CPSR.setCVFlagsForAdd(operand1, operand2, result);
       }
-      else if (operation == thumbStateF4OrrBits)
-      {
+      else if (operation == thumbStateF4OrrBits) {
         int result = destinationRegister.get() | sourceRegister.get();
         destinationRegister.set(result);
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF4MulBits)
-      {
+      else if (operation == thumbStateF4MulBits) {
         int result = destinationRegister.get() * sourceRegister.get();
 	destinationRegister.set(result);
 	CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
         //CPSR.setBit(cFlagBit, meaninglessCondition);
       }
-      else if (operation == thumbStateF4BicBits)
-      {
+      else if (operation == thumbStateF4BicBits) {
         int result = destinationRegister.get() & ~sourceRegister.get();
 	destinationRegister.set(result);
         CPSR.setBit(zFlagBit, (result == 0));
         CPSR.setBit(nFlagBit, (result < 0));
       }
-      else if (operation == thumbStateF4MvnBits)
-      {
+      else if (operation == thumbStateF4MvnBits) {
         int result = ~sourceRegister.get();
         destinationRegister.set(result);
         CPSR.setBit(zFlagBit, (result == 0));
@@ -1573,14 +1418,12 @@ public class Arm7TdmiGen1
     }
 
     // Format 5
-    else if ((halfWord & thumbStateF5InstructionMask) == thumbStateF5InstructionBits)
-    {
+    else if ((halfWord & thumbStateF5InstructionMask) == thumbStateF5InstructionBits) {
       ArmReg sourceRegister = getRegister((halfWord & (thumbStateF5RsMask | thumbStateF5H2Bit)) >>> 3);
       ArmReg destinationRegister = getRegister((halfWord & thumbStateF5RdMask) | ((halfWord & thumbStateF5H1Bit) >>> 4));
       int operation = halfWord & thumbStateF5OpMask;
 
-      switch (operation)
-      {
+      switch (operation) {
       case thumbStateF5AddBits:
         destinationRegister.add(sourceRegister.get());
 	break;
@@ -1605,8 +1448,7 @@ public class Arm7TdmiGen1
     }
 
     // Format 6
-    else if ((halfWord & thumbStateF6InstructionMask) == thumbStateF6InstructionBits)
-    {
+    else if ((halfWord & thumbStateF6InstructionMask) == thumbStateF6InstructionBits) {
       ArmReg destinationRegister = getRegister((halfWord & thumbStateF6RdMask) >>> 8);
       int immediateValue = halfWord & thumbStateF6ImmMask;
       int value = memory.loadWord(((PC.get() + 2) & 0xfffffffc) + (immediateValue << 2));
@@ -1614,23 +1456,19 @@ public class Arm7TdmiGen1
     }
 
     // Format 7
-    else if ((halfWord & thumbStateF7InstructionMask) == thumbStateF7InstructionBits)
-    {
+    else if ((halfWord & thumbStateF7InstructionMask) == thumbStateF7InstructionBits) {
       int offset = getRegister((halfWord & thumbStateF7RoMask) >>> 6).get() +
                    getRegister((halfWord & thumbStateF7RbMask) >>> 3).get();
       ArmReg srcDstRegister = getRegister(halfWord & thumbStateF7RdMask);
 
-      if ((halfWord & thumbStateF7LoadStoreBit) == 0) // store
-      {
+      if ((halfWord & thumbStateF7LoadStoreBit) == 0) { // store
         if ((halfWord & thumbStateF7ByteWordBit) == 0) // word
           memory.storeWord(offset, srcDstRegister.get());
         else // byte
           memory.storeByte(offset, (byte) srcDstRegister.get());
       }
-      else // load
-      {
-        if ((halfWord & thumbStateF7ByteWordBit) == 0) // word
-        {
+      else { // load
+        if ((halfWord & thumbStateF7ByteWordBit) == 0) { // word
           int wordAlignedOffset = offset & 0xfffffffc;
           int rightRotate = (offset & 0x00000002) << 3;
           int value = memory.loadWord(wordAlignedOffset);
@@ -1642,21 +1480,18 @@ public class Arm7TdmiGen1
     }
 
     // Format 8
-    else if ((halfWord & thumbStateF8InstructionMask) == thumbStateF8InstructionBits)
-    {
+    else if ((halfWord & thumbStateF8InstructionMask) == thumbStateF8InstructionBits) {
       int offset = getRegister((halfWord & thumbStateF8RoMask) >>> 6).get() +
                    getRegister((halfWord & thumbStateF8RbMask) >>> 3).get();
       ArmReg srcDstRegister = getRegister(halfWord & thumbStateF8RdMask);
 
-      if ((halfWord & thumbStateF8SignExtendedBit) == 0)
-      {
+      if ((halfWord & thumbStateF8SignExtendedBit) == 0) {
         if ((halfWord & thumbStateF8HBit) == 0)
           memory.storeHalfWord(offset & 0xfffffffe, (short) srcDstRegister.get());
         else
           srcDstRegister.set(0x0000ffff & memory.loadHalfWord(offset & 0xfffffffe));
       }
-      else
-      {
+      else {
         if ((halfWord & thumbStateF8HBit) == 0)
           srcDstRegister.set(memory.loadByte(offset));
         else
@@ -1665,27 +1500,23 @@ public class Arm7TdmiGen1
     }
 
     // Format 9
-    else if ((halfWord & thumbStateF9InstructionMask) == thumbStateF9InstructionBits)
-    {
+    else if ((halfWord & thumbStateF9InstructionMask) == thumbStateF9InstructionBits) {
       int baseOffset = getRegister((halfWord & thumbStateF9RbMask) >>> 3).get();
       int offset = (halfWord & thumbStateF9OffsetMask) >>> 6;
       ArmReg srcDstRegister = getRegister(halfWord & thumbStateF9RdMask);
 
-      if ((halfWord & thumbStateF9ByteWordBit) == 0) // word
-      {
+      if ((halfWord & thumbStateF9ByteWordBit) == 0) { // word
 	baseOffset += (offset << 2);
 	int wordAlignedOffset = baseOffset & 0xfffffffc;
         if ((halfWord & thumbStateF9LoadStoreBit) == 0) // store
           memory.storeWord(wordAlignedOffset, srcDstRegister.get());
-        else // load
-        {
+        else { // load
           int rightRotate = (baseOffset & 0x00000003) << 3;
           int value = memory.loadWord(wordAlignedOffset);
           srcDstRegister.set((value >>> rightRotate) | (value << (32 - rightRotate)));
         }
       }
-      else // byte
-      {
+      else { // byte
         if ((halfWord & thumbStateF9LoadStoreBit) == 0) // store
           memory.storeByte(baseOffset + offset, (byte) srcDstRegister.get());
         else // load
@@ -1694,8 +1525,7 @@ public class Arm7TdmiGen1
     }
 
     // Format 10
-    else if ((halfWord & thumbStateF10InstructionMask) == thumbStateF10InstructionBits)
-    {
+    else if ((halfWord & thumbStateF10InstructionMask) == thumbStateF10InstructionBits) {
       int offset = getRegister((halfWord & thumbStateF10RbMask) >>> 3).get() +
                    ((halfWord & thumbStateF10OffsetMask) >>> 6) * 2;
       ArmReg srcDstRegister = getRegister(halfWord & thumbStateF10RdMask);
@@ -1707,8 +1537,7 @@ public class Arm7TdmiGen1
     }
 
     // Format 11
-    else if ((halfWord & thumbStateF11InstructionMask) == thumbStateF11InstructionBits)
-    {
+    else if ((halfWord & thumbStateF11InstructionMask) == thumbStateF11InstructionBits) {
       ArmReg srcDstRegister = getRegister((halfWord & thumbStateF11RdMask) >>> 8);
       int immediateValue = halfWord & thumbStateF11ImmMask;
       int offset = (getSP().get() & 0xfffffffc) + (immediateValue * 4);
@@ -1720,8 +1549,7 @@ public class Arm7TdmiGen1
     }
 
     // Format 12
-    else if ((halfWord & thumbStateF12InstructionMask) == thumbStateF12InstructionBits)
-    {
+    else if ((halfWord & thumbStateF12InstructionMask) == thumbStateF12InstructionBits) {
       int sourceAdress = (((halfWord & thumbStateF12SPBit) == 0) ? (PC.get() + 4) : getSP().get());
       ArmReg destinationRegister = getRegister((halfWord & thumbStateF12RdMask) >>> 8);
       int offset = halfWord & thumbStateF12OffsetMask;
@@ -1729,45 +1557,37 @@ public class Arm7TdmiGen1
     }
 
     // Format 13
-    else if ((halfWord & thumbStateF13InstructionMask) == thumbStateF13InstructionBits)
-    {
+    else if ((halfWord & thumbStateF13InstructionMask) == thumbStateF13InstructionBits) {
       int offset = halfWord & thumbStateF13ImmediateMask;
       if ((halfWord & thumbStateF13SignBit) != 0) offset = -offset;
       getSP().add(offset * 4);
     }
 
     // Format 14
-    else if ((halfWord & thumbStateF14InstructionMask) == thumbStateF14InstructionBits)
-    {
+    else if ((halfWord & thumbStateF14InstructionMask) == thumbStateF14InstructionBits) {
       ArmReg SP = getSP();
       int spValue = SP.get();
 
-      if ((halfWord & thumbStateF14LoadStoreBit) == 0) // push
-      {
-        if ((halfWord & thumbStateF14PcLrBit) != 0) // push LR too
-        {
+      if ((halfWord & thumbStateF14LoadStoreBit) == 0) { // push
+        if ((halfWord & thumbStateF14PcLrBit) != 0) { // push LR too
           spValue -= 4;
           memory.storeWord(spValue, getLR().get());
         }
 
         for (int i = 7; i >= 0; i--)
-          if ((halfWord & (1 << i)) != 0)
-          {
+          if ((halfWord & (1 << i)) != 0) {
             spValue -= 4;
             memory.storeWord(spValue, getRegister(i).get());
           }
       }
-      else // pop
-      {
+      else { // pop
         for (int i = 0; i <= 7; i++)
-          if ((halfWord & (1 << i)) != 0)
-          {
+          if ((halfWord & (1 << i)) != 0) {
             getRegister(i).set(memory.loadWord(spValue));
             spValue += 4;
           }
 
-        if ((halfWord & thumbStateF14PcLrBit) != 0) // pop PC too
-        {
+        if ((halfWord & thumbStateF14PcLrBit) != 0) { // pop PC too
           PC.set(memory.loadWord(spValue));
           spValue += 4;
         }
@@ -1777,25 +1597,20 @@ public class Arm7TdmiGen1
     }
 
     // Format 15
-    else if ((halfWord & thumbStateF15InstructionMask) == thumbStateF15InstructionBits)
-    {
+    else if ((halfWord & thumbStateF15InstructionMask) == thumbStateF15InstructionBits) {
       ArmReg baseRegister = getRegister((halfWord & thumbStateF15RbMask) >>> 8);
       int baseValue = baseRegister.get();
 
-      if ((halfWord & thumbStateF15LoadStoreBit) == 0) // push
-      {
+      if ((halfWord & thumbStateF15LoadStoreBit) == 0) { // push
         for (int i = 7; i >= 0; i--)
-          if ((halfWord & (1 << i)) != 0)
-          {
+          if ((halfWord & (1 << i)) != 0) {
             memory.storeWord(baseValue, getRegister(i).get());
             baseValue += 4;
           }
       }
-      else // pop
-      {
+      else { // pop
         for (int i = 0; i <= 7; i++)
-          if ((halfWord & (1 << i)) != 0)
-          {
+          if ((halfWord & (1 << i)) != 0) {
             getRegister(i).set(memory.loadWord(baseValue));
             baseValue += 4;
           }
@@ -1805,8 +1620,7 @@ public class Arm7TdmiGen1
     }
 
     // Format 17
-    else if ((halfWord & thumbStateF17InstructionMask) == thumbStateF17InstructionBits)
-    {
+    else if ((halfWord & thumbStateF17InstructionMask) == thumbStateF17InstructionBits) {
       svcRegisters[14].set(PC);
       SPSR_svc.set(CPSR);
       setMode(svcModeBits);
@@ -1815,52 +1629,46 @@ public class Arm7TdmiGen1
     }
 
     // Format 16
-    else if ((halfWord & thumbStateF16InstructionMask) == thumbStateF16InstructionBits)
-    {
+    else if ((halfWord & thumbStateF16InstructionMask) == thumbStateF16InstructionBits) {
       int offset = (int) ((byte) (halfWord & thumbStateF16SOffsetMask));
       int condType = halfWord & thumbStateF16CondMask;
       boolean condition;
 
-      switch (condType)
-      {
-      case thumbStateF16EQBits: condition =  CPSR.isBitSet(zFlagBit); break;
-      case thumbStateF16NEBits: condition = !CPSR.isBitSet(zFlagBit); break;
-      case thumbStateF16CSBits: condition =  CPSR.isBitSet(cFlagBit); break;
-      case thumbStateF16CCBits: condition = !CPSR.isBitSet(cFlagBit); break;
-      case thumbStateF16MIBits: condition =  CPSR.isBitSet(nFlagBit); break;
-      case thumbStateF16PLBits: condition = !CPSR.isBitSet(nFlagBit); break;
-      case thumbStateF16VSBits: condition =  CPSR.isBitSet(vFlagBit); break;
-      case thumbStateF16VCBits: condition = !CPSR.isBitSet(vFlagBit); break;
-      case thumbStateF16HIBits: condition =  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit); break;
-      case thumbStateF16LSBits: condition = !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit); break;
-      case thumbStateF16GEBits: condition =  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit); break;
-      case thumbStateF16LTBits: condition =  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit); break;
-      case thumbStateF16GTBits: condition = !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit)); break;
-      case thumbStateF16LEBits: condition =  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit)); break;
-      default: condition = false; // Si condType indefini, ne saute pas, ne fait rien.
+      switch (condType) {
+        case thumbStateF16EQBits: condition =  CPSR.isBitSet(zFlagBit); break;
+        case thumbStateF16NEBits: condition = !CPSR.isBitSet(zFlagBit); break;
+        case thumbStateF16CSBits: condition =  CPSR.isBitSet(cFlagBit); break;
+        case thumbStateF16CCBits: condition = !CPSR.isBitSet(cFlagBit); break;
+        case thumbStateF16MIBits: condition =  CPSR.isBitSet(nFlagBit); break;
+        case thumbStateF16PLBits: condition = !CPSR.isBitSet(nFlagBit); break;
+        case thumbStateF16VSBits: condition =  CPSR.isBitSet(vFlagBit); break;
+        case thumbStateF16VCBits: condition = !CPSR.isBitSet(vFlagBit); break;
+        case thumbStateF16HIBits: condition =  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit); break;
+        case thumbStateF16LSBits: condition = !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit); break;
+        case thumbStateF16GEBits: condition =  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit); break;
+        case thumbStateF16LTBits: condition =  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit); break;
+        case thumbStateF16GTBits: condition = !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit)); break;
+        case thumbStateF16LEBits: condition =  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit)); break;
+        default: condition = false; // Si condType indefini, ne saute pas, ne fait rien.
       }
 
       if (condition) PC.set(PC.get() + 2 + offset * 2);
     }
 
     // Format 18
-    else if ((halfWord & thumbStateF18InstructionMask) == thumbStateF18InstructionBits)
-    {
+    else if ((halfWord & thumbStateF18InstructionMask) == thumbStateF18InstructionBits) {
       int offset = ((halfWord & thumbStateF18OffsetMask) << 21) >> 21;
       PC.set(PC.get() + 2 + offset * 2);
     }
 
     // Format 19
-    else if ((halfWord & thumbStateF19InstructionMask) == thumbStateF19InstructionBits)
-    {
+    else if ((halfWord & thumbStateF19InstructionMask) == thumbStateF19InstructionBits) {
       int offset = halfWord & thumbStateF19OffsetMask;
-      if ((halfWord & thumbStateF19LowHiOffsetBit) == 0) // High offset
-      {
+      if ((halfWord & thumbStateF19LowHiOffsetBit) == 0) { // High offset
         offset = ((offset << 21) >> 21) << 12;
         getLR().set(offset + 2 + (PC.get() & 0xfffffffe));
       }
-      else // Low offset
-      {
+      else { // Low offset
         ArmReg LR = getLR();
         LR.add(offset << 1);
         int nextInstrAdress = PC.get();

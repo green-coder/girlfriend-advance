@@ -1,45 +1,35 @@
 package gfa.cpu;
 
-import java.io.*;
-import gfa.memory.*;
-import gfa.time.*;
-import gfa.util.*;
+import gfa.memory.MemoryInterface;
 
-public class Arm7TdmiGen2
-  extends Arm7Tdmi
-{
+public class Arm7TdmiGen2 extends Arm7Tdmi {
+
   public InstructionDecoder decoder;
 
-  public Arm7TdmiGen2()
-  {
+  public Arm7TdmiGen2() {
     super();
   }
 
-  public void connectToMemory(MemoryInterface memory)
-  {
+  public void connectToMemory(MemoryInterface memory) {
     super.connectToMemory(memory);
     decoder = new InstructionDecoder(allRegisters, memory);
   }
   
-  public String disassembleArmInstruction(int offset)
-  {
+  public String disassembleArmInstruction(int offset) {
     return decoder.decodeArmInstruction(memory.directLoadWord(offset)).disassemble(offset);
   }
 
-  public String disassembleThumbInstruction(int offset)
-  {
+  public String disassembleThumbInstruction(int offset) {
     return decoder.decodeThumbInstruction(memory.directLoadHalfWord(offset)).disassemble(offset);
   }
 
-    /*
-  protected ArmReg newArmReg(int v)
-  {
+  /*
+  protected ArmReg newArmReg(int v) {
     return new ArmRegObserver(new ArmReg(v));
   }
-    */
+  */
   
-  public void step()
-  {
+  public void step() {
     int instructionTime;
 
     // Handle IRQ
@@ -60,15 +50,13 @@ public class Arm7TdmiGen2
       //stopPlease();
     }
     
-    else if (isInThumbState())
-    {
+    else if (isInThumbState()) {
       short opcode = memory.directLoadHalfWord(PC.get());
       PC.add(2); // add the size of a halfword.
       decoder.decodeThumbInstruction(opcode).execute();
       instructionTime = 2; // inaccurate
     }
-    else
-    {
+    else {
       int opcode = memory.directLoadWord(PC.get());
       PC.add(4); // add the size of a word.
       decoder.decodeArmInstruction(opcode).execute();

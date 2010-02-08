@@ -1,15 +1,12 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
-import java.math.*;
+import gfa.memory.MemoryInterface;
+import java.math.BigInteger;
 
-public class ArmStateMull
-  extends ArmStateInstruction
-{
+public class ArmStateMull extends ArmStateInstruction {
 
-  public ArmStateMull(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateMull(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -21,8 +18,7 @@ public class ArmStateMull
   static final protected int RsMask          = 0x00000f00;
   static final protected int RmMask          = 0x0000000f;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     ArmReg rdHi = getRegister((opcode & RdHiMask) >>> 16);
@@ -31,21 +27,18 @@ public class ArmStateMull
     ArmReg rm = getRegister(opcode & RmMask);
     long longResult;
     
-    if ((opcode & UnsignedBit) != 0) // signed multiplication
-    {
+    if ((opcode & UnsignedBit) != 0) { // signed multiplication
       longResult = (long) rm.get() * (long) rs.get();
       
       if ((opcode & AccumulateBit) != 0)
         longResult += ((long) rdHi.get() << 32) | (0xffffffffL & (long) rdLo.get());
     }
-    else // unsigned multiplication 64 bits ... :-(
-    {
+    else { // unsigned multiplication 64 bits ... :-(
       BigInteger operand1 = new BigInteger(Long.toString(0xffffffffL & (long) rm.get()));
       BigInteger operand2 = new BigInteger(Long.toString(0xffffffffL & (long) rs.get()));
       BigInteger bigResult = operand1.multiply(operand2);
       
-      if ((opcode & AccumulateBit) != 0)
-      {
+      if ((opcode & AccumulateBit) != 0) {
         BigInteger hi = new BigInteger(Long.toString(0xffffffffL & (long) rdHi.get()));
 	BigInteger lo = new BigInteger(Long.toString(0xffffffffL & (long) rdLo.get()));
 	bigResult = bigResult.add(hi.shiftLeft(32).or(lo));
@@ -57,8 +50,7 @@ public class ArmStateMull
     rdLo.set((int) longResult);
     rdHi.set((int) (longResult >> 32));
     
-    if ((opcode & SetConditionBit) != 0)
-    {
+    if ((opcode & SetConditionBit) != 0) {
       CPSR.setBit(zFlagBit, (longResult == 0));
       CPSR.setBit(nFlagBit, (longResult < 0));
       //CPSR.setBit(cFlagBit, meaninglessCondition);
@@ -66,8 +58,7 @@ public class ArmStateMull
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instruc = ((opcode & UnsignedBit) != 0) ? "s" : "u";
     instruc += ((opcode & AccumulateBit) != 0) ? "mlal" : "mull";
@@ -79,4 +70,5 @@ public class ArmStateMull
     String rm = getRegisterName(opcode & RmMask);
     return instruc + " " + rdLo + ", " + rdHi + ", " + rm + ", " + rs;
   }
+
 }

@@ -1,22 +1,18 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF17
-  extends ThumbStateInstruction
-{
+public class ThumbStateF17 extends ThumbStateInstruction {
 
-  public ThumbStateF17(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF17(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   static final protected int instructionParameterMask      = 0x000000ff;
   static final protected int softwareInterrupVectorAddress = 0x00000008;
 
-  public void execute()
-  {
+  public void execute() {
     //System.out.println("swi #" + (opcode & instructionParameterMask));
     
     getRegister(14, svcModeBits).set(PC);   // LR_svc <- PC
@@ -26,9 +22,9 @@ public class ThumbStateF17
     setArmState();
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     return "swi #" + (opcode & instructionParameterMask);
   }
+  
 }

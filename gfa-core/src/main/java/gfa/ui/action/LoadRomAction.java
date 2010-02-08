@@ -1,20 +1,16 @@
 package gfa.ui.action;
 
-import gfa.*;
-import gfa.ui.*;
+import gfa.GirlfriendAdvance;
+import gfa.ui.UserInterface;
+import java.awt.event.ActionEvent;
 
-import java.awt.event.*;
-import javax.swing.*;
+public class LoadRomAction extends InternationalAction {
 
-public class LoadRomAction
-    extends InternationalAction
-{
-    public LoadRomAction(UserInterface ui, GirlfriendAdvance gfa)
-    {
-	super(ui, "LoadRomAction");
-    }
-    
-    public void actionPerformed(ActionEvent event)
-    {
-    }
+  public LoadRomAction(UserInterface ui, GirlfriendAdvance gfa) {
+    super(ui, "LoadRomAction");
+  }
+
+  public void actionPerformed(ActionEvent event) {
+  }
+
 }

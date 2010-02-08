@@ -1,16 +1,15 @@
 package gfa.ui;
 
 import gfa.GirlfriendAdvance;
-import gfa.memory.*;
+import gfa.memory.IORegisterSpace_8_16_32;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+public class InputPanel extends JPanel implements ItemListener {
 
-public class InputPanel
-  extends JPanel
-  implements ItemListener
-{
   private JCheckBox upPad;
   private JCheckBox downPad;
   private JCheckBox leftPad;
@@ -24,8 +23,7 @@ public class InputPanel
 
   private IORegisterSpace_8_16_32 ioMem;
 
-  public InputPanel(GirlfriendAdvance gfa)
-  {
+  public InputPanel(GirlfriendAdvance gfa) {
     super(new GridLayout(10, 1), false);
     ioMem = (IORegisterSpace_8_16_32) gfa.getMemory().getMemoryBank(0x04);
     
@@ -63,8 +61,7 @@ public class InputPanel
     add(rPad);
   }
 
-  public void itemStateChanged(ItemEvent e)
-  {
+  public void itemStateChanged(ItemEvent e) {
     short keys = (short)
      ~((aPad.isSelected() ?      0x0001 : 0) |
        (bPad.isSelected() ?      0x0002 : 0) |

@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF9
-  extends ThumbStateInstruction
-{
+public class ThumbStateF9 extends ThumbStateInstruction {
 
-  public ThumbStateF9(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF9(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -18,27 +15,23 @@ public class ThumbStateF9
   static final protected int RbMask       = 0x00000038;
   static final protected int RdMask       = 0x00000007;
 
-  public void execute()
-  {
+  public void execute() {
     int baseOffset = getRegister((opcode & RbMask) >>> 3).get();
     int offset = (opcode & OffsetMask) >>> 6;
     ArmReg srcDstRegister = getRegister(opcode & RdMask);
     
-    if ((opcode & ByteWordBit) == 0) // word
-    {
+    if ((opcode & ByteWordBit) == 0) { // word
       baseOffset += (offset << 2);
       int wordAlignedOffset = baseOffset & 0xfffffffc;
       if ((opcode & LoadStoreBit) == 0) // store
         memory.storeWord(wordAlignedOffset, srcDstRegister.get());
-      else // load
-      {
+      else { // load
         int rightRotate = (baseOffset & 0x00000003) << 3;
 	int value = memory.loadWord(wordAlignedOffset);
 	srcDstRegister.set((value >>> rightRotate) | (value << (32 - rightRotate)));
       }
     }
-    else // byte
-    {
+    else { // byte
       if ((opcode & LoadStoreBit) == 0) // store
         memory.storeByte(baseOffset + offset, (byte) srcDstRegister.get());
       else // load
@@ -46,8 +39,7 @@ public class ThumbStateF9
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru = (((opcode & LoadStoreBit) == 0) ? "str" : "ldr") +
 	            (((opcode & ByteWordBit) == 0) ? "" : "b");

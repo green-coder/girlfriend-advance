@@ -1,10 +1,8 @@
 package gfa.memory;
 
-public class SystemROM_8_16_32
-  extends MemoryManagementUnit_8_16_32
-{
-  public SystemROM_8_16_32(String name, int size)
-  {
+public class SystemROM_8_16_32 extends MemoryManagementUnit_8_16_32 {
+
+  public SystemROM_8_16_32(String name, int size) {
     super(name, size);
 
     // BIOS emulation.
@@ -51,8 +49,7 @@ public class SystemROM_8_16_32
     setReg32(0x00000090, 0x00000084);
   }
 
-  protected void setReg32(int offset, int value)
-  {
+  protected void setReg32(int offset, int value) {
     offset = getInternalOffset(offset);
     offset &= 0xfffffffc; // offset is now word-aligned
     memory[offset + 0] = (byte) value;
@@ -61,20 +58,18 @@ public class SystemROM_8_16_32
     memory[offset + 3] = (byte) (value >>> 24);
   }
 
-  protected byte read(int offset)
-  {
+  protected byte read(int offset) {
     offset = getInternalOffset(offset);
     return memory[offset];
   }
 
-  protected void write(int offset, byte value)
-  {
+  protected void write(int offset, byte value) {
     //System.out.println("Ecriture dans la rom system a l'offset " + gfa.util.Hex.toString(offset) + " !!!");
     //gfa.debug.StepFrame.BREAK();
     //memory[offset] = value;
   }
 
-  public void reset()
-  {
+  public void reset() {
   }
+  
 }

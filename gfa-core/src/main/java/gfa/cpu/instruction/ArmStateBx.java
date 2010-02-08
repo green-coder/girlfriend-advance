@@ -3,18 +3,15 @@ package gfa.cpu.instruction;
 import gfa.cpu.ArmReg;
 import gfa.memory.MemoryInterface;
 
-public class ArmStateBx
-  extends ArmStateInstruction
-{
-  public ArmStateBx(ArmReg[][] regs, MemoryInterface memory)
-  {
+public class ArmStateBx extends ArmStateInstruction {
+
+  public ArmStateBx(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   static final protected int RnMask = 0x0000000f;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     int registerNumber = opcode & RnMask;
@@ -24,10 +21,10 @@ public class ArmStateBx
     else setThumbState();
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     int registerNumber = opcode & RnMask;
     return "bx" + preconditionToString(opcode) + " " + getRegisterName(registerNumber);
   }
+
 }

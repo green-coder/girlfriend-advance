@@ -1,18 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateAdc
-  extends ArmStateArithmLogic
-{
-  public ArmStateAdc(ArmReg[][] regs, MemoryInterface memory)
-  {
+public class ArmStateAdc extends ArmStateArithmLogic {
+
+  public ArmStateAdc(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation(int operand1, int operand2)
-  {
+  protected void applyOperation(int operand1, int operand2) {
     int cFlagValue = (CPSR.isBitSet(cFlagBit) ? 1 : 0);
     int result = operand1 + operand2 + cFlagValue;
     destinationRegister.set(result);
@@ -21,8 +18,8 @@ public class ArmStateAdc
     tmpCPSR.setCVFlagsForAdd(operand1, operand2, result);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "adc";
   }
+
 }

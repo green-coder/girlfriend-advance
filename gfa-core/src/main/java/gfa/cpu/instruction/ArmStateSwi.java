@@ -1,22 +1,18 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateSwi
-  extends ArmStateInstruction
-{
+public class ArmStateSwi extends ArmStateInstruction {
 
-  public ArmStateSwi(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateSwi(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   static final protected int softwareInterrupVectorAddress = 0x00000008;
   static final protected int ParameterMask = 0x00ffffff;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     //System.out.println("swi #" + (opcode & ParameterMask));
@@ -28,9 +24,9 @@ public class ArmStateSwi
     setArmState();
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     return "swi #" + (opcode & ParameterMask);
   }
+
 }

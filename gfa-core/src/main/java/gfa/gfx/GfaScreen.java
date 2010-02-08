@@ -7,60 +7,57 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import javax.swing.JComponent;
 
-public class GfaScreen
-    extends JComponent
-{
-    private Dimension fixedDimension = new Dimension(240, 160);
-    protected Image lcdImage;
-    
-    public GfaScreen() {
-        lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
-    }
-    
-    public GfaScreen(GirlfriendAdvance gfa)
-    {
-	setDoubleBuffered(false);
-	lcdImage = gfa.getLcd().getImage();
-    }
+public class GfaScreen extends JComponent {
 
-    @Override
-    public Dimension getMaximumSize() {
-        return fixedDimension;
-    }
+  private Dimension fixedDimension = new Dimension(240, 160);
+  protected Image lcdImage;
 
-    @Override
-    public Dimension getMinimumSize() {
-        return fixedDimension;
-    }
+  public GfaScreen() {
+    lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
+  }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return fixedDimension;
-    }
+  public GfaScreen(GirlfriendAdvance gfa) {
+    setDoubleBuffered(false);
+    lcdImage = gfa.getLcd().getImage();
+  }
 
-    @Override
-    public boolean isPreferredSizeSet() {
-        return true;
-    }
+  @Override
+  public Dimension getMaximumSize() {
+    return fixedDimension;
+  }
 
-    @Override
-    public boolean isMinimumSizeSet() {
-        return true;
-    }
+  @Override
+  public Dimension getMinimumSize() {
+    return fixedDimension;
+  }
 
-    @Override
-    public boolean isMaximumSizeSet() {
-        return true;
-    }
-    
-    public void resfresh()
-    {
-	repaint();
-    }
-    
-    @Override
-    public void paint(Graphics g)
-    {
-	g.drawImage(lcdImage, 0, 0, this);
-    }
+  @Override
+  public Dimension getPreferredSize() {
+    return fixedDimension;
+  }
+
+  @Override
+  public boolean isPreferredSizeSet() {
+    return true;
+  }
+
+  @Override
+  public boolean isMinimumSizeSet() {
+    return true;
+  }
+
+  @Override
+  public boolean isMaximumSizeSet() {
+    return true;
+  }
+
+  public void resfresh() {
+    repaint();
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    g.drawImage(lcdImage, 0, 0, this);
+  }
+  
 }

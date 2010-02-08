@@ -1,25 +1,20 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF5Mov
-  extends ThumbStateF5
-{
+public class ThumbStateF5Mov extends ThumbStateF5 {
 
-  public ThumbStateF5Mov(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF5Mov(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     destinationRegister.set(sourceValue);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "mov";
   }
-
+  
 }

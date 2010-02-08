@@ -1,14 +1,11 @@
 package gfa.cpu;
 
-import gfa.memory.*;
-import gfa.time.*;
-import gfa.util.*;
+import gfa.memory.GfaMMU;
+import gfa.memory.MemoryInterface;
+import gfa.time.Time;
 
-import java.io.*;
+public abstract class Arm7Tdmi implements Runnable {
 
-public abstract class Arm7Tdmi
-        implements Runnable
-{
   protected GfaMMU memory;
   protected Time time;
 
@@ -68,18 +65,15 @@ public abstract class Arm7Tdmi
   static final int REG_IF_Address  = 0x04000202;
   static final int REG_IME_Address = 0x04000208;
   
-  public Arm7Tdmi()
-  {
+  public Arm7Tdmi() {
     initRegisters();
   }
 
-  protected ArmReg newArmReg(int v)
-  {
+  protected ArmReg newArmReg(int v) {
     return new ArmReg(v);
   }
   
-  protected void initRegisters()
-  {
+  protected void initRegisters() {
     usrRegisters = new ArmReg[18];
     fiqRegisters = new ArmReg[18];
     irqRegisters = new ArmReg[18];
@@ -89,8 +83,7 @@ public abstract class Arm7Tdmi
     sysRegisters = new ArmReg[18];
     currentRegisters = null; // need a first reset to set it up.
 
-    for (int i = 0; i <= 7; i++)
-    {
+    for (int i = 0; i <= 7; i++) {
       ArmReg reg = newArmReg(0);
       usrRegisters[i] = reg;
       fiqRegisters[i] = reg;
@@ -101,8 +94,7 @@ public abstract class Arm7Tdmi
       sysRegisters[i] = reg;
     }
 
-    for (int i = 8; i <= 12; i++)
-    {
+    for (int i = 8; i <= 12; i++) {
       ArmReg reg = newArmReg(0);
       usrRegisters[i] = reg;
       irqRegisters[i] = reg;
@@ -189,74 +181,60 @@ public abstract class Arm7Tdmi
     allRegisters[sysModeBits] = sysRegisters;
   }
 
-  public void connectToMemory(MemoryInterface memory)
-  {
+  public void connectToMemory(MemoryInterface memory) {
     this.memory = (GfaMMU) memory;
   }
 
-  public void connectToTime(Time time)
-  {
+  public void connectToTime(Time time) {
     this.time = time;
   }
 
-  public Time getTime()
-  {
+  public Time getTime() {
     return time;
   }
 
-  public String disassembleArmInstruction(int offset)
-  {
+  public String disassembleArmInstruction(int offset) {
     return "";
   }
 
-  public String disassembleThumbInstruction(int offset)
-  {
+  public String disassembleThumbInstruction(int offset) {
     return "";
   }
 
-  public ArmReg[][] getRegisters()
-  {
+  public ArmReg[][] getRegisters() {
     return allRegisters;
   }
 
-  public boolean isInThumbState()
-  {
+  public boolean isInThumbState() {
     return CPSR.isBitSet(tFlagBit);
   }
 
-  public boolean isInArmState()
-  {
+  public boolean isInArmState() {
     return !CPSR.isBitSet(tFlagBit);
   }
 
-  public int currentInstructionSize()
-  {
+  public int currentInstructionSize() {
     if (isInThumbState()) return 2;
     else return 4;
   }
 
-  public ArmReg getRegister(int registerNumber)
-  {
+  public ArmReg getRegister(int registerNumber) {
     return allRegisters[CPSR.get() & modeBitsMask][registerNumber];
   }
 
-  public ArmReg getRegister(int registerNumber, int modeBits)
-  {
+  public ArmReg getRegister(int registerNumber, int modeBits) {
     return allRegisters[modeBits][registerNumber];
   }
 
-  protected void setArmState()
-  {
+  protected void setArmState() {
     CPSR.setOff(tFlagBit);
   }
 
-  protected void setThumbState()
-  {
+  protected void setThumbState() {
     CPSR.setOn(tFlagBit);
   }
 
-  protected void setMode(int modeBits)
-  {
+  protected void setMode(int modeBits) {
     if (modeBits == usrModeBits) currentRegisters = usrRegisters;
     else if (modeBits == fiqModeBits) currentRegisters = fiqRegisters;
     else if (modeBits == irqModeBits) currentRegisters = irqRegisters;
@@ -269,8 +247,7 @@ public abstract class Arm7Tdmi
     CPSR.set((CPSR.get() & ~modeBitsMask) | modeBits);
   }
 
-  public void reset()
-  {
+  public void reset() {
     // Set all registers to the zero value.
     for (int i = 0; i < allRegisters.length; i++)
       if (allRegisters[i] != null)
@@ -297,40 +274,35 @@ public abstract class Arm7Tdmi
 
   abstract public void step();
 
-  public void breakpoint(int offset)
-  {
+  public void breakpoint(int offset) {
     stopPolitelyRequested = false;
-    do
-    {
+    do {
       step();
     } while ((PC.get() != offset) && !stopPolitelyRequested);
   }
 
-  public void stepOver()
-  {
+  public void stepOver() {
     breakpoint(PC.get() + currentInstructionSize());
   }
 
   private boolean stopPolitelyRequested;
 
-  public void run()
-  {
+  public void run() {
     while (!stopPolitelyRequested)
       step();
   }
   
   public void start() {
-      stopPolitelyRequested = false;
-      new Thread(this).start();
+    stopPolitelyRequested = false;
+    new Thread(this).start();
   }
 
-  public void stopPlease()
-  {
+  public void stopPlease() {
     stopPolitelyRequested = true;
   }
   
-  public boolean isStopPolitelyRequested()
-  {
+  public boolean isStopPolitelyRequested() {
     return stopPolitelyRequested;
   }
+
 }

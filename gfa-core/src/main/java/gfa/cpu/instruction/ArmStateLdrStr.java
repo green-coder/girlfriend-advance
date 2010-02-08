@@ -1,15 +1,12 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
-import gfa.util.*;
+import gfa.memory.MemoryInterface;
+import gfa.util.Hex;
 
-public class ArmStateLdrStr
-  extends ArmStateInstruction
-{
+public class ArmStateLdrStr extends ArmStateInstruction {
 
-  public ArmStateLdrStr(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateLdrStr(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -30,8 +27,7 @@ public class ArmStateLdrStr
   static final protected int ArithmRightBits  = 0x00000040;
   static final protected int RotateRightBits  = 0x00000060;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     ArmReg baseRegister = getRegister((opcode & RnMask) >>> 16);
@@ -40,8 +36,7 @@ public class ArmStateLdrStr
     int offset = 0;
     if ((opcode & ImmediateBit) == 0)
       offset = opcode & ImmediateMask;
-    else
-    {
+    else {
       int offsetValue = getRegister(opcode & RmMask).get();
       int shiftAmount = (opcode & ShiftAmountMask) >>> 7;
       int shiftType = opcode & ShiftTypeMask;
@@ -73,23 +68,19 @@ public class ArmStateLdrStr
       signalError("A non-emulated instruction for an OS has been used !");
 */
     
-    if ((opcode & LoadStoreBit) == 0)  // Store
-    {
+    if ((opcode & LoadStoreBit) == 0) { // Store
       int valueToStore = srcDstRegister.get();
       if (srcDstRegister == PC) valueToStore += 8;
       
-      if ((opcode & ByteWordBit) == 0) // Word
-      {
+      if ((opcode & ByteWordBit) == 0) { // Word
         int wordAlignedAdress = newAdress & 0xfffffffc;
 	memory.storeWord(wordAlignedAdress, valueToStore);
       }
       else                                         // Byte
         memory.storeByte(newAdress, (byte) valueToStore);
     }
-    else                                           // Load
-    {
-      if ((opcode & ByteWordBit) == 0) // Word
-      {
+    else {                                          // Load
+      if ((opcode & ByteWordBit) == 0) { // Word
 	int wordAlignedAdress = newAdress & 0xfffffffc;
 	int rightRotate = (newAdress & 0x00000003) << 3;
 	int value = memory.loadWord(wordAlignedAdress);
@@ -107,8 +98,7 @@ public class ArmStateLdrStr
       baseRegister.set(newAdress);
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
 
     String instru = ((opcode & LoadStoreBit) == 0) ? "str" : "ldr";
@@ -138,18 +128,17 @@ public class ArmStateLdrStr
     if ((opcode & ImmediateMask) == 0) offset2 = "";
     
     String address;
-    if ((opcode & PreIndexingBit) != 0) // PreIndex
-    {
+    if ((opcode & PreIndexingBit) != 0) { // PreIndex
       if ((opcode & ImmediateBit) == 0) address = "[" + rn + offset2 + "]";
       else address = "[" + rn + rm + shift + "]";	
       if ((opcode & WriteBackBit) != 0) address += "!";
     }
-    else // PostIndex
-    {
+    else { // PostIndex
       if ((opcode & ImmediateBit) == 0) address = "[" + rn + "]" + offset2;
       else address = "[" + rn + "]" + rm + shift;
     }
     
     return instru + " " + rd + ", " + address;
   }
+
 }

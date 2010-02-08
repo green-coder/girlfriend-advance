@@ -1,18 +1,14 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public abstract class ArmStateTest
-  extends ArmStateDataProcessing
-{
-  public ArmStateTest(ArmReg[][] regs, MemoryInterface memory)
-  {
+public abstract class ArmStateTest extends ArmStateDataProcessing {
+  public ArmStateTest(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instru = getInstructionName() + preconditionToString(opcode);
     String rn = getRegisterName((opcode & Operand1Mask) >>> 16);
@@ -22,4 +18,5 @@ public abstract class ArmStateTest
   }
 
   abstract protected String getInstructionName();
+
 }

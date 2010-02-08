@@ -1,19 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF3Add
-  extends ThumbStateF3
-{
+public class ThumbStateF3Add extends ThumbStateF3 {
 
-  public ThumbStateF3Add(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF3Add(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int sourceValue = srcDstRegister.get();
     int result = sourceValue + immediateValue;
     srcDstRegister.set(result);
@@ -23,8 +19,7 @@ public class ThumbStateF3Add
     CPSR.setBit(nFlagBit, (result < 0));
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "add";
   }
 

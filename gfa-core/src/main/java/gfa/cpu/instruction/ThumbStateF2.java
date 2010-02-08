@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF2
-  extends ThumbStateInstruction
-{
+public class ThumbStateF2 extends ThumbStateInstruction {
 
-  public ThumbStateF2(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF2(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -18,8 +15,7 @@ public class ThumbStateF2
   static final protected int ImmediateBit = 0x00000400;
   static final protected int OpBit        = 0x00000200;
 
-  public void execute()
-  {
+  public void execute() {
     ArmReg sourceRegister = getRegister((opcode & RsMask) >>> 3);
     ArmReg destinationRegister = getRegister(opcode & RdMask);
     int value = (opcode & RnMask) >>> 6;
@@ -31,13 +27,11 @@ public class ThumbStateF2
       value = getRegister(value).get();
     
     int result;
-    if ((opcode & OpBit) != 0) // substraction
-    {
+    if ((opcode & OpBit) != 0) { // substraction
       result = sourceValue - value;
       CPSR.setCVFlagsForSub(sourceValue, value, result);
     }
-    else
-    {
+    else {
       result = sourceValue + value;
       CPSR.setCVFlagsForAdd(sourceValue, value, result);
     }
@@ -47,8 +41,7 @@ public class ThumbStateF2
     CPSR.setBit(nFlagBit, (result < 0));
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru = ((opcode & OpBit) != 0) ? "sub" : "add";
     String rd = getRegisterName(opcode & RdMask);
@@ -57,4 +50,5 @@ public class ThumbStateF2
     String rnOrOffset3 = ((opcode & ImmediateBit) == 0) ? getRegisterName(value) : ("#" + value);
     return instru + " " + rd + ", " + rs + ", " + rnOrOffset3;
   }
+
 }

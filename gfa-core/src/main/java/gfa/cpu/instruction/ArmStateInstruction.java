@@ -9,27 +9,22 @@ import gfa.memory.MemoryInterface;
  * It allows the use of a flag based precondition on each of its element.
  * Arm-state instructions allows the use of many constants in its opcode.
  */
-public abstract class ArmStateInstruction
-  extends Instruction
-{
+public abstract class ArmStateInstruction extends Instruction {
 
   protected int opcode;
 
-  public ArmStateInstruction(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateInstruction(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   /*
    * Is used by the InstructionDecoder.
    */
-  public void setOpcode(int opcode)
-  {
+  public void setOpcode(int opcode) {
     this.opcode = opcode;
   }
 
-  protected int getOpcode(int instructionOffset)
-  {
+  protected int getOpcode(int instructionOffset) {
     return memory.loadWord(instructionOffset);
   }
 
@@ -50,55 +45,52 @@ public abstract class ArmStateInstruction
   static final protected int ConditionLEBits   = 0xd0000000; // less than or equal
   static final protected int ConditionALBits   = 0xe0000000; // always
 
-  public boolean isPreconditionSatisfied()
-  {
+  public boolean isPreconditionSatisfied() {
     int conditionBits = opcode & ConditionBitsMask;
     
-    switch (conditionBits)
-    {
-    case ConditionEQBits: return  CPSR.isBitSet(zFlagBit);
-    case ConditionNEBits: return !CPSR.isBitSet(zFlagBit);
-    case ConditionCSBits: return  CPSR.isBitSet(cFlagBit);
-    case ConditionCCBits: return !CPSR.isBitSet(cFlagBit);
-    case ConditionMIBits: return  CPSR.isBitSet(nFlagBit);
-    case ConditionPLBits: return !CPSR.isBitSet(nFlagBit);
-    case ConditionVSBits: return  CPSR.isBitSet(vFlagBit);
-    case ConditionVCBits: return !CPSR.isBitSet(vFlagBit);
-    case ConditionHIBits: return  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit);
-    case ConditionLSBits: return !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit);
-    case ConditionGEBits: return  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit);
-    case ConditionLTBits: return  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit);
-    case ConditionGTBits: return !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit));
-    case ConditionLEBits: return  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit));
-    case ConditionALBits: return true;
-    default:
+    switch (conditionBits) {
+      case ConditionEQBits: return  CPSR.isBitSet(zFlagBit);
+      case ConditionNEBits: return !CPSR.isBitSet(zFlagBit);
+      case ConditionCSBits: return  CPSR.isBitSet(cFlagBit);
+      case ConditionCCBits: return !CPSR.isBitSet(cFlagBit);
+      case ConditionMIBits: return  CPSR.isBitSet(nFlagBit);
+      case ConditionPLBits: return !CPSR.isBitSet(nFlagBit);
+      case ConditionVSBits: return  CPSR.isBitSet(vFlagBit);
+      case ConditionVCBits: return !CPSR.isBitSet(vFlagBit);
+      case ConditionHIBits: return  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit);
+      case ConditionLSBits: return !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit);
+      case ConditionGEBits: return  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit);
+      case ConditionLTBits: return  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit);
+      case ConditionGTBits: return !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit));
+      case ConditionLEBits: return  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit));
+      case ConditionALBits: return true;
+      default:
 	// Undefined condition. We interprete this like a NOP (No OPeration : an instruction that does nothing).
 	return false;
     }
   }
 
-  protected String preconditionToString(int opcode)
-  {
+  protected String preconditionToString(int opcode) {
     int conditionBits = opcode & ConditionBitsMask;
     
-    switch (conditionBits)
-    {
-    case ConditionEQBits: return "eq";
-    case ConditionNEBits: return "ne";
-    case ConditionCSBits: return "cs";
-    case ConditionCCBits: return "cc";
-    case ConditionMIBits: return "mi";
-    case ConditionPLBits: return "pl";
-    case ConditionVSBits: return "vs";
-    case ConditionVCBits: return "vc";
-    case ConditionHIBits: return "hi";
-    case ConditionLSBits: return "ls";
-    case ConditionGEBits: return "ge";
-    case ConditionLTBits: return "lt";
-    case ConditionGTBits: return "gt";
-    case ConditionLEBits: return "le";
-    case ConditionALBits: return "";
-    default: return "_precond??";
+    switch (conditionBits) {
+      case ConditionEQBits: return "eq";
+      case ConditionNEBits: return "ne";
+      case ConditionCSBits: return "cs";
+      case ConditionCCBits: return "cc";
+      case ConditionMIBits: return "mi";
+      case ConditionPLBits: return "pl";
+      case ConditionVSBits: return "vs";
+      case ConditionVCBits: return "vc";
+      case ConditionHIBits: return "hi";
+      case ConditionLSBits: return "ls";
+      case ConditionGEBits: return "ge";
+      case ConditionLTBits: return "lt";
+      case ConditionGTBits: return "gt";
+      case ConditionLEBits: return "le";
+      case ConditionALBits: return "";
+      default: return "_precond??";
     }
   }
+
 }

@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF7
-  extends ThumbStateInstruction
-{
+public class ThumbStateF7 extends ThumbStateInstruction {
 
-  public ThumbStateF7(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF7(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -18,23 +15,19 @@ public class ThumbStateF7
   static final protected int RbMask       = 0x00000038;
   static final protected int RdMask       = 0x00000007;
 
-  public void execute()
-  {
+  public void execute() {
     int offset = getRegister((opcode & RoMask) >>> 6).get() +
 	         getRegister((opcode & RbMask) >>> 3).get();
     ArmReg srcDstRegister = getRegister(opcode & RdMask);
     
-    if ((opcode & LoadStoreBit) == 0) // store
-    {
+    if ((opcode & LoadStoreBit) == 0) { // store
       if ((opcode & ByteWordBit) == 0) // word
         memory.storeWord(offset, srcDstRegister.get());
       else // byte
         memory.storeByte(offset, (byte) srcDstRegister.get());
     }
-    else // load
-    {
-      if ((opcode & ByteWordBit) == 0) // word
-      {
+    else { // load
+      if ((opcode & ByteWordBit) == 0) { // word
         int wordAlignedOffset = offset & 0xfffffffc;
 	int rightRotate = (offset & 0x00000003) << 3;
 	int value = memory.loadWord(wordAlignedOffset);
@@ -45,8 +38,7 @@ public class ThumbStateF7
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru = (((opcode & LoadStoreBit) == 0) ? "str" : "ldr") +
 	            (((opcode & ByteWordBit) == 0) ? "" : "b");

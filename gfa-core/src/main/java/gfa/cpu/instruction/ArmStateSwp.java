@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateSwp
-  extends ArmStateInstruction
-{
+public class ArmStateSwp extends ArmStateInstruction {
 
-  public ArmStateSwp(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateSwp(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -17,8 +14,7 @@ public class ArmStateSwp
   static final protected int RdMask      = 0x0000f000;
   static final protected int RmMask      = 0x0000000f;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     ArmReg baseRegister = getRegister((opcode & RnMask) >>> 16);
@@ -32,8 +28,7 @@ public class ArmStateSwp
       destinationRegister.set(memory.swapWord(swapAdress, sourceRegister.get()));
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instru = "swp" + preconditionToString(opcode);
     if ((opcode & ByteWordBit) != 0) instru += "b";
@@ -42,4 +37,5 @@ public class ArmStateSwp
     String rn = getRegisterName((opcode & RnMask) >>> 16);
     return instru + " " + rd + ", " + rm + ", [" + rn + "]";
   }
+
 }

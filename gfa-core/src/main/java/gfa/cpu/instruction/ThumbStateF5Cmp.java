@@ -1,19 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF5Cmp
-  extends ThumbStateF5
-{
+public class ThumbStateF5Cmp extends ThumbStateF5 {
 
-  public ThumbStateF5Cmp(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF5Cmp(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int operand1 = destinationRegister.get();
     //int operand2 = sourceValue;
     int result = operand1 - sourceValue;
@@ -22,8 +18,7 @@ public class ThumbStateF5Cmp
     CPSR.setCVFlagsForSub(operand1, sourceValue, result);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "cmp";
   }
 

@@ -1,9 +1,10 @@
 package gfa.time;
 
-import gfa.memory.*;
+import gfa.memory.GfaMMU;
+import gfa.memory.IORegisterSpace_8_16_32;
 
-public class Timer
-{
+public class Timer {
+
   private int value;  // Is in reality used as a short.
   private int rest;   // Number of cycles from last value change.
   private int period; // Number of cycles between 2 differents values of this timer.
@@ -17,12 +18,10 @@ public class Timer
   private short interruptBit;
   private IORegisterSpace_8_16_32 ioMem;
 
-  public Timer(Timer nextTimer, int timerNumber)
-  {
+  public Timer(Timer nextTimer, int timerNumber) {
     this.nextTimer = nextTimer;
     timerName = "timer" + timerNumber;
-    switch (timerNumber)
-    {
+    switch (timerNumber) {
       case 0:  interruptBit = IORegisterSpace_8_16_32.timer0InterruptBit; break;
       case 1:  interruptBit = IORegisterSpace_8_16_32.timer1InterruptBit; break;
       case 2:  interruptBit = IORegisterSpace_8_16_32.timer2InterruptBit; break;
@@ -32,13 +31,11 @@ public class Timer
     reset();
   }
 
-  public void connectToMemory(GfaMMU memory)
-  {
+  public void connectToMemory(GfaMMU memory) {
     ioMem = (IORegisterSpace_8_16_32) memory.getMemoryBank(4);
   }
   
-  public void reset()
-  {
+  public void reset() {
     value          = 0;
     rest           = 0;
     period         = 1;
@@ -47,28 +44,22 @@ public class Timer
     timerEnabled   = false;
   }
 
-  public void setTime(short n)
-  {
+  public void setTime(short n) {
     value = (0xffff & n);
     rest = 0;
   }
 
-  public short getTime()
-  {
+  public short getTime() {
     return (short) value;
   }
 
-  public void addTime(int n)
-  {
-    if (timerEnabled)
-    {
+  public void addTime(int n) {
+    if (timerEnabled) {
       rest += n;
-      while (rest > period)
-      {
+      while (rest > period) {
         value++;
         rest -= period;
-        if (value > 0xffff)
-        {
+        if (value > 0xffff) {
           if (nextTimer != null)
             nextTimer.addOverflowTime(value >>> 16);
 
@@ -82,29 +73,24 @@ public class Timer
     }
   }
 
-  public void addOverflowTime(int n)
-  {
+  public void addOverflowTime(int n) {
     if (cascadeEnabled)
       addTime(period);
   }
 
-  public void setPeriod(int i)
-  {
+  public void setPeriod(int i) {
     period = i;
   }
 
-  public void setCascadeEnabled(boolean b)
-  {
+  public void setCascadeEnabled(boolean b) {
     cascadeEnabled = b;
   }
 
-  public void setIRQEnabled(boolean b)
-  {
+  public void setIRQEnabled(boolean b) {
     irqEnabled = b;
   }
 
-  public void setTimerEnabled(boolean b)
-  {
+  public void setTimerEnabled(boolean b) {
     timerEnabled = b;
   }
 

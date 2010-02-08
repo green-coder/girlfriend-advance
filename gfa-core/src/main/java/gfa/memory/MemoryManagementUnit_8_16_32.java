@@ -1,20 +1,17 @@
 package gfa.memory;
 
-public class MemoryManagementUnit_8_16_32
-  extends MemoryManagementUnit
-{
+public class MemoryManagementUnit_8_16_32 extends MemoryManagementUnit {
+
   protected byte[] memory;
   protected int size;
   protected int mirrorMask;
 
-  public MemoryManagementUnit_8_16_32(String name, int size)
-  {
+  public MemoryManagementUnit_8_16_32(String name, int size) {
     super(name);
     createInternalArray(size);
   }
 
-  public byte[] createInternalArray(int s)
-  {
+  public byte[] createInternalArray(int s) {
     size = s;
     int i = 1;
     while (i < size) i <<= 1;
@@ -24,26 +21,22 @@ public class MemoryManagementUnit_8_16_32
     return memory;
   }
 
-  public void reset()
-  {
+  public void reset() {
     for (int i = 0; i < memory.length; i++)
       memory[i] = 0;
   }
 
-  public byte loadByte(int offset)
-  {
+  public byte loadByte(int offset) {
     return read(offset);
   }
 
-  public short loadHalfWord(int offset)
-  {
+  public short loadHalfWord(int offset) {
     offset &= 0xfffffffe;
     return (short) ((read(offset + 1) << 8) |
                     (0xff & read(offset)));
   }
 
-  public int loadWord(int offset)
-  {
+  public int loadWord(int offset) {
     offset &= 0xfffffffc;
     return ((read(offset + 3) << 24) |
             ((0xff & read(offset + 2)) << 16) |
@@ -51,20 +44,17 @@ public class MemoryManagementUnit_8_16_32
              (0xff & read(offset)));
   }
 
-  public void storeByte(int offset, byte value)
-  {
+  public void storeByte(int offset, byte value) {
     write(offset, value);
   }
 
-  public void storeHalfWord(int offset, short value)
-  {
+  public void storeHalfWord(int offset, short value) {
     offset &= 0xfffffffe;
     write(offset + 1, (byte) (value >> 8));
     write(offset, (byte) value);
   }
 
-  public void storeWord(int offset, int value)
-  {
+  public void storeWord(int offset, int value) {
     offset &= 0xfffffffc;
     write(offset + 3, (byte) (value >> 24));
     write(offset + 2, (byte) (value >> 16));
@@ -72,15 +62,13 @@ public class MemoryManagementUnit_8_16_32
     write(offset, (byte) value);
   }
 
-  public byte swapByte(int offset, byte value)
-  {
+  public byte swapByte(int offset, byte value) {
     byte result = read(offset);
     write(offset, value);
     return result;
   }
 
-  public short swapHalfWord(int offset, short value)
-  {
+  public short swapHalfWord(int offset, short value) {
     offset &= 0xfffffffe;
     short result = (short) ((read(offset + 1) << 8) |
                              read(offset));
@@ -89,8 +77,7 @@ public class MemoryManagementUnit_8_16_32
     return result;
   }
 
-  public int swapWord(int offset, int value)
-  {
+  public int swapWord(int offset, int value) {
     offset &= 0xfffffffc;
     int result = ((read(offset + 3) << 24) |
                   ((0xff & read(offset + 2)) << 16) |
@@ -103,20 +90,17 @@ public class MemoryManagementUnit_8_16_32
     return result;
   }
 
-  protected byte read(int offset)
-  {
+  protected byte read(int offset) {
     offset = getInternalOffset(offset);
     return memory[offset];
   }
 
-  protected void write(int offset, byte value)
-  {
+  protected void write(int offset, byte value) {
     offset = getInternalOffset(offset);
     memory[offset] = value;
   }
 
-  public int getInternalOffset(int offset)
-  {
+  public int getInternalOffset(int offset) {
     return offset & mirrorMask;
   }
 

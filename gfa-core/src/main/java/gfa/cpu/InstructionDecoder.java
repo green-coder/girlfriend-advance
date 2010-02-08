@@ -1,11 +1,83 @@
 package gfa.cpu;
 
-import gfa.cpu.instruction.*;
+import gfa.cpu.instruction.ArmStateAdc;
+import gfa.cpu.instruction.ArmStateAdd;
+import gfa.cpu.instruction.ArmStateAnd;
+import gfa.cpu.instruction.ArmStateB;
+import gfa.cpu.instruction.ArmStateBic;
+import gfa.cpu.instruction.ArmStateBx;
+import gfa.cpu.instruction.ArmStateCmn;
+import gfa.cpu.instruction.ArmStateCmp;
+import gfa.cpu.instruction.ArmStateEor;
+import gfa.cpu.instruction.ArmStateHsdtio;
+import gfa.cpu.instruction.ArmStateHsdtro;
+import gfa.cpu.instruction.ArmStateInstruction;
+import gfa.cpu.instruction.ArmStateLdmStm;
+import gfa.cpu.instruction.ArmStateLdrStr;
+import gfa.cpu.instruction.ArmStateMov;
+import gfa.cpu.instruction.ArmStateMrs;
+import gfa.cpu.instruction.ArmStateMsr1;
+import gfa.cpu.instruction.ArmStateMsr2;
+import gfa.cpu.instruction.ArmStateMul;
+import gfa.cpu.instruction.ArmStateMull;
+import gfa.cpu.instruction.ArmStateMvn;
+import gfa.cpu.instruction.ArmStateOrr;
+import gfa.cpu.instruction.ArmStateRsb;
+import gfa.cpu.instruction.ArmStateRsc;
+import gfa.cpu.instruction.ArmStateSbc;
+import gfa.cpu.instruction.ArmStateSub;
+import gfa.cpu.instruction.ArmStateSwi;
+import gfa.cpu.instruction.ArmStateSwp;
+import gfa.cpu.instruction.ArmStateTeq;
+import gfa.cpu.instruction.ArmStateTst;
+import gfa.cpu.instruction.ArmStateUndef;
+import gfa.cpu.instruction.ArmStateUnknown;
+import gfa.cpu.instruction.ThumbStateF1;
+import gfa.cpu.instruction.ThumbStateF10;
+import gfa.cpu.instruction.ThumbStateF11;
+import gfa.cpu.instruction.ThumbStateF12;
+import gfa.cpu.instruction.ThumbStateF13;
+import gfa.cpu.instruction.ThumbStateF14;
+import gfa.cpu.instruction.ThumbStateF15;
+import gfa.cpu.instruction.ThumbStateF16;
+import gfa.cpu.instruction.ThumbStateF17;
+import gfa.cpu.instruction.ThumbStateF18;
+import gfa.cpu.instruction.ThumbStateF19;
+import gfa.cpu.instruction.ThumbStateF2;
+import gfa.cpu.instruction.ThumbStateF3Add;
+import gfa.cpu.instruction.ThumbStateF3Cmp;
+import gfa.cpu.instruction.ThumbStateF3Mov;
+import gfa.cpu.instruction.ThumbStateF3Sub;
+import gfa.cpu.instruction.ThumbStateF4Adc;
+import gfa.cpu.instruction.ThumbStateF4And;
+import gfa.cpu.instruction.ThumbStateF4Asr;
+import gfa.cpu.instruction.ThumbStateF4Bic;
+import gfa.cpu.instruction.ThumbStateF4Cmn;
+import gfa.cpu.instruction.ThumbStateF4Cmp;
+import gfa.cpu.instruction.ThumbStateF4Eor;
+import gfa.cpu.instruction.ThumbStateF4Lsl;
+import gfa.cpu.instruction.ThumbStateF4Lsr;
+import gfa.cpu.instruction.ThumbStateF4Mul;
+import gfa.cpu.instruction.ThumbStateF4Mvn;
+import gfa.cpu.instruction.ThumbStateF4Neg;
+import gfa.cpu.instruction.ThumbStateF4Orr;
+import gfa.cpu.instruction.ThumbStateF4Ror;
+import gfa.cpu.instruction.ThumbStateF4Sbc;
+import gfa.cpu.instruction.ThumbStateF4Tst;
+import gfa.cpu.instruction.ThumbStateF5Add;
+import gfa.cpu.instruction.ThumbStateF5Bx;
+import gfa.cpu.instruction.ThumbStateF5Cmp;
+import gfa.cpu.instruction.ThumbStateF5Mov;
+import gfa.cpu.instruction.ThumbStateF6;
+import gfa.cpu.instruction.ThumbStateF7;
+import gfa.cpu.instruction.ThumbStateF8;
+import gfa.cpu.instruction.ThumbStateF9;
+import gfa.cpu.instruction.ThumbStateInstruction;
+import gfa.cpu.instruction.ThumbStateUnknown;
 import gfa.memory.MemoryInterface;
-import gfa.util.*;
 
-public class InstructionDecoder
-{
+public class InstructionDecoder {
+
   protected ArmStateInstruction armStateBx;
   protected ArmStateInstruction armStateB;
   protected ArmStateInstruction armStateMrs;
@@ -82,8 +154,7 @@ public class InstructionDecoder
   protected ThumbStateInstruction thumbStateF19;
   protected ThumbStateInstruction thumbStateUnknown;
 
-  public InstructionDecoder(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public InstructionDecoder(ArmReg[][] regs, MemoryInterface memory) {
     armStateBx      = new ArmStateBx(regs, memory);
     armStateB       = new ArmStateB(regs, memory);
     armStateMrs     = new ArmStateMrs(regs, memory);
@@ -229,64 +300,56 @@ public class InstructionDecoder
   static final protected int thumbStateF19InstructionMask = 0x0000f000;
   static final protected int thumbStateF19InstructionBits = 0x0000f000;
 
-  public ThumbStateInstruction decodeThumbInstruction(short opcode)
-  {
+  public ThumbStateInstruction decodeThumbInstruction(short opcode) {
       ThumbStateInstruction instruction = thumbInstructions[0x0000ffff & opcode];
       instruction.setOpcode(opcode);
       return instruction;
   }
   
-  public ThumbStateInstruction oldFashionDecodeThumbInstruction(short opcode)
-  {
+  public ThumbStateInstruction oldFashionDecodeThumbInstruction(short opcode) {
     ThumbStateInstruction instruction;
 
          if ((opcode & thumbStateF2InstructionMask)  == thumbStateF2InstructionBits)
       instruction = thumbStateF2;
     else if ((opcode & thumbStateF1InstructionMask)  == thumbStateF1InstructionBits)
       instruction = thumbStateF1;
-    else if ((opcode & thumbStateF3InstructionMask)  == thumbStateF3InstructionBits)
-    {
-      switch (opcode & thumbStateF3OpMask)
-      {
-      case thumbStateF3MovBits: instruction = thumbStateF3Mov; break;
-      case thumbStateF3CmpBits: instruction = thumbStateF3Cmp; break;
-      case thumbStateF3AddBits: instruction = thumbStateF3Add; break;
-      case thumbStateF3SubBits: instruction = thumbStateF3Sub; break;
-      default: instruction = null; // it can't happen
+    else if ((opcode & thumbStateF3InstructionMask)  == thumbStateF3InstructionBits) {
+      switch (opcode & thumbStateF3OpMask) {
+        case thumbStateF3MovBits: instruction = thumbStateF3Mov; break;
+        case thumbStateF3CmpBits: instruction = thumbStateF3Cmp; break;
+        case thumbStateF3AddBits: instruction = thumbStateF3Add; break;
+        case thumbStateF3SubBits: instruction = thumbStateF3Sub; break;
+        default: instruction = null; // it can't happen
       }
     }
-    else if ((opcode & thumbStateF4InstructionMask)  == thumbStateF4InstructionBits)
-    {
-      switch (opcode & thumbStateF4OpMask)
-      {
-      case thumbStateF4AndBits: instruction = thumbStateF4And; break;
-      case thumbStateF4EorBits: instruction = thumbStateF4Eor; break;
-      case thumbStateF4LslBits: instruction = thumbStateF4Lsl; break;
-      case thumbStateF4LsrBits: instruction = thumbStateF4Lsr; break;
-      case thumbStateF4AsrBits: instruction = thumbStateF4Asr; break;
-      case thumbStateF4AdcBits: instruction = thumbStateF4Adc; break;
-      case thumbStateF4SbcBits: instruction = thumbStateF4Sbc; break;
-      case thumbStateF4RorBits: instruction = thumbStateF4Ror; break;
-      case thumbStateF4TstBits: instruction = thumbStateF4Tst; break;
-      case thumbStateF4NegBits: instruction = thumbStateF4Neg; break;
-      case thumbStateF4CmpBits: instruction = thumbStateF4Cmp; break;
-      case thumbStateF4CmnBits: instruction = thumbStateF4Cmn; break;
-      case thumbStateF4OrrBits: instruction = thumbStateF4Orr; break;
-      case thumbStateF4MulBits: instruction = thumbStateF4Mul; break;
-      case thumbStateF4BicBits: instruction = thumbStateF4Bic; break;
-      case thumbStateF4MvnBits: instruction = thumbStateF4Mvn; break;
-      default: instruction = null; // it can't happen
+    else if ((opcode & thumbStateF4InstructionMask)  == thumbStateF4InstructionBits) {
+      switch (opcode & thumbStateF4OpMask) {
+        case thumbStateF4AndBits: instruction = thumbStateF4And; break;
+        case thumbStateF4EorBits: instruction = thumbStateF4Eor; break;
+        case thumbStateF4LslBits: instruction = thumbStateF4Lsl; break;
+        case thumbStateF4LsrBits: instruction = thumbStateF4Lsr; break;
+        case thumbStateF4AsrBits: instruction = thumbStateF4Asr; break;
+        case thumbStateF4AdcBits: instruction = thumbStateF4Adc; break;
+        case thumbStateF4SbcBits: instruction = thumbStateF4Sbc; break;
+        case thumbStateF4RorBits: instruction = thumbStateF4Ror; break;
+        case thumbStateF4TstBits: instruction = thumbStateF4Tst; break;
+        case thumbStateF4NegBits: instruction = thumbStateF4Neg; break;
+        case thumbStateF4CmpBits: instruction = thumbStateF4Cmp; break;
+        case thumbStateF4CmnBits: instruction = thumbStateF4Cmn; break;
+        case thumbStateF4OrrBits: instruction = thumbStateF4Orr; break;
+        case thumbStateF4MulBits: instruction = thumbStateF4Mul; break;
+        case thumbStateF4BicBits: instruction = thumbStateF4Bic; break;
+        case thumbStateF4MvnBits: instruction = thumbStateF4Mvn; break;
+        default: instruction = null; // it can't happen
       }
     }
-    else if ((opcode & thumbStateF5InstructionMask)  == thumbStateF5InstructionBits)
-    {
-      switch (opcode & thumbStateF5OpMask)
-      {
-      case thumbStateF5AddBits: instruction = thumbStateF5Add; break;
-      case thumbStateF5CmpBits: instruction = thumbStateF5Cmp; break;
-      case thumbStateF5MovBits: instruction = thumbStateF5Mov; break;
-      case thumbStateF5BxBits:  instruction = thumbStateF5Bx;  break;
-      default: instruction = null; // it can't happen
+    else if ((opcode & thumbStateF5InstructionMask)  == thumbStateF5InstructionBits) {
+      switch (opcode & thumbStateF5OpMask) {
+        case thumbStateF5AddBits: instruction = thumbStateF5Add; break;
+        case thumbStateF5CmpBits: instruction = thumbStateF5Cmp; break;
+        case thumbStateF5MovBits: instruction = thumbStateF5Mov; break;
+        case thumbStateF5BxBits:  instruction = thumbStateF5Bx;  break;
+        default: instruction = null; // it can't happen
       }
     }
     else if ((opcode & thumbStateF6InstructionMask)  == thumbStateF6InstructionBits)
@@ -372,8 +435,7 @@ public class InstructionDecoder
   static final protected int armStateUndefInstructionMask          = 0x0e000010;
   static final protected int armStateUndefInstructionBits          = 0x06000010;
 
-  public ArmStateInstruction decodeArmInstruction(int opcode)
-  {
+  public ArmStateInstruction decodeArmInstruction(int opcode) {
     ArmStateInstruction instruction;
     
          if ((opcode & armStateBXInstructionMask)             == armStateBXInstructionBits)
@@ -396,27 +458,25 @@ public class InstructionDecoder
       instruction = armStateHsdtio;
     else if ((opcode & armStateSWPInstructionMask)            == armStateSWPInstructionBits)
       instruction = armStateSwp;
-    else if ((opcode & armStateDataProcessingInstructionMask) == armStateDataProcessingInstructionBits)
-    {
-      switch (opcode & armStateDataProcessingOpcodeMask)
-      {
-      case armStateDataProcessingANDBits: instruction = armStateAnd; break;
-      case armStateDataProcessingEORBits: instruction = armStateEor; break;
-      case armStateDataProcessingSUBBits: instruction = armStateSub; break;
-      case armStateDataProcessingRSBBits: instruction = armStateRsb; break;
-      case armStateDataProcessingADDBits: instruction = armStateAdd; break;
-      case armStateDataProcessingADCBits: instruction = armStateAdc; break;
-      case armStateDataProcessingSBCBits: instruction = armStateSbc; break;
-      case armStateDataProcessingRSCBits: instruction = armStateRsc; break;
-      case armStateDataProcessingTSTBits: instruction = armStateTst; break;
-      case armStateDataProcessingTEQBits: instruction = armStateTeq; break;
-      case armStateDataProcessingCMPBits: instruction = armStateCmp; break;
-      case armStateDataProcessingCMNBits: instruction = armStateCmn; break;
-      case armStateDataProcessingORRBits: instruction = armStateOrr; break;
-      case armStateDataProcessingMOVBits: instruction = armStateMov; break;
-      case armStateDataProcessingBICBits: instruction = armStateBic; break;
-      case armStateDataProcessingMVNBits: instruction = armStateMvn; break;
-      default: instruction = null;
+    else if ((opcode & armStateDataProcessingInstructionMask) == armStateDataProcessingInstructionBits) {
+      switch (opcode & armStateDataProcessingOpcodeMask) {
+        case armStateDataProcessingANDBits: instruction = armStateAnd; break;
+        case armStateDataProcessingEORBits: instruction = armStateEor; break;
+        case armStateDataProcessingSUBBits: instruction = armStateSub; break;
+        case armStateDataProcessingRSBBits: instruction = armStateRsb; break;
+        case armStateDataProcessingADDBits: instruction = armStateAdd; break;
+        case armStateDataProcessingADCBits: instruction = armStateAdc; break;
+        case armStateDataProcessingSBCBits: instruction = armStateSbc; break;
+        case armStateDataProcessingRSCBits: instruction = armStateRsc; break;
+        case armStateDataProcessingTSTBits: instruction = armStateTst; break;
+        case armStateDataProcessingTEQBits: instruction = armStateTeq; break;
+        case armStateDataProcessingCMPBits: instruction = armStateCmp; break;
+        case armStateDataProcessingCMNBits: instruction = armStateCmn; break;
+        case armStateDataProcessingORRBits: instruction = armStateOrr; break;
+        case armStateDataProcessingMOVBits: instruction = armStateMov; break;
+        case armStateDataProcessingBICBits: instruction = armStateBic; break;
+        case armStateDataProcessingMVNBits: instruction = armStateMvn; break;
+        default: instruction = null;
       }
     }
     else if ((opcode & armStateUndefInstructionMask)  == armStateUndefInstructionBits)
@@ -433,4 +493,5 @@ public class InstructionDecoder
     instruction.setOpcode(opcode);
     return instruction;
   }
+  
 }

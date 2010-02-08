@@ -1,7 +1,7 @@
 package gfa.memory;
 
-public interface MemoryInterface
-{
+public interface MemoryInterface {
+  
   public void reset();
 
   public byte  loadByte     (int offset);
@@ -15,4 +15,5 @@ public interface MemoryInterface
   public byte  swapByte     (int offset, byte  value);
   public short swapHalfWord (int offset, short value);
   public int   swapWord     (int offset, int   value);
+
 }

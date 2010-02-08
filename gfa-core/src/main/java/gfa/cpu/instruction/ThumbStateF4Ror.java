@@ -1,19 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF4Ror
-  extends ThumbStateF4
-{
+public class ThumbStateF4Ror extends ThumbStateF4 {
 
-  public ThumbStateF4Ror(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF4Ror(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int src = sourceRegister.get();
     if (sourceRegister == PC) src += 2; // +4 ?
     
@@ -22,17 +18,14 @@ public class ThumbStateF4Ror
     
     if (src == 0)
       ; // Conservation of the old cFlagBit;
-    else if (src < 32)
-    {
+    else if (src < 32) {
       dst = (dst >>> src) | (dst << (32 - src));
       CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
     }
-    else if (src == 32)
-    {
+    else if (src == 32) {
       CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
     }
-    else if (src > 32)
-    {
+    else if (src > 32) {
       src = ((src - 1) & 0x1f) + 1; // put src in the range [1..32]
       dst = (dst >>> src) | (dst << (32 - src));
       CPSR.setBit(cFlagBit, ((dst & 0x80000000) != 0));
@@ -43,8 +36,7 @@ public class ThumbStateF4Ror
     destinationRegister.set(dst);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "ror";
   }
 

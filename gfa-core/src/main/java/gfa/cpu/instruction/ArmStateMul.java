@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateMul
-  extends ArmStateInstruction
-{
+public class ArmStateMul extends ArmStateInstruction {
 
-  public ArmStateMul(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateMul(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -19,8 +16,7 @@ public class ArmStateMul
   static final protected int RsMask          = 0x00000f00;
   static final protected int RmMask          = 0x0000000f;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     ArmReg rd = getRegister((opcode & RdMask) >>> 16);
@@ -34,16 +30,14 @@ public class ArmStateMul
     
     rd.set(result);
     
-    if ((opcode & SetConditionBit) != 0)
-    {
+    if ((opcode & SetConditionBit) != 0) {
       CPSR.setBit(zFlagBit, (result == 0));
       CPSR.setBit(nFlagBit, (result < 0));
       //CPSR.setBit(cFlagBit, meaninglessCondition);
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String rd = getRegisterName((opcode & RdMask) >>> 16);
     String rn = getRegisterName((opcode & RnMask) >>> 12);
@@ -57,4 +51,5 @@ public class ArmStateMul
     else
       return "mul" + preconditionToString(opcode) + sTag + " " + rd + ", " + rm + ", " + rs;
   }
+
 }

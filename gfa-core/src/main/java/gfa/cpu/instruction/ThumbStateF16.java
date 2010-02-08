@@ -1,15 +1,12 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
-import gfa.util.*;
+import gfa.memory.MemoryInterface;
+import gfa.util.Hex;
 
-public class ThumbStateF16
-  extends ThumbStateInstruction
-{
+public class ThumbStateF16 extends ThumbStateInstruction {
 
-  public ThumbStateF16(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF16(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -30,36 +27,33 @@ public class ThumbStateF16
   static final protected int GTBits      = 0x00000c00;
   static final protected int LEBits      = 0x00000d00;
 
-  public void execute()
-  {
+  public void execute() {
     int offset = (int) ((byte) (opcode & SOffsetMask));
     int condType = opcode & CondMask;
     boolean condition;
     
-    switch (condType)
-    {
-    case EQBits: condition =  CPSR.isBitSet(zFlagBit); break;
-    case NEBits: condition = !CPSR.isBitSet(zFlagBit); break;
-    case CSBits: condition =  CPSR.isBitSet(cFlagBit); break;
-    case CCBits: condition = !CPSR.isBitSet(cFlagBit); break;
-    case MIBits: condition =  CPSR.isBitSet(nFlagBit); break;
-    case PLBits: condition = !CPSR.isBitSet(nFlagBit); break;
-    case VSBits: condition =  CPSR.isBitSet(vFlagBit); break;
-    case VCBits: condition = !CPSR.isBitSet(vFlagBit); break;
-    case HIBits: condition =  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit); break;
-    case LSBits: condition = !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit); break;
-    case GEBits: condition =  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit); break;
-    case LTBits: condition =  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit); break;
-    case GTBits: condition = !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit)); break;
-    case LEBits: condition =  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit)); break;
-    default: condition = false; // Si condType indefini, ne saute pas, ne fait rien.
+    switch (condType) {
+      case EQBits: condition =  CPSR.isBitSet(zFlagBit); break;
+      case NEBits: condition = !CPSR.isBitSet(zFlagBit); break;
+      case CSBits: condition =  CPSR.isBitSet(cFlagBit); break;
+      case CCBits: condition = !CPSR.isBitSet(cFlagBit); break;
+      case MIBits: condition =  CPSR.isBitSet(nFlagBit); break;
+      case PLBits: condition = !CPSR.isBitSet(nFlagBit); break;
+      case VSBits: condition =  CPSR.isBitSet(vFlagBit); break;
+      case VCBits: condition = !CPSR.isBitSet(vFlagBit); break;
+      case HIBits: condition =  CPSR.isBitSet(cFlagBit) && !CPSR.isBitSet(zFlagBit); break;
+      case LSBits: condition = !CPSR.isBitSet(cFlagBit) ||  CPSR.isBitSet(zFlagBit); break;
+      case GEBits: condition =  CPSR.isBitSet(nFlagBit) ==  CPSR.isBitSet(vFlagBit); break;
+      case LTBits: condition =  CPSR.isBitSet(nFlagBit) !=  CPSR.isBitSet(vFlagBit); break;
+      case GTBits: condition = !CPSR.isBitSet(zFlagBit) && (CPSR.isBitSet(nFlagBit) == CPSR.isBitSet(vFlagBit)); break;
+      case LEBits: condition =  CPSR.isBitSet(zFlagBit) || (CPSR.isBitSet(nFlagBit) != CPSR.isBitSet(vFlagBit)); break;
+      default: condition = false; // Si condType indefini, ne saute pas, ne fait rien.
     }
     
     if (condition) PC.set(PC.get() + 2 + offset * 2);
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     short opcode = getOpcode(offset);
     String instru = "b" + condName[(opcode & CondMask) >>> 8];
     int sOffset8 = (int) ((byte) (opcode & SOffsetMask));
@@ -67,9 +61,9 @@ public class ThumbStateF16
     return instru + " #" + Hex.toString(realTargetAddress);
   }
 
-  static protected String[] condName =
-  {
+  static private String[] condName = {
     "eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
     "hi", "ls", "ge", "lt", "gt", "le", "_??_", "_??_"
   };
+  
 }

@@ -1,14 +1,11 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ArmStateLdmStm
-  extends ArmStateInstruction
-{
+public class ArmStateLdmStm extends ArmStateInstruction {
 
-  public ArmStateLdmStm(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ArmStateLdmStm(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
@@ -20,8 +17,7 @@ public class ArmStateLdmStm
   static final protected int RnMask         = 0x000f0000;
   static final protected int R15Bit         = 0x00008000;
 
-  public void execute()
-  {
+  public void execute() {
     if (!isPreconditionSatisfied()) return;
     
     int baseRegisterNumber = (opcode & RnMask) >>> 16;
@@ -34,30 +30,26 @@ public class ArmStateLdmStm
         nbRegistersToSaveOrToLoad++;
     
     int newBaseRegisterValue;
-    if ((opcode & UpDownBit) != 0) // Up
-    {
+    if ((opcode & UpDownBit) != 0) { // Up
       newBaseRegisterValue = stackAdress + nbRegistersToSaveOrToLoad * 4;
       if ((opcode & PreIndexingBit) != 0) // Pre-increment
         stackAdress += 4;
     }
-    else                    // Down
-    {
+    else {                   // Down
       newBaseRegisterValue = stackAdress - nbRegistersToSaveOrToLoad * 4;
       stackAdress = newBaseRegisterValue;
       if ((opcode & PreIndexingBit) == 0) // Post-decrement
           stackAdress += 4;
     }
     
-    if ((opcode & LoadStoreBit) == 0) // Store
-    {
+    if ((opcode & LoadStoreBit) == 0) { // Store
       int mode = getMode();
       if ((opcode & PSRBit) != 0)
         mode = usrModeBits;
       
       int i = 0;
       for (; i < 15; i++) // Empile le premier registre : debut du deuxieme cycle
-        if ((opcode & (1 << i)) != 0)
-	{
+        if ((opcode & (1 << i)) != 0) {
           memory.storeWord(stackAdress, getRegister(i, mode).get());
 	  stackAdress += 4;
 	  i++;
@@ -68,20 +60,17 @@ public class ArmStateLdmStm
         baseRegister.set((baseRegister.get() & 0x00000003) | newBaseRegisterValue); // update
       
       for (; i < 15; i++) // Empile les autres registres jusqu'a 14
-        if ((opcode & (1 << i)) != 0)
-	{
+        if ((opcode & (1 << i)) != 0) {
           memory.storeWord(stackAdress, getRegister(i, mode).get());
 	  stackAdress += 4;
 	}
       
-      if ((opcode & R15Bit) != 0) // Le cas de R15 + 12.
-      {
+      if ((opcode & R15Bit) != 0) { // Le cas de R15 + 12.
         memory.storeWord(stackAdress, PC.get() + 8);
 	stackAdress += 4;
       }
     }
-    else                            // Load
-    {
+    else {                           // Load
       if ((opcode & WriteBackBit) != 0) // Write Back
         baseRegister.set((baseRegister.get() & 0x00000003) | newBaseRegisterValue);
       
@@ -91,14 +80,12 @@ public class ArmStateLdmStm
         mode = usrModeBits;
       
       for (int i = 0; i < 15; i++) // Depile les registres de 0 a 14
-        if ((opcode & (1 << i)) != 0)
-	{
+        if ((opcode & (1 << i)) != 0) {
           getRegister(i, mode).set(memory.loadWord(stackAdress));
 	  stackAdress += 4;
 	}
       
-      if ((opcode & R15Bit) != 0)
-      {
+      if ((opcode & R15Bit) != 0) {
         PC.set(memory.loadWord(stackAdress) & 0xfffffffe);
 	if ((opcode & PSRBit) != 0)
           CPSR.set(getSPSR());
@@ -107,8 +94,7 @@ public class ArmStateLdmStm
     }
   }
 
-  public String disassemble(int offset)
-  {
+  public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instru = ((opcode & LoadStoreBit) == 0) ? "stm" : "ldm";
     instru += preconditionToString(opcode);
@@ -129,4 +115,5 @@ public class ArmStateLdmStm
     if ((opcode & PSRBit) != 0) registerList += "^";
     return instru + " " + rn + ", " + registerList;
   }
+
 }

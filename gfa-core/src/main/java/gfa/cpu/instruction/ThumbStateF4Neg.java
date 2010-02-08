@@ -1,19 +1,15 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF4Neg
-  extends ThumbStateF4
-{
+public class ThumbStateF4Neg extends ThumbStateF4 {
 
-  public ThumbStateF4Neg(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF4Neg(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int operand1 = sourceRegister.get();
     if (sourceRegister == PC) operand1 += 2;
     int operand2 = 0;
@@ -24,8 +20,7 @@ public class ThumbStateF4Neg
     CPSR.setCVFlagsForSub(operand2, operand1, result);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "neg";
   }
 

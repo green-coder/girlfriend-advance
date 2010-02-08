@@ -1,22 +1,20 @@
 package gfa.cpu.instruction;
 
 import gfa.cpu.ArmReg;
-import gfa.memory.*;
+import gfa.memory.MemoryInterface;
 
-public class ThumbStateF4Adc
-  extends ThumbStateF4
-{
+public class ThumbStateF4Adc extends ThumbStateF4 {
 
-  public ThumbStateF4Adc(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateF4Adc(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
-  protected void applyOperation()
-  {
+  protected void applyOperation() {
     int operand1 = destinationRegister.get();
     int operand2 = sourceRegister.get();
-    if (sourceRegister == PC) operand2 += 2;
+    if (sourceRegister == PC) {
+      operand2 += 2;
+    }
     int cFlagValue = (CPSR.isBitSet(cFlagBit) ? 1 : 0);
     int result = operand1 + operand2 + cFlagValue;
     destinationRegister.set(result);
@@ -25,8 +23,7 @@ public class ThumbStateF4Adc
     CPSR.setCVFlagsForAdd(operand1, operand2, result);
   }
 
-  protected String getInstructionName()
-  {
+  protected String getInstructionName() {
     return "adc";
   }
 

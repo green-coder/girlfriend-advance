@@ -9,27 +9,22 @@ import gfa.memory.MemoryInterface;
  * Thumb-state instructions are essencially register-based instruction,
  * due to the little space in memory of their opcode.
  */
-public abstract class ThumbStateInstruction
-    extends Instruction
-{
+public abstract class ThumbStateInstruction extends Instruction {
 
   protected int opcode;
 
-  public ThumbStateInstruction(ArmReg[][] regs, MemoryInterface memory)
-  {
+  public ThumbStateInstruction(ArmReg[][] regs, MemoryInterface memory) {
     super(regs, memory);
   }
 
   /*
    * Is used by the InstructionDecoder.
    */
-  public void setOpcode(int opcode)
-  {
+  public void setOpcode(int opcode) {
     this.opcode = opcode;
   }
 
-  protected short getOpcode(int instructionOffset)
-  {
+  protected short getOpcode(int instructionOffset) {
     return memory.loadHalfWord(instructionOffset);
   }
 
