@@ -1,6 +1,5 @@
 package gfa.gfx;
 
-import gfa.GirlfriendAdvance;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -16,9 +15,9 @@ public class GfaScreen extends JComponent {
     lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
   }
 
-  public GfaScreen(GirlfriendAdvance gfa) {
+  public GfaScreen(Image lcdImage) {
     setDoubleBuffered(false);
-    lcdImage = gfa.getLcd().getImage();
+    this.lcdImage = lcdImage;
   }
 
   @Override

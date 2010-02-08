@@ -131,7 +131,7 @@ public class UserInterface extends JFrame {
     codeViewer = new CodeViewer(this, gfa);
     regViewer  = new RegisterViewerPanel(this, gfa);
     inputPanel = new InputPanel(gfa);
-    gfaScreen  = new GfaScreen(gfa);
+    gfaScreen  = new GfaScreen(gfa.getLcd().getImage());
 
     // Set the language to the default language of the plateform running gfa.
     fireLocaleChanged(Locale.getDefault());
