@@ -42,7 +42,7 @@
           <configuration>
             <descriptor>src/main/nbm/module.xml</descriptor>
             <brandingToken>${brandingToken}</brandingToken>
-            <cluster>foobar</cluster>
+            <cluster>gfa</cluster>
           </configuration>
         </plugin>
 

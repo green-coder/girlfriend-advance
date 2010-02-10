@@ -1,3 +1,7 @@
 Manifest-Version: 1.0
 OpenIDE-Module-Localizing-Bundle: com/lemoulinstudio/gfa/nb/Bundle.properties
 OpenIDE-Module-Layer: com/lemoulinstudio/gfa/nb/layer.xml
+
+Name: com/lemoulinstudio/gfa/nb/filetype/rom/RomDataLoader.class
+OpenIDE-Module-Class: Loader
+
