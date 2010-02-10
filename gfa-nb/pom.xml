@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>gfa-parent</artifactId>
+    <groupId>com.lemoulinstudio.gfa</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.lemoulinstudio.gfa</groupId>
+  <artifactId>gfa-nb</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>Girlfriend Advance - NetBeans integration</name>
+
+  <repositories>
+    <repository>
+      <id>netbeans</id>
+      <name>repository hosting netbeans.org api artifacts</name>
+      <url>http://bits.netbeans.org/maven2</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>nbm-maven-plugin</artifactId>
+          <version>3.1</version>
+          <extensions>true</extensions>
+          <configuration>
+            <descriptor>src/main/nbm/module.xml</descriptor>
+            <brandingToken>${brandingToken}</brandingToken>
+            <cluster>foobar</cluster>
+          </configuration>
+        </plugin>
+
+        <!-- netbeans modules in 5.5+ are 1.5 compatible -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.0.2</version>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <modules>
+    <module>nb-core-module</module>
+    <module>nb-branding</module>
+    <module>nb-application</module>
+  </modules>
+
+  <properties>
+    <netbeans.version>RELEASE68</netbeans.version>
+    <brandingToken>gfa</brandingToken>
+  </properties>
+
+</project>
