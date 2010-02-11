@@ -1,5 +1,6 @@
 package com.lemoulinstudio.gfa.nb.filetype.rom;
 
+import com.lemoulinstudio.gfa.nb.screen.DefaultScreenTopComponent;
 import java.io.IOException;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -19,7 +20,7 @@ public class RomDataObject extends MultiDataObject {
     private TopComponent getTopComponent() {
       // Todo: place a hook on the TopComponent's instanciation.
       if (topComponent == null)
-        topComponent = new TopComponent();
+        topComponent = new DefaultScreenTopComponent(RomDataObject.this);
 
       return topComponent;
     }
