@@ -16,6 +16,7 @@ import com.lemoulinstudio.gfa.jse.ui.action.ScreenShotAction;
 import com.lemoulinstudio.gfa.jse.ui.action.StepAction;
 import com.lemoulinstudio.gfa.jse.ui.action.StopAction;
 import com.lemoulinstudio.gfa.jse.ui.action.UndoAction;
+import com.lemoulinstudio.gfa.jse.ui.resource.GfaResource;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -210,7 +211,7 @@ public class UserInterface extends JFrame {
   }
 
   public void fireLocaleChanged(Locale locale) {
-    ResourceBundle resource = ResourceBundle.getBundle("gfa.ui.resource.GfaResource", locale);
+    ResourceBundle resource = ResourceBundle.getBundle(GfaResource.class.getName(), locale);
     for (int i = 0; i < localeListener.size(); i++)
       ((LocaleChangeListener) localeListener.get(i)).localeChanged(resource);
   }
