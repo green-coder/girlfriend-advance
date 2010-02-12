@@ -12,7 +12,7 @@
   <artifactId>nb-application</artifactId>
   <packaging>nbm-application</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>Girlfriend Advance - NetBeans Platform based application</name>
+  <name>Gfa Nb - NetBeans Platform based application</name>
 
   <dependencies>
     <dependency>
@@ -24,7 +24,7 @@
 
     <dependency>
       <groupId>com.lemoulinstudio.gfa</groupId>
-      <artifactId>nb-core-module</artifactId>
+      <artifactId>nb-main-module</artifactId>
       <version>1.0-SNAPSHOT</version>
       <type>nbm</type>
     </dependency>

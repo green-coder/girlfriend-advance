@@ -8,10 +8,10 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>nb-core-module</artifactId>
+  <artifactId>nb-main-module</artifactId>
   <packaging>nbm</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>Girlfriend Advance - Core module</name>
+  <name>Gfa Nb - Main module</name>
 
   <dependencies>
     <dependency>
