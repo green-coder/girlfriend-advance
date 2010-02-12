@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui.action;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.jse.ui.UserInterface;
 import com.lemoulinstudio.gfa.core.util.PngEncoder;
 import java.awt.Image;
@@ -12,13 +12,13 @@ import java.util.Date;
 public class ScreenShotAction extends InternationalAction
         implements Runnable {
 
-  protected GirlfriendAdvance gfa;
+  protected GfaDevice gfa;
   protected UserInterface ui;
   protected SimpleDateFormat dateFormat;
   protected boolean screenShotRequested;
   protected Image lcdImage;
 
-  public ScreenShotAction(UserInterface ui, GirlfriendAdvance gfa) {
+  public ScreenShotAction(UserInterface ui, GfaDevice gfa) {
     super(ui, "ScreenShotAction");
     this.gfa = gfa;
     this.ui = ui;

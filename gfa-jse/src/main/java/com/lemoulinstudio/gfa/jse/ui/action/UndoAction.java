@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui.action;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.cpu.Arm7Tdmi;
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.time.Time;
@@ -11,10 +11,10 @@ import java.awt.event.ActionEvent;
 public class UndoAction extends InternationalAction
         implements GfaStatusChangeListener {
 
-  protected GirlfriendAdvance gfa;
+  protected GfaDevice gfa;
   protected UserInterface ui;
 
-  public UndoAction(UserInterface ui, GirlfriendAdvance gfa) {
+  public UndoAction(UserInterface ui, GfaDevice gfa) {
     super(ui, "UndoAction");
     this.gfa = gfa;
     this.ui = ui;

@@ -1,17 +1,17 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.util.Hex;
 
 public class DisassemblerTableModel extends InternationalTableModel
         implements GfaStatusChangeListener {
 
-  protected GirlfriendAdvance gfa;
+  protected GfaDevice gfa;
   protected int memorySetViewed;
   protected boolean enabled;
   protected boolean armState;
 
-  public DisassemblerTableModel(UserInterface ui, GirlfriendAdvance gfa) {
+  public DisassemblerTableModel(UserInterface ui, GfaDevice gfa) {
     super(ui, "DisassemblerTableModel");
     this.gfa = gfa;
     enabled = false;

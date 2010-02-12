@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.cpu.Arm7Tdmi;
 import com.lemoulinstudio.gfa.core.cpu.ArmReg;
 import com.lemoulinstudio.gfa.core.util.Hex;
@@ -14,7 +14,7 @@ import javax.swing.JViewport;
 
 public class RegisterViewerPanel extends JScrollPane {
 
-  public RegisterViewerPanel(UserInterface ui, GirlfriendAdvance gfa) {
+  public RegisterViewerPanel(UserInterface ui, GfaDevice gfa) {
     super();
 
     JTable registerTable = new JTable(new RegisterTableModel(ui, gfa));
@@ -36,7 +36,7 @@ class RegisterTableModel extends InternationalTableModel
   protected Arm7Tdmi cpu;
   protected boolean enabled;
 
-  public RegisterTableModel(UserInterface ui, GirlfriendAdvance gfa) {
+  public RegisterTableModel(UserInterface ui, GfaDevice gfa) {
     super(ui, "RegisterTableModel");
     cpu = gfa.getCpu();
     enabled = false;
@@ -90,7 +90,7 @@ class CpsrFlagsPanel extends JPanel
   protected ArmReg cpsr;
   protected boolean enabled;
 
-  public CpsrFlagsPanel(UserInterface ui, GirlfriendAdvance gfa) {
+  public CpsrFlagsPanel(UserInterface ui, GfaDevice gfa) {
     super();
 
     cpsr = gfa.getCpu().CPSR;

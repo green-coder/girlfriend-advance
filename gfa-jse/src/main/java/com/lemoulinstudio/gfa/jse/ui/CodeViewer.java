@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.jse.ui.action.DoNothingAction;
 import com.lemoulinstudio.gfa.jse.ui.action.HomeDisasmAction;
 import com.lemoulinstudio.gfa.jse.ui.action.TrackingDisasmAction;
@@ -31,7 +31,7 @@ public class CodeViewer extends JScrollPane
   public static final int CENTER_TRACKING = 1;
   public static final int WINDOW_TRACKING = 2;
 
-  public CodeViewer(UserInterface ui, GirlfriendAdvance gfa) {
+  public CodeViewer(UserInterface ui, GfaDevice gfa) {
     super();
 
     tableModel = new DisassemblerTableModel(ui, gfa);

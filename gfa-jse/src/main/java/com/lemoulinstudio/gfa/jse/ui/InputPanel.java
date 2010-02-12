@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
@@ -23,7 +23,7 @@ public class InputPanel extends JPanel implements ItemListener {
 
   private IORegisterSpace_8_16_32 ioMem;
 
-  public InputPanel(GirlfriendAdvance gfa) {
+  public InputPanel(GfaDevice gfa) {
     super(new GridLayout(10, 1), false);
     ioMem = (IORegisterSpace_8_16_32) gfa.getMemory().getMemoryBank(0x04);
     

@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.gfx.GfaScreen;
 import com.lemoulinstudio.gfa.jse.ui.action.AboutAction;
 import com.lemoulinstudio.gfa.jse.ui.action.DoNothingAction;
@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 
 public class UserInterface extends JFrame {
 
-  public GirlfriendAdvance gfa;
+  public GfaDevice gfa;
 
   public GfaMenuBar menuBar;
   public GfaToolBar toolBar;
@@ -93,7 +93,7 @@ public class UserInterface extends JFrame {
             + "(I am looking for a job in Japan)");
 
     // Create an instance of the emulator.
-    gfa = new GirlfriendAdvance();
+    gfa = new GfaDevice();
 
     // Create the actions of the program.
 

@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.jse.ui.action;
 
-import com.lemoulinstudio.gfa.jse.GirlfriendAdvance;
+import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.jse.ui.GfaStatusChangeListener;
 import com.lemoulinstudio.gfa.jse.ui.UserInterface;
 import java.awt.event.ActionEvent;
@@ -8,10 +8,10 @@ import java.awt.event.ActionEvent;
 public class StepAction extends InternationalAction
         implements GfaStatusChangeListener {
 
-  protected GirlfriendAdvance gfa;
+  protected GfaDevice gfa;
   protected UserInterface ui;
 
-  public StepAction(UserInterface ui, GirlfriendAdvance gfa) {
+  public StepAction(UserInterface ui, GfaDevice gfa) {
     super(ui, "StepAction");
     this.gfa = gfa;
     this.ui = ui;
