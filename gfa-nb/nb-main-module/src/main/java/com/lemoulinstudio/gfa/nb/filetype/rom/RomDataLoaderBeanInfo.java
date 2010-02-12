@@ -22,7 +22,7 @@ public class RomDataLoaderBeanInfo extends SimpleBeanInfo {
   @Override
   public Image getIcon(int type) {
     if (type == BeanInfo.ICON_COLOR_16x16 || type == BeanInfo.ICON_MONO_16x16) {
-      return ImageUtilities.loadImage("com/lemoulinstudio/gfa/nb/filetype/rom/green_mushroom16.png");
+      return ImageUtilities.loadImage(RomDataNode.IMAGE_ICON_BASE);
     } else {
       return null;
     }

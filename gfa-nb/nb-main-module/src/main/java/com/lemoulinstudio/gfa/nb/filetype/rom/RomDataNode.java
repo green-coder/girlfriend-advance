@@ -6,7 +6,7 @@ import org.openide.util.Lookup;
 
 public class RomDataNode extends DataNode {
 
-  private static final String IMAGE_ICON_BASE = "com/lemoulinstudio/gfa/nb/filetype/rom/green_mushroom16.png";
+  public static final String IMAGE_ICON_BASE = "com/lemoulinstudio/gfa/nb/filetype/rom/green_mushroom16.png";
 
   RomDataNode(RomDataObject obj, Lookup lookup) {
     super(obj, Children.LEAF, lookup);
@@ -25,4 +25,5 @@ public class RomDataNode extends DataNode {
 //        // TODO add some relevant properties: ss.put(...)
 //        return s;
 //    }
+  
 }

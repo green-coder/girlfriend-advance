@@ -1,22 +1,12 @@
 package com.lemoulinstudio.gfa.nb.screen;
 
-import org.openide.util.NbBundle;
-//import org.openide.util.Utilities;
-
 /**
  * Top component which displays something.
  */
 public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
-  /** path to the icon used by the component and its open action */
-//    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
-  
   public DefaultScreenTopComponent() {
     initComponents();
-    setName(NbBundle.getMessage(DefaultScreenTopComponent.class, "CTL_DefaultScreenTopComponent"));
-//    setToolTipText(NbBundle.getMessage(DefaultScreenTopComponent.class, "HINT_DefaultScreenTopComponent"));
-//        setIcon(Utilities.loadImage(ICON_PATH, true));
-
   }
 
   /** This method is called from within the constructor to

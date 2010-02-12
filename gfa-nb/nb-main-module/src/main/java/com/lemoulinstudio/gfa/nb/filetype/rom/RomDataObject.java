@@ -2,6 +2,7 @@ package com.lemoulinstudio.gfa.nb.filetype.rom;
 
 import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponent;
+import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponentFactory;
 import java.io.IOException;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -17,16 +18,19 @@ public class RomDataObject extends MultiDataObject {
 
   private class OpenSupport implements OpenCookie {
 
-    private TopComponent topComponent;
+    private ScreenTopComponent screenTopComponent;
 
     private TopComponent getTopComponent() {
-      // Todo: Document this hook.
-      if (topComponent == null) {
-        ScreenTopComponent screenTopComponent = Lookups.forPath("Gfa/TopComponent").lookupAll(ScreenTopComponent.class).iterator().next();
+      if (screenTopComponent == null) {
+        // Todo: Document this hook.
+        ScreenTopComponentFactory factory =
+                Lookups.forPath("Gfa/ScreenTopComponentFactory")
+                .lookup(ScreenTopComponentFactory.class);
+        screenTopComponent = factory.createScreenTopComponent();
         screenTopComponent.setDataObject(RomDataObject.this);
       }
 
-      return topComponent;
+      return screenTopComponent;
     }
 
     public void open() {
@@ -39,6 +43,7 @@ public class RomDataObject extends MultiDataObject {
 
   public RomDataObject(FileObject pf, RomDataLoader loader) throws DataObjectExistsException, IOException {
     super(pf, loader);
+
     CookieSet cookies = getCookieSet();
     cookies.add(new OpenSupport());
   }
@@ -51,6 +56,15 @@ public class RomDataObject extends MultiDataObject {
   @Override
   public Lookup getLookup() {
     return getCookieSet().getLookup();
+  }
+
+  private GfaDevice gfaDevice;
+
+  public synchronized GfaDevice getGfaDevice() {
+    if (gfaDevice == null)
+      gfaDevice = new GfaDevice();
+    
+    return gfaDevice;
   }
 
 }
