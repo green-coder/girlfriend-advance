@@ -11,12 +11,12 @@ public abstract class ScreenTopComponent extends TopComponent {
 
   private RomDataObject dataObject;
 
-  public ScreenTopComponent(RomDataObject dataObject) {
-    this.dataObject = dataObject;
-  }
-
   public RomDataObject getDataObject() {
     return dataObject;
+  }
+
+  public void setDataObject(RomDataObject dataObject) {
+    this.dataObject = dataObject;
   }
 
   @Override

@@ -8,15 +8,11 @@ public class RomDataNode extends DataNode {
 
   private static final String IMAGE_ICON_BASE = "com/lemoulinstudio/gfa/nb/filetype/rom/green_mushroom16.png";
 
-  public RomDataNode(RomDataObject obj) {
-    super(obj, Children.LEAF);
-    setIconBaseWithExtension(IMAGE_ICON_BASE);
-  }
-
   RomDataNode(RomDataObject obj, Lookup lookup) {
     super(obj, Children.LEAF, lookup);
     setIconBaseWithExtension(IMAGE_ICON_BASE);
   }
+  
 //    /** Creates a property sheet. */
 //    @Override
 //    protected Sheet createSheet() {

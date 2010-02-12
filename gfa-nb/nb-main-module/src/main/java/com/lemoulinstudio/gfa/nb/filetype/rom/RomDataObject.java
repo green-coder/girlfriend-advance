@@ -1,6 +1,7 @@
 package com.lemoulinstudio.gfa.nb.filetype.rom;
 
-import com.lemoulinstudio.gfa.nb.screen.DefaultScreenTopComponent;
+import com.lemoulinstudio.gfa.core.GfaDevice;
+import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponent;
 import java.io.IOException;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
@@ -9,6 +10,7 @@ import org.openide.loaders.MultiDataObject;
 import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 
 public class RomDataObject extends MultiDataObject {
@@ -18,9 +20,11 @@ public class RomDataObject extends MultiDataObject {
     private TopComponent topComponent;
 
     private TopComponent getTopComponent() {
-      // Todo: place a hook on the TopComponent's instanciation.
-      if (topComponent == null)
-        topComponent = new DefaultScreenTopComponent(RomDataObject.this);
+      // Todo: Document this hook.
+      if (topComponent == null) {
+        ScreenTopComponent screenTopComponent = Lookups.forPath("Gfa/TopComponent").lookupAll(ScreenTopComponent.class).iterator().next();
+        screenTopComponent.setDataObject(RomDataObject.this);
+      }
 
       return topComponent;
     }
@@ -48,5 +52,5 @@ public class RomDataObject extends MultiDataObject {
   public Lookup getLookup() {
     return getCookieSet().getLookup();
   }
-  
+
 }

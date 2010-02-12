@@ -1,6 +1,5 @@
 package com.lemoulinstudio.gfa.nb.screen;
 
-import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import org.openide.util.NbBundle;
 //import org.openide.util.Utilities;
 
@@ -12,8 +11,7 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
   
-  public DefaultScreenTopComponent(RomDataObject dataObject) {
-    super(dataObject);
+  public DefaultScreenTopComponent() {
     initComponents();
     setName(NbBundle.getMessage(DefaultScreenTopComponent.class, "CTL_DefaultScreenTopComponent"));
 //    setToolTipText(NbBundle.getMessage(DefaultScreenTopComponent.class, "HINT_DefaultScreenTopComponent"));

@@ -79,4 +79,14 @@
       </file>
     </folder>
   </folder>
+  <folder name="Gfa">
+    <folder name="TopComponent">
+      <!--file name="com-lemoulinstudio-gfa-nb-screen-OtherScreenTopComponent.instance">
+        <attr name="position" intvalue="100"/>
+      </file-->
+      <file name="com-lemoulinstudio-gfa-nb-screen-DefaultScreenTopComponent.instance">
+        <attr name="position" intvalue="500"/>
+      </file>
+    </folder>
+  </folder>
 </filesystem>
