@@ -43,6 +43,16 @@
       <artifactId>org-openide-windows</artifactId>
       <version>${netbeans.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-awt</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-jdesktop-layout</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -65,4 +75,5 @@
   </build>
 
 </project>
+
 

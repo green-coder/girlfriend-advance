@@ -7,6 +7,9 @@
         <attr name="position" stringvalue="100"/>
       </file>
     </folder>
+    <folder name="Window">
+      <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+    </folder>
   </folder>
   <folder name="Loaders">
     <folder name="bin">
@@ -72,6 +75,15 @@
       </folder>
     </folder>
   </folder>
+  <folder name="Menu">
+    <folder name="Window">
+      <folder name="Girlfriend Advance">
+        <file name="DisassemblerAction.shadow">
+          <attr name="originalFile" stringvalue="Actions/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+        </file>
+      </folder>
+    </folder>
+  </folder>
   <folder name="Services">
     <folder name="MIMEResolver">
       <file name="RomResolver.xml" url="RomResolver.xml">
@@ -87,6 +99,16 @@
       <file name="com-lemoulinstudio-gfa-nb-screen-DefaultScreenTopComponentFactory.instance">
         <attr name="position" intvalue="500"/>
       </file>
+    </folder>
+  </folder>
+  <folder name="Windows2">
+    <folder name="Components">
+      <file name="DisassemblerTopComponent.settings" url="DisassemblerTopComponentSettings.xml"/>
+    </folder>
+    <folder name="Modes">
+      <folder name="output">
+        <file name="DisassemblerTopComponent.wstcref" url="DisassemblerTopComponentWstcref.xml"/>
+      </folder>
     </folder>
   </folder>
 </filesystem>

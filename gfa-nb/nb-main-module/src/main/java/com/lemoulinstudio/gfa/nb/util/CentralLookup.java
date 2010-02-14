@@ -18,12 +18,12 @@ import org.openide.util.lookup.InstanceContent;
 public class CentralLookup extends AbstractLookup {
 
   private static CentralLookup defaultInstance = new CentralLookup();
-  
+
   public static CentralLookup getDefault() {
     return defaultInstance;
   }
 
-  private InstanceContent content = null;
+  private InstanceContent content;
 
   public CentralLookup() {
     this(new InstanceContent());
@@ -32,6 +32,10 @@ public class CentralLookup extends AbstractLookup {
   public CentralLookup(InstanceContent content) {
     super(content);
     this.content = content;
+  }
+
+  public InstanceContent getContent() {
+    return content;
   }
 
   public void add(Object instance) {
