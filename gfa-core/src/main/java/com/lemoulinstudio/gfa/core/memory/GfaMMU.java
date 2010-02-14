@@ -4,6 +4,8 @@ import com.lemoulinstudio.gfa.core.dma.Dma;
 import com.lemoulinstudio.gfa.core.gfx.Lcd;
 import com.lemoulinstudio.gfa.core.time.Time;
 import com.lemoulinstudio.gfa.core.util.Hex;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -13,10 +15,6 @@ import java.util.zip.ZipInputStream;
 public class GfaMMU implements MemoryInterface {
 
   protected MemoryInterface[] memory;
-  protected String biosFileName = "";
-  protected String romFileName = "";
-  protected URL biosFileUrl = null;
-  protected URL romFileUrl = null;
 
   public GfaMMU() {
     memory = new MemoryInterface[16];
@@ -154,13 +152,12 @@ public class GfaMMU implements MemoryInterface {
 
   public boolean loadBios(URL url, String name) {
     try {
-      name = filterNameForJava(name);
+      name = name.replace('\\', '/');
+      name = name.substring(name.indexOf(':') + 1);
       InputStream inputStream = openBrutDataInputStream(url, name);
       byte[] sys = ((MemoryManagementUnit_8_16_32) memory[0x00]).createInternalArray(0x4000);
       readFully(inputStream, sys);
       inputStream.close();
-      biosFileName = name;
-      biosFileUrl = url;
     }
     catch (IOException e) {
       System.out.println("Probleme de chargement du bios " + name + " :");
@@ -171,78 +168,30 @@ public class GfaMMU implements MemoryInterface {
     return true;
   }
 
-  public boolean loadRom(String name) {
-    return loadRom(getClass().getClassLoader().getResource(name), name);
-  }
+  public void loadRom(InputStream in) throws IOException {
+    // Create a dynamic array with 1Mb of initial capacity.
+    ByteArrayOutputStream romByteArray = new ByteArrayOutputStream(0x100000);
 
-  public boolean loadRom(URL url, String name) {
-    try {
-      name = filterNameForJava(name);
-      InputStream inputStream = openBrutDataInputStream(url, name);
-      byte miniBuffer[] = new byte[1024]; // create a 1Kb buffer.
-      long fileSize = 0;
-      long nbByteRead = inputStream.read(miniBuffer, 0, 1024);
-      while (nbByteRead != -1) {
-        fileSize += nbByteRead;
-        nbByteRead = inputStream.read(miniBuffer, 0, 1024);
-      }
-      inputStream.close();
+    byte[] fourK = new byte[4096];
+    for (int nbBytes = in.read(fourK); nbBytes >= 0; nbBytes = in.read(fourK))
+      romByteArray.write(fourK, 0, nbBytes);
 
-      inputStream = openBrutDataInputStream(url, name);
-      long size1;
-      long size2;
+    int romSize = romByteArray.size();
+    
+    int part1Size = Math.min(romSize, 0x01000000); // 16Mb max
+    romSize -= part1Size;
+    int part2Size = Math.min(romSize, 0x01000000); // 16Mb max
+    romSize -= part2Size;
 
-      if (fileSize <= 0x01000000) { // (fileSize <= 16 Megs)
-        size1 = fileSize;
-        size2 = 0;
-      }
-      else if (fileSize <= 0x2000000) { // (fileSize <= 32 Megs)
-        size1 = 0x01000000;
-        size2 = fileSize - 0x01000000;
-      }
-      else { // the file is too big and it's not normal : don't load !
-        throw new IOException("The rom file is too long ! (0x" + Hex.toString(fileSize) + ")");
-      }
+    if (romSize > 0) // The file is too big and it's not normal: fail the load.
+      throw new IOException("The rom file is too long ! (0x" + Hex.toString(romSize) + ")");
 
-      romFileName = name;
-      romFileUrl = url;
-      byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) size1);
-      byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) size2);
-      readFully(inputStream, part1);
-      readFully(inputStream, part2);
-      inputStream.close();
-    }
-    catch (IOException e) {
-      System.out.println("Probleme de chargement de la rom " + name + " :");
-      e.printStackTrace();
-      return false;
-    }
+    byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) part1Size);
+    byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) part2Size);
 
-    return true;
-  }
-
-  public void reloadBios() {
-    if (!biosFileName.equals(""))
-      loadBios(biosFileUrl, biosFileName);
-  }
-
-  public void reloadRom() {
-    if (!romFileName.equals(""))
-      loadRom(romFileUrl, romFileName);
-  }
-
-  public String getRomFileName() {
-    return romFileName;
-  }
-
-  public String filterNameForJava(String s) {
-    char[] c = new char[s.length()];
-    for (int i = 0; i < s.length(); i++)
-      c[i] = ((s.charAt(i) == '\\') ? '/' : s.charAt(i));
-    s = new String(c);
-    int index = s.indexOf(':');
-    if (index >= 0) s = s.substring(index + 1);
-    return s;
+    ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(romByteArray.toByteArray());
+    arrayInputStream.read(part1);
+    arrayInputStream.read(part2);
   }
 
   public void reset() {

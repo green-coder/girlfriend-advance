@@ -36,7 +36,7 @@ public class ScreenShotAction extends InternationalAction
   }
 
   protected String getPngFileName() {
-    String fileName = gfa.getMemory().getRomFileName();
+    String fileName = ui.getRomName();
     fileName = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.length());
     String filename = fileName.toLowerCase();
     if (filename.endsWith(".bin")

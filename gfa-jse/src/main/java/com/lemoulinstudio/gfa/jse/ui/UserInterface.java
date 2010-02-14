@@ -21,6 +21,10 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -84,6 +88,8 @@ public class UserInterface extends JFrame {
   public Action noTrackingDisasmAction;
   public Action centerTrackingDisasmAction;
   public Action windowTrackingDisasmAction;
+
+  private String romName = "";
 
   public UserInterface() {
     this(gfaDemoRomName);
@@ -173,9 +179,14 @@ public class UserInterface extends JFrame {
 
     // Load a rom into the memory.
     if (romName != null) {
-      gfa.getMemory().loadRom(romName);
+      try {
+      InputStream inputStream = new FileInputStream(romName);
+      gfa.getMemory().loadRom(inputStream);
+      inputStream.close();
       fireGfaStatusChanged(GfaStatusChangeListener.STATUS_EXECUTION_STOPPED);
       fireGfaStateChanged();
+      } catch (IOException e) {}
+      this.romName = new File(romName).getName();
     }
     
     // Sizes the frame to the screen size.
@@ -218,5 +229,9 @@ public class UserInterface extends JFrame {
 
   public static final String gfaDemoRomName =
           "roms/gfa-splash.zip"; // gfx by Sonik (www.dream-emulation.fr.st)
+
+  public String getRomName() {
+    return romName;
+  }
   
 }

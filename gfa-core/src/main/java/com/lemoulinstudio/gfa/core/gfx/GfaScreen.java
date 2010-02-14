@@ -9,7 +9,7 @@ import javax.swing.JComponent;
 public class GfaScreen extends JComponent {
 
   private Dimension fixedDimension = new Dimension(240, 160);
-  protected Image lcdImage;
+  private Image lcdImage;
 
   public GfaScreen() {
     lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
@@ -18,6 +18,11 @@ public class GfaScreen extends JComponent {
   public GfaScreen(Image lcdImage) {
     setDoubleBuffered(false);
     this.lcdImage = lcdImage;
+  }
+
+  public void setLcdImage(Image lcdImage) {
+    this.lcdImage = lcdImage;
+    repaint();
   }
 
   @Override
