@@ -23,8 +23,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -169,6 +168,7 @@ public class UserInterface extends JFrame {
     // Handle the windowClose event.
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         exitAction.actionPerformed(new ActionEvent(this, 0, ""));
       }
@@ -180,13 +180,12 @@ public class UserInterface extends JFrame {
     // Load a rom into the memory.
     if (romName != null) {
       try {
-      InputStream inputStream = new FileInputStream(romName);
-      gfa.getMemory().loadRom(inputStream);
-      inputStream.close();
-      fireGfaStatusChanged(GfaStatusChangeListener.STATUS_EXECUTION_STOPPED);
-      fireGfaStateChanged();
-      } catch (IOException e) {}
-      this.romName = new File(romName).getName();
+        gfa.getMemory().loadRom(new FileInputStream(romName));
+        fireGfaStatusChanged(GfaStatusChangeListener.STATUS_EXECUTION_STOPPED);
+        fireGfaStateChanged();
+        this.romName = new File(romName).getName();
+      }
+      catch (FileNotFoundException e) {}
     }
     
     // Sizes the frame to the screen size.

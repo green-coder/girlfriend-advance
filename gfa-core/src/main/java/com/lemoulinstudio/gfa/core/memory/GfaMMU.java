@@ -168,30 +168,43 @@ public class GfaMMU implements MemoryInterface {
     return true;
   }
 
-  public void loadRom(InputStream in) throws IOException {
-    // Create a dynamic array with 1Mb of initial capacity.
-    ByteArrayOutputStream romByteArray = new ByteArrayOutputStream(0x100000);
+  public boolean loadRom(InputStream in) {
+    try {
+      // Create a dynamic array with 1Mb of initial capacity.
+      ByteArrayOutputStream romByteArray = new ByteArrayOutputStream(0x100000);
 
-    byte[] fourK = new byte[4096];
-    for (int nbBytes = in.read(fourK); nbBytes >= 0; nbBytes = in.read(fourK))
-      romByteArray.write(fourK, 0, nbBytes);
+      byte[] fourK = new byte[4096];
+      for (int nbBytes = in.read(fourK); nbBytes >= 0; nbBytes = in.read(fourK))
+        romByteArray.write(fourK, 0, nbBytes);
 
-    int romSize = romByteArray.size();
-    
-    int part1Size = Math.min(romSize, 0x01000000); // 16Mb max
-    romSize -= part1Size;
-    int part2Size = Math.min(romSize, 0x01000000); // 16Mb max
-    romSize -= part2Size;
+      int romSize = romByteArray.size();
 
-    if (romSize > 0) // The file is too big and it's not normal: fail the load.
-      throw new IOException("The rom file is too long ! (0x" + Hex.toString(romSize) + ")");
+      int part1Size = Math.min(romSize, 0x01000000); // 16Mb max
+      romSize -= part1Size;
+      int part2Size = Math.min(romSize, 0x01000000); // 16Mb max
+      romSize -= part2Size;
 
-    byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) part1Size);
-    byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) part2Size);
+      if (romSize > 0) // The file is too big and it's not normal: fail the load.
+        throw new IOException("The rom file is too long ! (0x" + Hex.toString(romSize) + ")");
 
-    ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(romByteArray.toByteArray());
-    arrayInputStream.read(part1);
-    arrayInputStream.read(part2);
+      byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) part1Size);
+      byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) part2Size);
+
+      ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(romByteArray.toByteArray());
+      arrayInputStream.read(part1);
+      arrayInputStream.read(part2);
+
+      return true;
+    }
+    catch (IOException e) {
+      System.err.println(e.getMessage());
+      e.printStackTrace();
+      return false;
+    }
+    finally {
+      try {in.close();}
+      catch (Exception e) {}
+    }
   }
 
   public void reset() {
