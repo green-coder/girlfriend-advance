@@ -16,7 +16,7 @@ public class ScreenShotAction extends InternationalAction
   protected UserInterface ui;
   protected SimpleDateFormat dateFormat;
   protected boolean screenShotRequested;
-  protected Image lcdImage;
+  protected Image screenImage;
 
   public ScreenShotAction(UserInterface ui, GfaDevice gfa) {
     super(ui, "ScreenShotAction");
@@ -24,7 +24,7 @@ public class ScreenShotAction extends InternationalAction
     this.ui = ui;
     screenShotRequested = false;
     dateFormat = new SimpleDateFormat("dd_MM_yyyy HH_mm_ss_SSS");
-    lcdImage = gfa.getLcd().getImage();
+    screenImage = ui.gfaScreen.getImage();
   }
 
   public void actionPerformed(ActionEvent event) {
@@ -53,7 +53,7 @@ public class ScreenShotAction extends InternationalAction
    */
   public void run() {
     try {
-      PngEncoder encoder = new PngEncoder(lcdImage, false, PngEncoder.FILTER_NONE, 9);
+      PngEncoder encoder = new PngEncoder(screenImage, false, PngEncoder.FILTER_NONE, 9);
       FileOutputStream pngFile = new FileOutputStream(getPngFileName());
       pngFile.write(encoder.pngEncode());
       pngFile.close();

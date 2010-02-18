@@ -4,25 +4,26 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.image.ImageProducer;
 import javax.swing.JComponent;
 
 public class GfaScreen extends JComponent {
 
   private Dimension fixedDimension = new Dimension(240, 160);
-  private Image lcdImage;
+  private final Image image;
 
   public GfaScreen() {
-    lcdImage = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
-  }
-
-  public GfaScreen(Image lcdImage) {
     setDoubleBuffered(false);
-    this.lcdImage = lcdImage;
+    image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
   }
 
-  public void setLcdImage(Image lcdImage) {
-    this.lcdImage = lcdImage;
-    repaint();
+  public GfaScreen(ImageProducer imageProducer) {
+    setDoubleBuffered(false);
+    image = Toolkit.getDefaultToolkit().createImage(imageProducer);
+  }
+
+  public Image getImage() {
+    return image;
   }
 
   @Override
@@ -55,13 +56,9 @@ public class GfaScreen extends JComponent {
     return true;
   }
 
-  public void resfresh() {
-    repaint();
-  }
-
   @Override
   public void paint(Graphics g) {
-    g.drawImage(lcdImage, 0, 0, this);
+    g.drawImage(image, 0, 0, this);
   }
   
 }

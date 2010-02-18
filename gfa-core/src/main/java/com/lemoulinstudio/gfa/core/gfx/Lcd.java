@@ -4,40 +4,33 @@ import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
 import com.lemoulinstudio.gfa.core.memory.MemoryManagementUnit_16_32;
 import com.lemoulinstudio.gfa.core.memory.ObjectAttributMemory_16_32;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.image.DirectColorModel;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
 public class Lcd implements ImageProducer {
 
-  protected int[] rawPixels;
-  protected DirectColorModel model;
-  protected List<ImageConsumer> consumers;
-  protected Image image;
+  private final int[] rawPixels;
+  private final DirectColorModel model;
+  private final List<ImageConsumer> consumerList;
 
   public final int xScreenSize = 240;
   public final int yScreenSize = 160;
 
-  protected IORegisterSpace_8_16_32   ioMem; // registers
-  protected MemoryManagementUnit_16_32 pMem; // palette
-  protected MemoryManagementUnit_16_32 vMem; // video
-  protected ObjectAttributMemory_16_32 sMem; // sprite
+  private IORegisterSpace_8_16_32   ioMem; // registers
+  private MemoryManagementUnit_16_32 pMem; // palette
+  private MemoryManagementUnit_16_32 vMem; // video
+  private ObjectAttributMemory_16_32 sMem; // sprite
 
   public Lcd() {
     rawPixels = new int[xScreenSize * yScreenSize];
     model = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff);
-    image = Toolkit.getDefaultToolkit().createImage(this);
-    consumers = new Vector<ImageConsumer>();
+    consumerList = new ArrayList<ImageConsumer>();
   }
 
-  public Image getImage() {
-    return image;
-  }
-  
   public void addConsumer(ImageConsumer ic) {
     ic.setDimensions(xScreenSize, yScreenSize);
     ic.setHints(ic.TOPDOWNLEFTRIGHT |
@@ -45,33 +38,31 @@ public class Lcd implements ImageProducer {
 		ic.SINGLEPASS |
 		ic.SINGLEFRAME);
     ic.setColorModel(model);
-    consumers.add(ic);
+    synchronized (consumerList) {consumerList.add(ic);}
   }
 
   public boolean isConsumer(ImageConsumer ic) {
-    return consumers.contains(ic);
+    return consumerList.contains(ic);
   }
 
   public void removeConsumer(ImageConsumer ic) {
-    consumers.remove(ic);
+    synchronized (consumerList) {consumerList.remove(ic);}
   }
 
   public void startProduction(ImageConsumer ic) {
     addConsumer(ic);
+    updatePixels();
   }
 
   public void requestTopDownLeftRightResend(ImageConsumer ic) {
-    // Do nothing.
-    // No need to resend data since images are sent frame per frame :
-    // the next sent image will be the next frame.
+    ic.setPixels(0, 0, xScreenSize, yScreenSize, model, rawPixels, 0, xScreenSize);
+    ic.imageComplete(ic.SINGLEFRAMEDONE);
   }
 
   public void updatePixels() {
-    //System.out.println("consumers.size() = " + consumers.size());
-    for (int i = 0; i < consumers.size(); i++) {
-      ImageConsumer ic = consumers.get(i);
-      ic.setPixels(0, 0, xScreenSize, yScreenSize, model, rawPixels, 0, xScreenSize);
-      ic.imageComplete(ic.SINGLEFRAMEDONE);
+    synchronized (consumerList) {
+      for (ImageConsumer ic : consumerList)
+        requestTopDownLeftRightResend(ic);
     }
   }
 
@@ -82,9 +73,13 @@ public class Lcd implements ImageProducer {
     sMem  = (ObjectAttributMemory_16_32) memory.getMemoryBank(0x07); // sprite
   }
 
+  public void reset() {
+    Arrays.fill(rawPixels, 0);
+    updatePixels();
+  }
+
   public void drawLine(int y) {
     if (y < yScreenSize) {
-      //if (y == 159) System.out.println("Mode " + ioMem.getGfxMode());
       switch(ioMem.getGfxMode()) {
         case 0: drawMode0Line(y); break;
         case 1: drawMode1Line(y); break;

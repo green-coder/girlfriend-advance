@@ -68,13 +68,14 @@ public class GfaDevice {
   }
 
   public void reset() {
-    getTime().reset();
     getCpu().reset();
+    getMemory().reset();
     getDma0().reset();
     getDma1().reset();
     getDma2().reset();
     getDma3().reset();
-    getMemory().reset();
+    getTime().reset();
+    getLcd().reset();
   }
 
   public Arm7Tdmi    getCpu()         {return cpu;}
