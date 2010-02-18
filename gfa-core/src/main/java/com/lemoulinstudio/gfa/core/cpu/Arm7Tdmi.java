@@ -288,15 +288,11 @@ public abstract class Arm7Tdmi implements Runnable {
   private boolean stopPolitelyRequested;
 
   public void run() {
+    stopPolitelyRequested = false;
     while (!stopPolitelyRequested)
       step();
   }
   
-  public void start() {
-    stopPolitelyRequested = false;
-    new Thread(this).start();
-  }
-
   public void stopPlease() {
     stopPolitelyRequested = true;
   }
