@@ -13,19 +13,38 @@ import org.openide.util.LookupListener;
 
 /**
  *
- * @author vincent
+ * @author Vincent Cantin
  */
 public class SmartProxyLookup extends Lookup {
 
-  private static class ProxyResult<T> extends Result<T> implements LookupListener {
+  private static class ProxyResult<T> extends Result<T> {
+
+    private static class DelegateLookupListener implements LookupListener {
+
+      private final Reference<ProxyResult> proxyResultRef;
+
+      public DelegateLookupListener(ProxyResult proxyResult) {
+        this.proxyResultRef = new WeakReference(proxyResult);
+      }
+
+      public void resultChanged(LookupEvent ev) {
+        ProxyResult proxyResult = proxyResultRef.get();
+        if (proxyResult != null)
+          proxyResult.fireResultChanged();
+      }
+      
+    }
 
     private Template<T> template;
     private Collection<LookupListener> listeners;
     private Result<T> delegateResult;
+    private DelegateLookupListener delegateLookupListener;
 
     public ProxyResult(Template<T> template, Lookup delegateLookup) {
       this.template = template;
-      this.delegateResult = delegateLookup.lookup(template);
+      delegateResult = delegateLookup.lookup(template);
+      delegateLookupListener = new DelegateLookupListener(this);
+      delegateResult.addLookupListener(delegateLookupListener);
     }
 
     public void setDelegateLookup(Lookup delegateLookup) {
@@ -36,17 +55,13 @@ public class SmartProxyLookup extends Lookup {
       Collection<? extends T> contentBefore = this.delegateResult.allInstances();
       Collection<? extends T> contentAfter = delegateResult.allInstances();
 
-      this.delegateResult.removeLookupListener(this);
+      this.delegateResult.removeLookupListener(delegateLookupListener);
       this.delegateResult = delegateResult;
-      this.delegateResult.addLookupListener(this);
+      this.delegateResult.addLookupListener(delegateLookupListener);
 
       if (!contentAfter.containsAll(contentBefore) ||
           !contentBefore.containsAll(contentAfter))
         fireResultChanged();
-    }
-
-    public void resultChanged(LookupEvent ev) {
-      fireResultChanged();
     }
 
     private synchronized void fireResultChanged() {
@@ -82,6 +97,11 @@ public class SmartProxyLookup extends Lookup {
     @Override
     public Collection<? extends Item<T>> allItems() {
       return delegateResult.allItems();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      delegateResult.removeLookupListener(delegateLookupListener);
     }
 
   }
