@@ -13,19 +13,28 @@ import org.openide.windows.TopComponent;
  */
 public abstract class ScreenTopComponent extends TopComponent {
 
-  protected final RomDataObject dataObject;
+  private final RomDataObject dataObject;
+  private PropertyChangeListener propertyChangeListener;
 
   public ScreenTopComponent(final RomDataObject dataObject) {
     this.dataObject = dataObject;
-
-    dataObject.addPropertyChangeListener(new PropertyChangeListener() {
+    
+    this.propertyChangeListener = new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
         setName(dataObject.getName());
       }
-    });
+    };
+
+    dataObject.addPropertyChangeListener(propertyChangeListener);
+
+    associateLookup(dataObject.getLookup());
 
     setName(dataObject.getName());
     setIcon(ImageUtilities.loadImage(RomDataNode.IMAGE_ICON_BASE, true));
+  }
+
+  public RomDataObject getDataObject() {
+    return dataObject;
   }
 
   @Override
@@ -38,6 +47,11 @@ public abstract class ScreenTopComponent extends TopComponent {
   @Override
   protected String preferredID() {
     return PREFERRED_ID;
+  }
+
+  @Override
+  protected void componentClosed() {
+    dataObject.removePropertyChangeListener(propertyChangeListener);
   }
 
 }

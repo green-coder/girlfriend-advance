@@ -2,8 +2,8 @@ package com.lemoulinstudio.gfa.nb.screen;
 
 import com.lemoulinstudio.gfa.core.gfx.GfaScreen;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
-import com.lemoulinstudio.gfa.nb.util.CentralLookup;
 import com.lemoulinstudio.gfa.nb.GfaContext;
+import org.openide.util.Lookup;
 
 /**
  * Top component which displays something.
@@ -14,7 +14,8 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
   public DefaultScreenTopComponent(RomDataObject dataObject) {
     super(dataObject);
-    gfaScreen = new GfaScreen();
+
+    gfaScreen = new GfaScreen(dataObject.getGfaDevice().getLcd());
 
     initComponents();
     
@@ -41,14 +42,9 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
   @Override
   protected void componentActivated() {
-    CentralLookup gfaLookup = GfaContext.lookup;
-
-    synchronized (gfaLookup) {
-      for (Object o : gfaLookup.lookupResult(RomDataObject.class).allInstances())
-        gfaLookup.remove(o);
-
-      gfaLookup.add(dataObject);
-    }
+    super.componentActivated();
+    
+    GfaContext.setDelegateLookup(getLookup());
   }
 
   @Override
@@ -57,9 +53,12 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
   @Override
   public void componentClosed() {
-    GfaContext.lookup.remove(dataObject);
+    super.componentClosed();
     
-    // Todo: ask the data source to release the reference.
+    if (GfaContext.getDelegateLookup() == getLookup())
+      GfaContext.setDelegateLookup(Lookup.EMPTY);
+    
+    getDataObject().releaseResources();
   }
 
 }

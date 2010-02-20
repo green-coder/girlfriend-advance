@@ -39,12 +39,16 @@ public class DisassemblerTableModel extends AbstractTableModel {
     0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x0e, 0x0e
   };
 
-  public void setMemorySetViewed(int memorySetToView) {
+  public void setViewedMemoryBank(int memorySetToView) {
     memorySetToView &= 0x0f;
     if (memorySetViewed != userComplientMap[memorySetToView]) {
       memorySetViewed = userComplientMap[memorySetToView];
       fireTableDataChanged();
     }
+  }
+
+  public void viewCurrentlyExecutedMemoryBank() {
+    setViewedMemoryBank(gfaDevice.getCpu().PC.get() >>> 24);
   }
 
   public int getPcRow() {
@@ -58,11 +62,7 @@ public class DisassemblerTableModel extends AbstractTableModel {
     }
   }
 
-  public void goHome() {
-    setMemorySetViewed(gfaDevice.getCpu().PC.get() >>> 24);
-  }
-
-  protected final int[] memorySize = {
+  private final int[] memorySize = {
     0x00004000, // Bios ROM
     0x00000100, // Dummy RAM
     0x00040000, // External RAM

@@ -1,6 +1,7 @@
 package com.lemoulinstudio.gfa.nb;
 
-import com.lemoulinstudio.gfa.nb.util.CentralLookup;
+import com.lemoulinstudio.gfa.nb.util.SmartProxyLookup;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -8,6 +9,18 @@ import com.lemoulinstudio.gfa.nb.util.CentralLookup;
  */
 public class GfaContext {
 
-  static public CentralLookup lookup = new CentralLookup();
+  private static SmartProxyLookup lookup = new SmartProxyLookup();
+
+  public static Lookup getLookup() {
+    return lookup;
+  }
+
+  public static Lookup getDelegateLookup() {
+    return lookup.getDelegateLookup();
+  }
+
+  public static void setDelegateLookup(Lookup lookupDelegate) {
+    lookup.setDelegateLookup(lookupDelegate);
+  }
   
 }

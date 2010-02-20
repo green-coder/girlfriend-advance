@@ -2,6 +2,9 @@ package com.lemoulinstudio.gfa.nb.disasm;
 
 import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
+import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -17,24 +20,48 @@ import org.openide.windows.WindowManager;
 /**
  * Top component which displays something.
  */
-final class DisassemblerTopComponent extends TopComponent {
+public final class DisassemblerTopComponent extends TopComponent {
 
-  private static class MemoryBank {
-    public int id;
+  public enum MemoryBank {
+
+    BiosRom    (0x00, "Bios Rom"),
+    ExternalRam(0x02, "External Ram"),
+    WorkRam    (0x03, "Work Ram"),
+    IORegisters(0x04, "IO Registers"),
+    PaletteRam (0x05, "Palette Ram"),
+    VideoRam   (0x06, "Video Ram"),
+    OAMRam     (0x07, "OAM Ram"),
+    GamepackRom(0x08, "Gamepack Rom"),
+    CartRam    (0x0e, "Cart Ram");
+
+    public int bankIndex;
     public String name;
 
-    public MemoryBank(int id, String name) {
-      this.id = id;
+    MemoryBank(int bankIndex, String name) {
+      this.bankIndex = bankIndex;
       this.name = name;
+    }
+
+    public int getBankIndex() {
+      return bankIndex;
+    }
+
+    public String getName() {
+      return name;
     }
 
     @Override
     public String toString() {
-      return name;
+      return getName();
     }
 
   }
-
+  public enum TrackingPolicy {
+    None,
+    Centered,
+    Window;
+  }
+  
   private static DisassemblerTopComponent instance;
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -43,48 +70,83 @@ final class DisassemblerTopComponent extends TopComponent {
   private DisassemblerTableModel tableModel;
   private ComboBoxModel memoryBankComboBoxModel;
   private ComboBoxModel executionTrackingComboBoxModel;
-  private ExecutionTracking executionTracking;
-  private Lookup.Result romDataObjectResult;
+  private TrackingPolicy trackingPolicy;
+
+  private Lookup.Result stoppedStateResult;
 
   private DisassemblerTopComponent() {
     tableModel = new DisassemblerTableModel();
 
-    memoryBankComboBoxModel = new DefaultComboBoxModel(new MemoryBank[] {
-      new MemoryBank(0x00, "Bios Rom"),
-      new MemoryBank(0x02, "External Ram"),
-      new MemoryBank(0x03, "Work Ram"),
-      new MemoryBank(0x04, "IO Registers"),
-      new MemoryBank(0x05, "Palette Ram"),
-      new MemoryBank(0x06, "Video Ram"),
-      new MemoryBank(0x07, "OAM Ram"),
-      new MemoryBank(0x08, "Gamepak Rom"),
-      new MemoryBank(0x0e, "Cart Ram")
-    });
-
-    executionTrackingComboBoxModel = new DefaultComboBoxModel(ExecutionTracking.values());
-    executionTracking = ExecutionTracking.None;
-
-    romDataObjectResult = GfaContext.lookup.lookupResult(RomDataObject.class);
-
-    onEvent(GfaContext.lookup.lookup(RomDataObject.class));
-    
-    romDataObjectResult.addLookupListener(new LookupListener() {
-      public void resultChanged(LookupEvent ev) {
-        onEvent(GfaContext.lookup.lookup(RomDataObject.class));
-      }
-    });
+    memoryBankComboBoxModel = new DefaultComboBoxModel(MemoryBank.values());
+    executionTrackingComboBoxModel = new DefaultComboBoxModel(TrackingPolicy.values());
 
     initComponents();
 
-    memoryBankComboBox.setSelectedIndex(8);
+    memoryBankComboBox.setSelectedItem(MemoryBank.GamepackRom);
+    executionTrackingComboBox.setSelectedItem(TrackingPolicy.Window);
+    
     setName(NbBundle.getMessage(DisassemblerTopComponent.class, "CTL_DisassemblerTopComponent"));
 //        setIcon(Utilities.loadImage(ICON_PATH, true));
 
+    stoppedStateResult = GfaContext.getLookup().lookupResult(StoppedState.class);
+    stoppedStateResult.addLookupListener(new LookupListener() {
+      public void resultChanged(LookupEvent ev) {
+        onEvent(GfaContext.getLookup().lookup(StoppedState.class));
+      }
+    });
+    onEvent(GfaContext.getLookup().lookup(StoppedState.class));
   }
 
-  private void onEvent(RomDataObject dataObject) {
-    if (dataObject == null) tableModel.setGfaDevice(null);
-    else tableModel.setGfaDevice(dataObject.getGfaDevice());
+  private void onEvent(StoppedState stoppedState) {
+    if (stoppedState == null) {
+       tableModel.setGfaDevice(null);
+    }
+    else {
+      tableModel.setGfaDevice(stoppedState.getRomDataObject().getGfaDevice());
+      trackInstructionPointer();
+    }
+  }
+
+  public void trackInstructionPointer() {
+    trackInstructionPointer(trackingPolicy);
+  }
+
+  public void trackInstructionPointer(TrackingPolicy trackingPolicy) {
+    int yRow = -1;
+    int rowHeight;
+
+    switch (trackingPolicy) {
+      case None: {
+        yRow = tableModel.getPcRow();
+      }
+      break;
+
+      case Centered: {
+        tableModel.viewCurrentlyExecutedMemoryBank();
+        yRow = tableModel.getPcRow();
+        JViewport viewport = scrollPane.getViewport();
+        Rectangle rect = viewport.getViewRect();
+        rowHeight = table.getRowHeight();
+        int y = yRow * rowHeight - rect.height / 2;
+        if (y < 0) y = 0;
+        viewport.setViewPosition(new Point(0, y));
+      }
+      break;
+
+      case Window: {
+        tableModel.viewCurrentlyExecutedMemoryBank();
+        yRow = tableModel.getPcRow();
+        JViewport viewport = scrollPane.getViewport();
+        Rectangle rect = viewport.getViewRect();
+        rowHeight = table.getRowHeight();
+        if (!rect.contains(0, yRow * rowHeight, 1, rowHeight))
+          viewport.setViewPosition(new Point(0, yRow * rowHeight));
+      }
+      break;
+    }
+
+    // Select the current instruction row.
+    if (yRow >= 0) table.setRowSelectionInterval(yRow, yRow);
   }
 
   /** This method is called from within the constructor to
@@ -95,17 +157,18 @@ final class DisassemblerTopComponent extends TopComponent {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    jScrollPane1 = new javax.swing.JScrollPane();
-    jScrollPane1.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
-    jTable1 = new javax.swing.JTable();
+    scrollPane = new javax.swing.JScrollPane();
+    scrollPane.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+    table = new javax.swing.JTable();
     memoryBankComboBox = new javax.swing.JComboBox();
     executionTrackingComboBox = new javax.swing.JComboBox();
     javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
     javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
 
-    jTable1.setModel(tableModel);
-    jTable1.setSelectionBackground(java.awt.Color.pink);
-    jScrollPane1.setViewportView(jTable1);
+    table.setModel(tableModel);
+    table.setSelectionBackground(java.awt.Color.pink);
+    table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    scrollPane.setViewportView(table);
 
     memoryBankComboBox.setModel(memoryBankComboBoxModel);
     memoryBankComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -139,7 +202,7 @@ final class DisassemblerTopComponent extends TopComponent {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(executionTrackingComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-      .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+      .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 363, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -151,23 +214,23 @@ final class DisassemblerTopComponent extends TopComponent {
           .addComponent(jLabel2)
           .addComponent(executionTrackingComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
+        .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
   private void memoryBankComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_memoryBankComboBoxActionPerformed
-    tableModel.setMemorySetViewed(((MemoryBank) memoryBankComboBoxModel.getSelectedItem()).id);
+    tableModel.setViewedMemoryBank(((MemoryBank) memoryBankComboBoxModel.getSelectedItem()).bankIndex);
   }//GEN-LAST:event_memoryBankComboBoxActionPerformed
 
   private void executionTrackingComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executionTrackingComboBoxActionPerformed
-    executionTracking = (ExecutionTracking) executionTrackingComboBoxModel.getSelectedItem();
+    trackingPolicy = (TrackingPolicy) executionTrackingComboBoxModel.getSelectedItem();
   }//GEN-LAST:event_executionTrackingComboBoxActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JComboBox executionTrackingComboBox;
-  private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JTable jTable1;
   private javax.swing.JComboBox memoryBankComboBox;
+  private javax.swing.JScrollPane scrollPane;
+  private javax.swing.JTable table;
   // End of variables declaration//GEN-END:variables
   /**
    * Gets default instance. Do not use directly: reserved for *.settings files only,

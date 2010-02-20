@@ -65,7 +65,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
         <configuration>
           <!-- to have the jar plugin pickup the nbm generated manifest -->
           <useDefaultManifestFile>true</useDefaultManifestFile>

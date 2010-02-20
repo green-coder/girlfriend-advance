@@ -7,8 +7,48 @@
         <attr name="position" stringvalue="100"/>
       </file>
     </folder>
-    <folder name="Window">
-      <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+    <folder name="Gfa">
+      <folder name="Run">
+        <file name="com-lemoulinstudio-gfa-nb-action-run-ResetAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Resetable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.ResetAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_ResetAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/reset16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-RunAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Runnable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.RunAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_RunAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/run16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-StepAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Steppable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StepAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StepAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/step16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-StopAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Stoppable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StopAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StopAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/stop16.png"/>
+        </file>
+      </folder>
+      <folder name="Window">
+        <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+      </folder>
     </folder>
   </folder>
   <folder name="Loaders">
@@ -76,12 +116,43 @@
     </folder>
   </folder>
   <folder name="Menu">
+    <folder name="GfaRun">
+      <attr name="position" intvalue="900"/>
+      <file name="ResetAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-ResetAction.instance"/>
+      </file>
+      <file name="RunAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+      </file>
+      <file name="StepAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+      </file>
+      <file name="StopAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StopAction.instance"/>
+      </file>
+    </folder>
     <folder name="Window">
       <folder name="Girlfriend Advance">
         <file name="DisassemblerAction.shadow">
-          <attr name="originalFile" stringvalue="Actions/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+          <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
         </file>
       </folder>
+    </folder>
+  </folder>
+  <folder name="Toolbars">
+    <folder name="GfaRun">
+      <file name="ResetAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-ResetAction.instance"/>
+      </file>
+      <file name="RunAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+      </file>
+      <file name="StepAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+      </file>
+      <file name="StopAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StopAction.instance"/>
+      </file>
     </folder>
   </folder>
   <folder name="Services">
