@@ -115,8 +115,17 @@ public class SmartProxyLookup extends Lookup {
 
   @Override
   public <T> Result<T> lookup(Template<T> template) {
-    ProxyResult<T> proxyResult = new ProxyResult<T>(template, delegateLookup);
-    templateToProxyResult.put(template, new WeakReference<ProxyResult<?>>(proxyResult));
+    Reference<ProxyResult<?>> proxyResultRef = templateToProxyResult.get(template);
+
+    ProxyResult<T> proxyResult = null;
+    if (proxyResultRef != null)
+      proxyResult = (ProxyResult<T>) proxyResultRef.get();
+
+    if (proxyResult == null) {
+      proxyResult = new ProxyResult<T>(template, delegateLookup);
+      templateToProxyResult.put(template, new WeakReference<ProxyResult<?>>(proxyResult));
+    }
+    
     return proxyResult;
   }
 
