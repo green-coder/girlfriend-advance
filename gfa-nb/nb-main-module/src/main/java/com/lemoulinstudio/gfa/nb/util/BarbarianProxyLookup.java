@@ -10,7 +10,7 @@ import org.openide.util.lookup.InstanceContent;
  * Naive implementation of a proxy look up. At least, this one works fine
  * in all the situations that I tested it for.
  *
- * @author vincent
+ * @author Vincent Cantin
  */
 public class BarbarianProxyLookup extends AbstractLookup {
 

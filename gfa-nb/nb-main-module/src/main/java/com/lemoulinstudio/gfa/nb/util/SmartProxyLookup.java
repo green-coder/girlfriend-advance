@@ -12,6 +12,10 @@ import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 
 /**
+ * This is my implementation of a Lookup which proxies 1 lookup at a time.
+ *
+ * It doesn't suffer the design flows and the bugs of the ones provided by
+ * the NetBeans platform 11.
  *
  * @author Vincent Cantin
  */
