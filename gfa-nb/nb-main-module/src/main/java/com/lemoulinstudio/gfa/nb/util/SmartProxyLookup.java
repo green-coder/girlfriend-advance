@@ -2,8 +2,8 @@ package com.lemoulinstudio.gfa.nb.util;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -20,7 +20,7 @@ public class SmartProxyLookup extends Lookup {
   private static class ProxyResult<T> extends Result<T> implements LookupListener {
 
     private Template<T> template;
-    private Set<LookupListener> listenerSet;
+    private Collection<LookupListener> listeners;
     private Result<T> delegateResult;
 
     public ProxyResult(Template<T> template, Lookup delegateLookup) {
@@ -49,24 +49,24 @@ public class SmartProxyLookup extends Lookup {
       fireResultChanged();
     }
 
-    private void fireResultChanged() {
+    private synchronized void fireResultChanged() {
       LookupEvent event = new LookupEvent(this);
-      for (LookupListener listener : listenerSet)
+      for (LookupListener listener : listeners)
         listener.resultChanged(event);
     }
 
     @Override
-    public void addLookupListener(LookupListener listener) {
-      if (listenerSet == null)
-        listenerSet = new HashSet<LookupListener>();
+    public synchronized void addLookupListener(LookupListener listener) {
+      if (listeners == null)
+        listeners = new ArrayList<LookupListener>();
       
-      listenerSet.add(listener);
+      listeners.add(listener);
     }
 
     @Override
-    public void removeLookupListener(LookupListener listener) {
-      if (listenerSet != null)
-        listenerSet.remove(listener);
+    public synchronized void removeLookupListener(LookupListener listener) {
+      if (listeners != null)
+        listeners.remove(listener);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class SmartProxyLookup extends Lookup {
     return delegateLookup;
   }
 
-  public void setDelegateLookup(Lookup delegateLookup) {
+  public synchronized void setDelegateLookup(Lookup delegateLookup) {
     this.delegateLookup = delegateLookup;
 
     for (Reference<ProxyResult<?>> proxyResultRef : templateToProxyResult.values()) {
@@ -114,7 +114,7 @@ public class SmartProxyLookup extends Lookup {
   }
 
   @Override
-  public <T> Result<T> lookup(Template<T> template) {
+  public synchronized <T> Result<T> lookup(Template<T> template) {
     Reference<ProxyResult<?>> proxyResultRef = templateToProxyResult.get(template);
 
     ProxyResult<T> proxyResult = null;
