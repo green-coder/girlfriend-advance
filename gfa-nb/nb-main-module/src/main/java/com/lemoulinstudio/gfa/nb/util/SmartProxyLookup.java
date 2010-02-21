@@ -70,8 +70,9 @@ public class SmartProxyLookup extends Lookup {
 
     private synchronized void fireResultChanged() {
       LookupEvent event = new LookupEvent(this);
-      for (LookupListener listener : listeners)
-        listener.resultChanged(event);
+      if (listeners != null)
+        for (LookupListener listener : new ArrayList<LookupListener>(listeners))
+          listener.resultChanged(event);
     }
 
     @Override
