@@ -10,24 +10,19 @@ public class Arm7TdmiGen2 extends Arm7Tdmi {
     super();
   }
 
+  @Override
   public void connectToMemory(MemoryInterface memory) {
     super.connectToMemory(memory);
     decoder = new InstructionDecoder(allRegisters, memory);
   }
   
-  public String disassembleArmInstruction(int offset) {
-    return decoder.decodeArmInstruction(memory.directLoadWord(offset)).disassemble(offset);
+  @Override
+  public String disassembleInstruction(int offset, ExecutionState executionState) {
+    if (executionState == ExecutionState.Thumb)
+      return decoder.decodeThumbInstruction(memory.directLoadHalfWord(offset)).disassemble(offset);
+    else
+      return decoder.decodeArmInstruction(memory.directLoadWord(offset)).disassemble(offset);
   }
-
-  public String disassembleThumbInstruction(int offset) {
-    return decoder.decodeThumbInstruction(memory.directLoadHalfWord(offset)).disassemble(offset);
-  }
-
-  /*
-  protected ArmReg newArmReg(int v) {
-    return new ArmRegObserver(new ArmReg(v));
-  }
-  */
   
   public void step() {
     int instructionTime;
@@ -50,17 +45,25 @@ public class Arm7TdmiGen2 extends Arm7Tdmi {
       //stopPlease();
     }
     
-    else if (isInThumbState()) {
-      short opcode = memory.directLoadHalfWord(PC.get());
-      PC.add(2); // add the size of a halfword.
-      decoder.decodeThumbInstruction(opcode).execute();
-      instructionTime = 2; // inaccurate
-    }
     else {
-      int opcode = memory.directLoadWord(PC.get());
-      PC.add(4); // add the size of a word.
-      decoder.decodeArmInstruction(opcode).execute();
-      instructionTime = 4; // inaccurate
+      ExecutionState executionState = getExecutionState();
+      
+      if (executionState == ExecutionState.Thumb) {
+        short opcode = memory.directLoadHalfWord(PC.get());
+        PC.add(executionState.getInstructionSize());
+        decoder.decodeThumbInstruction(opcode).execute();
+
+        // Todo: Fix this arbitrary number.
+        instructionTime = 2;
+      }
+      else {
+        int opcode = memory.directLoadWord(PC.get());
+        PC.add(executionState.getInstructionSize());
+        decoder.decodeArmInstruction(opcode).execute();
+        
+        // Todo: Fix this arbitrary number.
+        instructionTime = 4;
+      }
     }
 
     time.addTime(instructionTime);

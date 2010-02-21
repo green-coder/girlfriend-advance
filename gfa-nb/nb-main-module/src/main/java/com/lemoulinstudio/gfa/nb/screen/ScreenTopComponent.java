@@ -1,10 +1,12 @@
 package com.lemoulinstudio.gfa.nb.screen;
 
+import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataNode;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 
 /**
@@ -27,7 +29,7 @@ public abstract class ScreenTopComponent extends TopComponent {
 
     dataObject.addPropertyChangeListener(propertyChangeListener);
 
-    associateLookup(dataObject.getLookup());
+    associateLookup(GfaContext.getLookup());
 
     setName(dataObject.getName());
     setIcon(ImageUtilities.loadImage(RomDataNode.IMAGE_ICON_BASE, true));
@@ -50,8 +52,18 @@ public abstract class ScreenTopComponent extends TopComponent {
   }
 
   @Override
+  protected void componentActivated() {
+    GfaContext.setDelegateLookup(getDataObject().getLookup());
+  }
+
+  @Override
   protected void componentClosed() {
+    if (GfaContext.getDelegateLookup() == dataObject.getLookup())
+      GfaContext.setDelegateLookup(Lookup.EMPTY);
+
     dataObject.removePropertyChangeListener(propertyChangeListener);
+
+    getDataObject().releaseResources();
   }
 
 }

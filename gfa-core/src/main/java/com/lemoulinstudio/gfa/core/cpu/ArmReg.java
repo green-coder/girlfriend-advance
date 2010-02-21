@@ -55,6 +55,7 @@ public class ArmReg
     return ((get() & bitMask) != 0);
   }
 
+  @Override
   public String toString() {
     return Hex.toString(get());
   }

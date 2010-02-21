@@ -133,6 +133,7 @@
     </folder>
     <folder name="Window">
       <folder name="Girlfriend Advance">
+        <attr name="position" intvalue="1000"/>
         <file name="DisassemblerAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
         </file>

@@ -1,6 +1,7 @@
 package com.lemoulinstudio.gfa.jse.ui;
 
 import com.lemoulinstudio.gfa.core.GfaDevice;
+import com.lemoulinstudio.gfa.core.cpu.ExecutionState;
 import com.lemoulinstudio.gfa.core.util.Hex;
 
 public class DisassemblerTableModel extends InternationalTableModel
@@ -87,7 +88,7 @@ public class DisassemblerTableModel extends InternationalTableModel
 
         // The disassembled instruction
         case 2:
-          if (enabled) return gfa.getCpu().disassembleArmInstruction(address);
+          if (enabled) return gfa.getCpu().disassembleInstruction(address, gfa.getCpu().getExecutionState());
           else return "---";
 
         default: return null;
@@ -107,7 +108,7 @@ public class DisassemblerTableModel extends InternationalTableModel
           
         // The disassembled instruction
         case 2:
-          if (enabled) return gfa.getCpu().disassembleThumbInstruction(address);
+          if (enabled) return gfa.getCpu().disassembleInstruction(address, gfa.getCpu().getExecutionState());
           else return "---";
         
         default: return null;
@@ -116,7 +117,7 @@ public class DisassemblerTableModel extends InternationalTableModel
   }
 
   public void gfaStateChanged() {
-    boolean newArmState = gfa.getCpu().isInArmState();
+    boolean newArmState = gfa.getCpu().getExecutionState() == ExecutionState.Arm;
     if (armState != newArmState) {
       armState = newArmState;
       fireTableDataChanged();

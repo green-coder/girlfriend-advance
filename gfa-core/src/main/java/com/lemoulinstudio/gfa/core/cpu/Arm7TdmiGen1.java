@@ -24,11 +24,6 @@ public class Arm7TdmiGen1 extends Arm7Tdmi {
     return (CPSR.get() & modeBitsMask);
   }
 
-  public int currentInstructionSize() {
-    if (isInThumbState()) return 2;
-    else return 4;
-  }
-
   public void step() {
     int instructionTime;
 
@@ -45,20 +40,26 @@ public class Arm7TdmiGen1 extends Arm7Tdmi {
       instructionTime = 4;    // inaccurate
     }
     
-    else if (isInThumbState()) {
-      short halfWord = memory.loadHalfWord(PC.get());
-      PC.add(currentInstructionSize());
-      decodeThumbStateInstruction(halfWord);
-      
-      instructionTime = 2;
-    }
     else {
-      int word = memory.loadWord(PC.get());
-      PC.add(currentInstructionSize());
-      if (decodeArmStateCondition(word))
-        decodeArmStateInstruction(word);
+      ExecutionState executionState = getExecutionState();
       
-      instructionTime = 4;
+      if (executionState == ExecutionState.Thumb) {
+        short halfWord = memory.loadHalfWord(PC.get());
+        PC.add(executionState.getInstructionSize());
+        decodeThumbStateInstruction(halfWord);
+
+        // Todo: Fix this arbitrary number.
+        instructionTime = 2;
+      }
+      else {
+        int word = memory.loadWord(PC.get());
+        PC.add(executionState.getInstructionSize());
+        if (decodeArmStateCondition(word))
+          decodeArmStateInstruction(word);
+
+        // Todo: Fix this arbitrary number.
+        instructionTime = 4;
+      }
     }
 
     time.addTime(instructionTime);

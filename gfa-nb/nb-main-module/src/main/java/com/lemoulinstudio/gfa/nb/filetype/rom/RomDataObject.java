@@ -170,10 +170,10 @@ public class RomDataObject extends MultiDataObject {
     return gfaDevice;
   }
 
-  public void releaseResources() {
+  public synchronized void releaseResources() {
     // Stop the device if needed.
     if (getGfaDeviceState() == GfaDeviceState.Running)
-      setGfaDeviceState(GfaDeviceState.Stopped);
+      stoppable.stop();
 
     // Set state to undefined, so that no unwanted cookies are left in the lookup.
     setGfaDeviceState(GfaDeviceState.Undefined);

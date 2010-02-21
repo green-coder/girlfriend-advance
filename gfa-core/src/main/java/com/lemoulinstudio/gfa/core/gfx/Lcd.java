@@ -10,6 +10,7 @@ import java.awt.image.ImageProducer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Lcd implements ImageProducer {
 
@@ -28,7 +29,7 @@ public class Lcd implements ImageProducer {
   public Lcd() {
     rawPixels = new int[xScreenSize * yScreenSize];
     model = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff);
-    consumerList = new ArrayList<ImageConsumer>();
+    consumerList = new CopyOnWriteArrayList<ImageConsumer>();
   }
 
   public void addConsumer(ImageConsumer ic) {
@@ -38,7 +39,7 @@ public class Lcd implements ImageProducer {
 		ic.SINGLEPASS |
 		ic.SINGLEFRAME);
     ic.setColorModel(model);
-    synchronized (consumerList) {consumerList.add(ic);}
+    consumerList.add(ic);
   }
 
   public boolean isConsumer(ImageConsumer ic) {
@@ -46,7 +47,7 @@ public class Lcd implements ImageProducer {
   }
 
   public void removeConsumer(ImageConsumer ic) {
-    synchronized (consumerList) {consumerList.remove(ic);}
+    consumerList.remove(ic);
   }
 
   public void startProduction(ImageConsumer ic) {
@@ -60,10 +61,8 @@ public class Lcd implements ImageProducer {
   }
 
   public void updatePixels() {
-    synchronized (consumerList) {
-      for (ImageConsumer ic : consumerList)
-        requestTopDownLeftRightResend(ic);
-    }
+    for (ImageConsumer ic : consumerList)
+      requestTopDownLeftRightResend(ic);
   }
 
   public void connectToMemory(GfaMMU memory) {

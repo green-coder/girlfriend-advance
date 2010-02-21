@@ -193,11 +193,7 @@ public abstract class Arm7Tdmi implements Runnable {
     return time;
   }
 
-  public String disassembleArmInstruction(int offset) {
-    return "";
-  }
-
-  public String disassembleThumbInstruction(int offset) {
+  public String disassembleInstruction(int offset, ExecutionState executionState) {
     return "";
   }
 
@@ -205,17 +201,8 @@ public abstract class Arm7Tdmi implements Runnable {
     return allRegisters;
   }
 
-  public boolean isInThumbState() {
-    return CPSR.isBitSet(tFlagBit);
-  }
-
-  public boolean isInArmState() {
-    return !CPSR.isBitSet(tFlagBit);
-  }
-
-  public int currentInstructionSize() {
-    if (isInThumbState()) return 2;
-    else return 4;
+  public ExecutionState getExecutionState() {
+    return (CPSR.isBitSet(tFlagBit) ? ExecutionState.Thumb : ExecutionState.Arm);
   }
 
   public ArmReg getRegister(int registerNumber) {
@@ -272,7 +259,7 @@ public abstract class Arm7Tdmi implements Runnable {
     //*/
   }
 
-  abstract public void step();
+  public abstract void step();
 
   public void breakpoint(int offset) {
     stopPolitelyRequested = false;
@@ -282,7 +269,7 @@ public abstract class Arm7Tdmi implements Runnable {
   }
 
   public void stepOver() {
-    breakpoint(PC.get() + currentInstructionSize());
+    breakpoint(PC.get() + getExecutionState().getInstructionSize());
   }
 
   private boolean stopPolitelyRequested;

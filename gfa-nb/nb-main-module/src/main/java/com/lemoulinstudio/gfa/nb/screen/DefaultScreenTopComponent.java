@@ -2,11 +2,9 @@ package com.lemoulinstudio.gfa.nb.screen;
 
 import com.lemoulinstudio.gfa.core.gfx.GfaScreen;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
-import com.lemoulinstudio.gfa.nb.GfaContext;
-import org.openide.util.Lookup;
 
 /**
- * Top component which displays something.
+ * Top component which displays the screen of the gfa device.
  */
 public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
@@ -35,30 +33,5 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   // End of variables declaration//GEN-END:variables
-
-  @Override
-  public void componentOpened() {
-  }
-
-  @Override
-  protected void componentActivated() {
-    super.componentActivated();
-    
-    GfaContext.setDelegateLookup(getLookup());
-  }
-
-  @Override
-  protected void componentDeactivated() {
-  }
-
-  @Override
-  public void componentClosed() {
-    super.componentClosed();
-    
-    if (GfaContext.getDelegateLookup() == getLookup())
-      GfaContext.setDelegateLookup(Lookup.EMPTY);
-    
-    getDataObject().releaseResources();
-  }
 
 }
