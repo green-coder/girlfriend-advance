@@ -35,8 +35,6 @@ public final class DisassemblerTopComponent extends TopComponent {
   private Lookup.Result stoppedStateResult;
 
   private DisassemblerTopComponent() {
-    associateLookup(GfaContext.getLookup());
-
     executionStateComboBoxModel = new DefaultComboBoxModel(ExecutionState.values());
     memoryBankComboBoxModel = new DefaultComboBoxModel(MemoryBank.values());
     programTrackingComboBoxModel = new DefaultComboBoxModel(ProgramTrackingPolicy.values());
@@ -58,6 +56,11 @@ public final class DisassemblerTopComponent extends TopComponent {
       }
     });
     onEvent(GfaContext.getLookup().lookup(StoppedState.class));
+  }
+
+  @Override
+  public Lookup getLookup() {
+    return GfaContext.getLookup();
   }
 
   private void onEvent(StoppedState stoppedState) {

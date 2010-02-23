@@ -29,8 +29,6 @@ public abstract class ScreenTopComponent extends TopComponent {
 
     dataObject.addPropertyChangeListener(propertyChangeListener);
 
-    associateLookup(GfaContext.getLookup());
-
     setName(dataObject.getName());
     setIcon(ImageUtilities.loadImage(RomDataNode.IMAGE_ICON_BASE, true));
   }
@@ -49,6 +47,11 @@ public abstract class ScreenTopComponent extends TopComponent {
   @Override
   protected String preferredID() {
     return PREFERRED_ID;
+  }
+
+  @Override
+  public Lookup getLookup() {
+    return GfaContext.getLookup();
   }
 
   @Override

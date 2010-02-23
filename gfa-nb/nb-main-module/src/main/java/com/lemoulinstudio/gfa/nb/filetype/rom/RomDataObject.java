@@ -162,6 +162,7 @@ public class RomDataObject extends MultiDataObject {
       // Load the rom.
       try {gfaDevice.getMemory().loadRom(getPrimaryFile().getInputStream());}
       catch (FileNotFoundException e) {}
+      catch (OutOfMemoryError oome) {} // tmp fix
 
       // Set the state of the device.
       setGfaDeviceState(GfaDeviceState.Stopped);
