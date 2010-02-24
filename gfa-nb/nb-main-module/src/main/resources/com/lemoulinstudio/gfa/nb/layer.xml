@@ -47,6 +47,7 @@
         </file>
       </folder>
       <folder name="Window">
+        <file name="com-lemoulinstudio-gfa-nb-cpureg-CpuRegistersAction.instance"/>
         <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
       </folder>
     </folder>
@@ -134,6 +135,9 @@
     <folder name="Window">
       <folder name="Girlfriend Advance">
         <attr name="position" intvalue="1000"/>
+        <file name="CpuRegistersAction.shadow">
+          <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-cpureg-CpuRegistersAction.instance"/>
+        </file>
         <file name="DisassemblerAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
         </file>
@@ -175,9 +179,13 @@
   </folder>
   <folder name="Windows2">
     <folder name="Components">
+      <file name="CpuRegistersTopComponent.settings" url="CpuRegistersTopComponentSettings.xml"/>
       <file name="DisassemblerTopComponent.settings" url="DisassemblerTopComponentSettings.xml"/>
     </folder>
     <folder name="Modes">
+      <folder name="commonpalette">
+        <file name="CpuRegistersTopComponent.wstcref" url="CpuRegistersTopComponentWstcref.xml"/>
+      </folder>
       <folder name="output">
         <file name="DisassemblerTopComponent.wstcref" url="DisassemblerTopComponentWstcref.xml"/>
       </folder>

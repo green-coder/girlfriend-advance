@@ -221,6 +221,19 @@ public abstract class Arm7Tdmi implements Runnable {
     CPSR.setOn(tFlagBit);
   }
 
+  public String getModeName() {
+    switch (CPSR.get() & modeBitsMask) {
+      case usrModeBits: return "usr";
+      case fiqModeBits: return "fiq";
+      case irqModeBits: return "irq";
+      case svcModeBits: return "svc";
+      case abtModeBits: return "abt";
+      case undModeBits: return "und";
+      case sysModeBits: return "sys";
+      default : return "???";
+    }
+  }
+
   protected void setMode(int modeBits) {
     if (modeBits == usrModeBits) currentRegisters = usrRegisters;
     else if (modeBits == fiqModeBits) currentRegisters = fiqRegisters;
