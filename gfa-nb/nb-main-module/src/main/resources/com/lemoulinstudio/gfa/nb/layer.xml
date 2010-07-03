@@ -183,7 +183,7 @@
       <file name="DisassemblerTopComponent.settings" url="DisassemblerTopComponentSettings.xml"/>
     </folder>
     <folder name="Modes">
-      <folder name="commonpalette">
+      <folder name="properties">
         <file name="CpuRegistersTopComponent.wstcref" url="CpuRegistersTopComponentWstcref.xml"/>
       </folder>
       <folder name="output">

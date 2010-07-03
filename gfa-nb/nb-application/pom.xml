@@ -25,14 +25,14 @@
     <dependency>
       <groupId>com.lemoulinstudio.gfa</groupId>
       <artifactId>nb-main-module</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>nbm</type>
     </dependency>
 
     <dependency>
       <groupId>com.lemoulinstudio.gfa</groupId>
       <artifactId>nb-branding</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>nbm</type>
     </dependency>
   </dependencies>

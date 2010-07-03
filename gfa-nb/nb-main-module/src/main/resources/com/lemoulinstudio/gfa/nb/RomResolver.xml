@@ -5,6 +5,6 @@
     <ext name="gba"/>
     <ext name="agb"/>
     <ext name="bin"/>
-   <resolver mime="bin/x-gba"/>
+    <resolver mime="bin/x-gba"/>
   </file>
 </MIME-resolver>
