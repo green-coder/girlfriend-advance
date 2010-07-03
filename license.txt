@@ -1,3 +1,4 @@
+This is the license of the Girlfriend Advance emulator.
 Copyright (c) 2010, Vincent Cantin (vincent.cantin<at>le-moulin-studio.com)
 All rights reserved.
 
