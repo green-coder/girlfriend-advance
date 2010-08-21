@@ -12,6 +12,10 @@ syntax: glob
 # No text backups in the repository.
 *~
 
+# No personal stuffs in the repository.
+doc/*
+img/*
+
 syntax: regexp
 
 \.orig$
