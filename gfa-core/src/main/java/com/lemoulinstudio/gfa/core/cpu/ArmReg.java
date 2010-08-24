@@ -1,9 +1,7 @@
 package com.lemoulinstudio.gfa.core.cpu;
 
-import com.lemoulinstudio.gfa.core.util.Hex;
+public class ArmReg {
 
-public class ArmReg
-{
   protected int val;
 
   public ArmReg(int v) {
@@ -57,7 +55,7 @@ public class ArmReg
 
   @Override
   public String toString() {
-    return Hex.toString(get());
+    return Integer.toHexString(get());
   }
 
   // Code adapted from the elogba emu (from eloist) : from the file opcodes.c

@@ -2,8 +2,6 @@ package com.lemoulinstudio.gfa.core.input;
 
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
-import java.util.EnumMap;
-import java.util.EnumSet;
 
 /**
  *

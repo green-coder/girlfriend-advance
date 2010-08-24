@@ -1,5 +1,6 @@
 package com.lemoulinstudio.gfa.core.util;
 
+@Deprecated
 public class Hex {
 
   protected final static char[] digits = {

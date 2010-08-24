@@ -7,7 +7,6 @@ import com.lemoulinstudio.gfa.core.memory.ObjectAttributMemory_16_32;
 import java.awt.image.DirectColorModel;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

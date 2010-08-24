@@ -221,4 +221,10 @@ public class GfaMMU implements MemoryInterface {
     return ((MemoryManagementUnit) memory[(offset & MemOffsetHiBitsMask) >>> 24]).getInternalOffset(offset) | (offset & MemOffsetHiBitsMask);
   }
 
+  public void addReadMemoryListener(ReadMemoryListener listener) {
+  }
+
+  public void addWriteMemoryListener(WriteMemoryListener listener) {
+  }
+
 }
