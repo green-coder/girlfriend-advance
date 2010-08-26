@@ -16,7 +16,7 @@ public abstract class ScmExpr {
     return childs;
   }
 
-  /* By default, we supposes that all signetons are constant. */
+  /* By default, we supposes that all singletons are constant. */
   public boolean isConstant() {
     for (int i = 0; i < childs.length; i++) {
       if (!childs[i].isConstant()) {

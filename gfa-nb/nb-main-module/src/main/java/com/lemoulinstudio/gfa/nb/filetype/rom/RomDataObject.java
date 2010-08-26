@@ -1,6 +1,8 @@
 package com.lemoulinstudio.gfa.nb.filetype.rom;
 
+import com.lemoulinstudio.gfa.analysis.ParseException;
 import com.lemoulinstudio.gfa.core.GfaDevice;
+import com.lemoulinstudio.gfa.core.cpu.CpuStopListener;
 import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponent;
 import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponentFactory;
 import java.io.FileNotFoundException;
@@ -44,28 +46,103 @@ public class RomDataObject extends MultiDataObject {
 
   public class Runnable implements Node.Cookie {
     public void run() {
-      cpuThread = new Thread(getGfaDevice().getCpu());
-      cpuThread.start();
+      cpuThread = new Thread(new java.lang.Runnable() {
+        @Override
+        public void run() {
+          getGfaDevice().getCpu().run();
+        }
+      });
       setGfaDeviceState(GfaDeviceState.Running);
+      cpuThread.start();
     }
   }
 
   public class Steppable implements Node.Cookie {
     public void step() {
-      getGfaDevice().getCpu().step();
       setGfaDeviceState(GfaDeviceState.Undefined);
+      getGfaDevice().getCpu().step();
       setGfaDeviceState(GfaDeviceState.Stopped);
+    }
+  }
+
+  public class StepBackable implements Node.Cookie {
+    public void stepBack() {
+      try {
+        // Set a breakpoint.
+        getGfaDevice().getCpu().addCpuStepListener(breakpoint);
+
+        // Set its condition.
+        breakpoint.setCondition(String.format("(> (time) %d)",
+                getGfaDevice().getTime().getTime() - 8));
+        //breakpoint.setCondition("(and (> pc 33554431) (< pc 50331648))");
+
+        // Reset
+        setGfaDeviceState(GfaDeviceState.Undefined);
+        getGfaDevice().reset();
+
+        // Run
+        cpuThread = new Thread(new java.lang.Runnable() {
+          @Override
+          public void run() {
+            getGfaDevice().getCpu().run();
+          }
+        });
+        setGfaDeviceState(GfaDeviceState.Running);
+        cpuThread.start();
+      }
+      catch (ParseException ex) {
+        Exceptions.printStackTrace(ex);
+      }
+    }
+  }
+
+  public class Debuggable implements Node.Cookie {
+    public void debug() {
+      try {
+        // Set a breakpoint.
+        getGfaDevice().getCpu().addCpuStepListener(breakpoint);
+
+        // Set its condition.
+        breakpoint.setCondition("(> (time) 8062230)");
+
+        // Reset
+        setGfaDeviceState(GfaDeviceState.Undefined);
+        getGfaDevice().reset();
+
+        // Run
+        cpuThread = new Thread(new java.lang.Runnable() {
+          @Override
+          public void run() {
+            getGfaDevice().getCpu().run();
+          }
+        });
+        setGfaDeviceState(GfaDeviceState.Running);
+        cpuThread.start();
+      }
+      catch (ParseException ex) {
+        Exceptions.printStackTrace(ex);
+      }
+    }
+  }
+
+  public class DebugBackable implements Node.Cookie {
+    public void debugBack() {
     }
   }
 
   public class Stoppable implements Node.Cookie {
     public void stop() {
-      getGfaDevice().getCpu().stopPlease();
-      try {
-        cpuThread.join();
-        cpuThread = null;
-      }
-      catch (InterruptedException ex) {Exceptions.printStackTrace(ex);}
+      getGfaDevice().getCpu().requestStop();
+    }
+  }
+
+  private class MyCpuStoppedListener implements CpuStopListener {
+    public void notifyCpuStopped() {
+      cpuThread = null;
+      
+      // Make sure that we remove the breakpoint.
+      getGfaDevice().getCpu().removeCpuStepListener(breakpoint);
+
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
   }
@@ -83,9 +160,12 @@ public class RomDataObject extends MultiDataObject {
   }
 
   private Resetable resetable = new Resetable();
-  private Runnable runnable = new Runnable();
-  private Steppable steppable = new Steppable();
+  private DebugBackable debugBackable = new DebugBackable();
+  private StepBackable stepBackable = new StepBackable();
   private Stoppable stoppable = new Stoppable();
+  private Steppable steppable = new Steppable();
+  private Debuggable debuggable = new Debuggable();
+  private Runnable runnable = new Runnable();
   private StoppedState stoppedState = new StoppedState();
 
   private GfaDeviceState gfaDeviceState = GfaDeviceState.Undefined;
@@ -102,7 +182,7 @@ public class RomDataObject extends MultiDataObject {
     cookies.add(new OpenSupport());
 
     stateToCookies.put(GfaDeviceState.Undefined, Collections.<Node.Cookie>emptyList());
-    stateToCookies.put(GfaDeviceState.Stopped, Arrays.<Node.Cookie>asList(stoppedState, resetable, runnable, steppable));
+    stateToCookies.put(GfaDeviceState.Stopped, Arrays.<Node.Cookie>asList(stoppedState, resetable, debugBackable, stepBackable, steppable, debuggable, runnable));
     stateToCookies.put(GfaDeviceState.Running, Arrays.<Node.Cookie>asList(resetable, stoppable));
   }
 
@@ -150,11 +230,23 @@ public class RomDataObject extends MultiDataObject {
   }
 
   private GfaDevice gfaDevice;
+  private CpuStopListener cpuStopListener;
+  private Breakpoint breakpoint;
 
-  public synchronized GfaDevice getGfaDevice() {
+  private synchronized void ensureDeviceCreated() {
     if (gfaDevice == null) {
       // Create the device.
       gfaDevice = new GfaDevice();
+
+      // Listen when it stops.
+      cpuStopListener = new MyCpuStoppedListener();
+      gfaDevice.getCpu().addCpuStopListener(cpuStopListener);
+
+      // Create a breakpoint.
+      breakpoint = new Breakpoint(gfaDevice);
+
+      // Create a cpu logguer.
+      gfaDevice.getCpu().addCpuStepListener(new CpuLogger(gfaDevice));
 
       // Load the bios.
       gfaDevice.getMemory().loadBios("roms/bios.gba");
@@ -167,8 +259,16 @@ public class RomDataObject extends MultiDataObject {
       // Set the state of the device.
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
-    
+  }
+
+  public GfaDevice getGfaDevice() {
+    ensureDeviceCreated();
     return gfaDevice;
+  }
+
+  public Breakpoint getBreakpoint() {
+    ensureDeviceCreated();
+    return breakpoint;
   }
 
   public synchronized void releaseResources() {
@@ -181,6 +281,8 @@ public class RomDataObject extends MultiDataObject {
 
     // Release the reference to the device.
     gfaDevice = null;
+    cpuStopListener = null;
+    breakpoint = null;
 
     // Release the reference to the top component.
     screenTopComponent = null;

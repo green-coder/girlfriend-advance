@@ -18,14 +18,32 @@
           <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_ResetAction"/>
           <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/reset16.png"/>
         </file>
-        <file name="com-lemoulinstudio-gfa-nb-action-run-RunAction.instance">
+        <file name="com-lemoulinstudio-gfa-nb-action-run-DebugBackAction.instance">
           <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
-          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Runnable"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$DebugBackable"/>
           <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
           <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
-          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.RunAction"/>
-          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_RunAction"/>
-          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/run16.png"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.DebugBackAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_DebugBackAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/debugBack16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-StepBackAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$StepBackable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StepBackAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StepBackAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/stepBack16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-StopAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Stoppable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StopAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StopAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/stop16.png"/>
         </file>
         <file name="com-lemoulinstudio-gfa-nb-action-run-StepAction.instance">
           <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
@@ -36,14 +54,23 @@
           <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StepAction"/>
           <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/step16.png"/>
         </file>
-        <file name="com-lemoulinstudio-gfa-nb-action-run-StopAction.instance">
+        <file name="com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance">
           <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
-          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Stoppable"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Debuggable"/>
           <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
           <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
-          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StopAction"/>
-          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StopAction"/>
-          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/stop16.png"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.DebugAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_DebugAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/debug16.png"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-RunAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Runnable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.RunAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_RunAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/run16.png"/>
         </file>
       </folder>
       <folder name="Window">
@@ -121,15 +148,31 @@
       <attr name="position" intvalue="900"/>
       <file name="ResetAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-ResetAction.instance"/>
+        <attr name="position" intvalue="10"/>
       </file>
-      <file name="RunAction.shadow">
-        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+      <file name="DebugBackAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugBackAction.instance"/>
+        <attr name="position" intvalue="15"/>
       </file>
-      <file name="StepAction.shadow">
-        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+      <file name="StepBackAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepBackAction.instance"/>
+        <attr name="position" intvalue="20"/>
       </file>
       <file name="StopAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StopAction.instance"/>
+        <attr name="position" intvalue="30"/>
+      </file>
+      <file name="StepAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+        <attr name="position" intvalue="40"/>
+      </file>
+      <file name="DebugAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance"/>
+        <attr name="position" intvalue="45"/>
+      </file>
+      <file name="RunAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+        <attr name="position" intvalue="50"/>
       </file>
     </folder>
     <folder name="Window">
@@ -148,15 +191,31 @@
     <folder name="GfaRun">
       <file name="ResetAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-ResetAction.instance"/>
+        <attr name="position" intvalue="10"/>
       </file>
-      <file name="RunAction.shadow">
-        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+      <file name="DebugBackAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugBackAction.instance"/>
+        <attr name="position" intvalue="15"/>
       </file>
-      <file name="StepAction.shadow">
-        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+      <file name="StepBackAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepBackAction.instance"/>
+        <attr name="position" intvalue="20"/>
       </file>
       <file name="StopAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StopAction.instance"/>
+        <attr name="position" intvalue="30"/>
+      </file>
+      <file name="StepAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
+        <attr name="position" intvalue="40"/>
+      </file>
+      <file name="DebugAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance"/>
+        <attr name="position" intvalue="45"/>
+      </file>
+      <file name="RunAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
+        <attr name="position" intvalue="50"/>
       </file>
     </folder>
   </folder>

@@ -18,6 +18,7 @@ public class IntTime extends IntExpr {
     return (int) t;
   }
 
+  @Override
   public boolean isConstant() {
     return false;
   }

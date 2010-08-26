@@ -3,8 +3,10 @@ package com.lemoulinstudio.gfa.core.cpu;
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.MemoryInterface;
 import com.lemoulinstudio.gfa.core.time.Time;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Arm7Tdmi implements Runnable {
+public abstract class Arm7Tdmi {
 
   protected GfaMMU memory;
   protected Time time;
@@ -65,15 +67,20 @@ public abstract class Arm7Tdmi implements Runnable {
   static final int REG_IF_Address  = 0x04000202;
   static final int REG_IME_Address = 0x04000208;
   
+  protected List<CpuStepListener> cpuStepListeners;
+  protected List<CpuStopListener> cpuStopListeners;
+
   public Arm7Tdmi() {
     initRegisters();
+    cpuStepListeners = new ArrayList<CpuStepListener>();
+    cpuStopListeners = new ArrayList<CpuStopListener>();
   }
 
   protected ArmReg newArmReg(int v) {
     return new ArmReg(v);
   }
   
-  protected void initRegisters() {
+  protected final void initRegisters() {
     usrRegisters = new ArmReg[18];
     fiqRegisters = new ArmReg[18];
     irqRegisters = new ArmReg[18];
@@ -246,6 +253,22 @@ public abstract class Arm7Tdmi implements Runnable {
 
     CPSR.set((CPSR.get() & ~modeBitsMask) | modeBits);
   }
+  
+  public void addCpuStepListener(CpuStepListener listener) {
+    cpuStepListeners.add(listener);
+  }
+
+  public void removeCpuStepListener(CpuStepListener listener) {
+    cpuStepListeners.remove(listener);
+  }
+
+  public void addCpuStopListener(CpuStopListener listener) {
+    cpuStopListeners.add(listener);
+  }
+
+  public void removeCpuStopListener(CpuStopListener listener) {
+    cpuStopListeners.remove(listener);
+  }
 
   public void reset() {
     // Set all registers to the zero value.
@@ -263,42 +286,61 @@ public abstract class Arm7Tdmi implements Runnable {
     PC.set(resetVectorAddress);
     
     /* The following lines are used to boot without running the bios. */
-    ///*
+    /*
     PC.set(0x08000000);      // pas ecrit dans la doc
     CPSR.setOff(iFlagBit | fFlagBit);
     getRegister(13, svcModeBits).set(0x03007fe0); // et ca non plus
     getRegister(13, sysModeBits).set(0x03007fe0); // et ca non plus
     getRegister(13, irqModeBits).set(0x03007fe0); // et ca non plus
-    //*/
+    */
   }
 
   public abstract void step();
 
-  public void breakpoint(int offset) {
-    stopPolitelyRequested = false;
-    do {
-      step();
-    } while ((PC.get() != offset) && !stopPolitelyRequested);
-  }
+//  public void breakpoint(int offset) {
+//    stopRequested = false;
+//    do {
+//      step();
+//    } while ((PC.get() != offset) && !stopRequested);
+//  }
+//
+//  public void stepOver() {
+//    breakpoint(PC.get() + getExecutionState().getInstructionSize());
+//  }
 
-  public void stepOver() {
-    breakpoint(PC.get() + getExecutionState().getInstructionSize());
-  }
-
-  private boolean stopPolitelyRequested;
+  private boolean stopRequested;
 
   public void run() {
-    stopPolitelyRequested = false;
-    while (!stopPolitelyRequested)
-      step();
+    stopRequested = false;
+
+    try {
+      if (cpuStepListeners.isEmpty()) {
+        while (!stopRequested)
+          step();
+      }
+      else {
+        List<CpuStepListener> cpuSteppedListenersCopy = new ArrayList<CpuStepListener>(cpuStepListeners);
+
+        while (!stopRequested) {
+          step();
+
+          for (CpuStepListener listener : cpuSteppedListenersCopy)
+            listener.notifyCpuStepped();
+        }
+      }
+    }
+    finally {
+      for (CpuStopListener listener : cpuStopListeners)
+        listener.notifyCpuStopped();
+    }
   }
   
-  public void stopPlease() {
-    stopPolitelyRequested = true;
+  public void requestStop() {
+    stopRequested = true;
   }
   
-  public boolean isStopPolitelyRequested() {
-    return stopPolitelyRequested;
+  public boolean isStopRequested() {
+    return stopRequested;
   }
 
 }

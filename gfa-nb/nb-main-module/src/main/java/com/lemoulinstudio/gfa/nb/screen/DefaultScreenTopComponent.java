@@ -17,7 +17,7 @@ public final class DefaultScreenTopComponent extends ScreenTopComponent {
 
     initComponents();
     
-    add(gfaScreen);
+    add(gfaScreen, "");
   }
 
   /** This method is called from within the constructor to
