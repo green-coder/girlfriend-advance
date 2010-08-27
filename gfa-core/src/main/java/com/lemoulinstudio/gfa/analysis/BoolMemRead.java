@@ -11,12 +11,13 @@ public abstract class BoolMemRead
   protected GfaMMU memory;
   protected boolean hasBeenRead;
 
-  public BoolMemRead(IntExpr off, GfaMMU mem) {
-    super(new ScmExpr[]{off});
-    memory = mem;
-    offset = off;
+  public BoolMemRead(IntExpr offset, GfaMMU memory) {
+    super(new ScmExpr[] {offset});
+    this.memory = memory;
+    this.offset = offset;
+    this.hasBeenRead = false;
+
     memory.addReadMemoryListener(this);
-    hasBeenRead = false;
   }
 
   public boolean evaluation() {

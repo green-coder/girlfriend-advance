@@ -1,24 +1,25 @@
 package com.lemoulinstudio.gfa.analysis;
 
-import com.lemoulinstudio.gfa.core.memory.MemoryInterface;
+import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 
 public class IntSMem16 extends IntExpr {
 
   final protected IntExpr offset;
-  final protected MemoryInterface mem;
+  final protected GfaMMU memory;
 
-  public IntSMem16(IntExpr offset, MemoryInterface mem) {
-    super(new ScmExpr[]{offset});
+  public IntSMem16(IntExpr offset, GfaMMU memory) {
+    super(new ScmExpr[] {offset});
     this.offset = offset;
-    this.mem = mem;
+    this.memory = memory;
   }
 
   public int evaluation() {
-    return mem.loadHalfWord(offset.evaluation());
+    return memory.directLoadHalfWord(offset.evaluation());
   }
 
   @Override
   public boolean isConstant() {
     return false;
   }
+
 }

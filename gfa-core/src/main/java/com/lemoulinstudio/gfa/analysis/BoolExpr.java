@@ -6,8 +6,8 @@ public abstract class BoolExpr extends ScmExpr {
     super();
   }
 
-  public BoolExpr(ScmExpr[] childs) {
-    super(childs);
+  public BoolExpr(ScmExpr[] children) {
+    super(children);
   }
 
   abstract public boolean evaluation();

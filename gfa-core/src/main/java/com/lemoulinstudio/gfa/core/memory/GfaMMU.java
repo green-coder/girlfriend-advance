@@ -9,12 +9,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class GfaMMU implements MemoryInterface {
 
   protected MemoryInterface[] memory;
+  private List<ReadMemoryListener> readMemoryListeners;
+  private List<WriteMemoryListener> writeMemoryListeners;
 
   public GfaMMU() {
     memory = new MemoryInterface[16];
@@ -35,6 +39,9 @@ public class GfaMMU implements MemoryInterface {
     memory[0x0d] = memory[0x09];
     memory[0x0e] = new MemoryManagementUnit_8("Cart RAM", 0x10000);
     memory[0x0f] = memory[0x0e];
+
+    readMemoryListeners = new ArrayList<ReadMemoryListener>();
+    writeMemoryListeners = new ArrayList<WriteMemoryListener>();
   }
 
   public void connectToTime(Time time) {
@@ -60,42 +67,89 @@ public class GfaMMU implements MemoryInterface {
   public void connectToLcd(Lcd lcd) {
     ((IORegisterSpace_8_16_32) memory[0x04]).connectToLcd(lcd);
   }
+
+  public void addReadMemoryListener(ReadMemoryListener listener) {
+    readMemoryListeners.add(listener);
+  }
+
+  public void addWriteMemoryListener(WriteMemoryListener listener) {
+    writeMemoryListeners.add(listener);
+  }
+
+  public void clearListeners() {
+    readMemoryListeners.clear();
+    writeMemoryListeners.clear();
+  }
+
   static final protected int MemOffsetHiBitsMask = 0x0f000000;
   static final protected int MemOffsetLoBitsMask = 0x00ffffff;
 
   public byte loadByte(int offset) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadByte(offset);
+    
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadByte(offset);
   }
 
   public short loadHalfWord(int offset) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadHalfWord(offset);
+
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadHalfWord(offset);
   }
 
   public int loadWord(int offset) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadWord(offset);
+
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].loadWord(offset);
   }
 
   public void storeByte(int offset, byte value) {
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeByte(offset, value);
+
     memory[(offset & MemOffsetHiBitsMask) >>> 24].storeByte(offset, value);
   }
 
   public void storeHalfWord(int offset, short value) {
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeHalfWord(offset, value);
+
     memory[(offset & MemOffsetHiBitsMask) >>> 24].storeHalfWord(offset, value);
   }
 
   public void storeWord(int offset, int value) {
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeWord(offset, value);
+
     memory[(offset & MemOffsetHiBitsMask) >>> 24].storeWord(offset, value);
   }
 
   public byte swapByte(int offset, byte value) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadByte(offset);
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeByte(offset, value);
+
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].swapByte(offset, value);
   }
 
   public short swapHalfWord(int offset, short value) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadHalfWord(offset);
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeHalfWord(offset, value);
+
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].swapHalfWord(offset, value);
   }
 
   public int swapWord(int offset, int value) {
+    for (ReadMemoryListener listener : readMemoryListeners)
+      listener.loadWord(offset);
+    for (WriteMemoryListener listener : writeMemoryListeners)
+      listener.storeWord(offset, value);
+
     return memory[(offset & MemOffsetHiBitsMask) >>> 24].swapWord(offset, value);
   }
 
@@ -219,12 +273,6 @@ public class GfaMMU implements MemoryInterface {
 
   public int getInternalOffset(int offset) {
     return ((MemoryManagementUnit) memory[(offset & MemOffsetHiBitsMask) >>> 24]).getInternalOffset(offset) | (offset & MemOffsetHiBitsMask);
-  }
-
-  public void addReadMemoryListener(ReadMemoryListener listener) {
-  }
-
-  public void addWriteMemoryListener(WriteMemoryListener listener) {
   }
 
 }

@@ -2,34 +2,32 @@ package com.lemoulinstudio.gfa.analysis;
 
 public abstract class ScmExpr {
 
-  protected ScmExpr[] childs;
+  protected ScmExpr[] children;
 
   public ScmExpr() {
-    this(new ScmExpr[0]);
+    this(new ScmExpr[] {});
   }
 
-  public ScmExpr(ScmExpr[] childs) {
-    this.childs = childs;
+  public ScmExpr(ScmExpr[] children) {
+    this.children = children;
   }
 
-  public ScmExpr[] getChilds() {
-    return childs;
+  public ScmExpr[] getChildren() {
+    return children;
   }
 
   /* By default, we supposes that all singletons are constant. */
   public boolean isConstant() {
-    for (int i = 0; i < childs.length; i++) {
-      if (!childs[i].isConstant()) {
+    for (ScmExpr child : children)
+      if (!child.isConstant())
         return false;
-      }
-    }
 
     return true;
   }
 
   public void clearStatus() {
-    for (int i = 0; i < childs.length; i++) {
-      childs[i].clearStatus();
-    }
+    for (ScmExpr child : children)
+      child.clearStatus();
   }
+  
 }

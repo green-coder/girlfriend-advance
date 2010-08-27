@@ -195,27 +195,31 @@
       </file>
       <file name="DebugBackAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugBackAction.instance"/>
-        <attr name="position" intvalue="15"/>
+        <attr name="position" intvalue="20"/>
       </file>
       <file name="StepBackAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepBackAction.instance"/>
-        <attr name="position" intvalue="20"/>
+        <attr name="position" intvalue="30"/>
       </file>
       <file name="StopAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StopAction.instance"/>
-        <attr name="position" intvalue="30"/>
+        <attr name="position" intvalue="40"/>
       </file>
       <file name="StepAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
-        <attr name="position" intvalue="40"/>
+        <attr name="position" intvalue="50"/>
       </file>
       <file name="DebugAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance"/>
-        <attr name="position" intvalue="45"/>
+        <attr name="position" intvalue="60"/>
       </file>
       <file name="RunAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-RunAction.instance"/>
-        <attr name="position" intvalue="50"/>
+        <attr name="position" intvalue="70"/>
+      </file>
+
+      <file name="com-lemoulinstudio-gfa-nb-action-run-BreakpointToolbarPresenter.instance">
+        <attr name="position" intvalue="80"/>
       </file>
     </folder>
   </folder>

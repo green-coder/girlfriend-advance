@@ -5,6 +5,7 @@ import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
 import java.awt.Color;
+import java.awt.Component;
 import javax.swing.JPanel;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -16,15 +17,21 @@ import org.openide.util.LookupListener;
  */
 public class BreakpointPanel extends JPanel {
 
+  private static BreakpointPanel instance = new BreakpointPanel();
+
+  public static BreakpointPanel getInstance() {
+    return instance;
+  }
+
   private RomDataObject dataObject;
   private Lookup.Result stoppedStateResult;
-  private final Color bgColor;
+  private final Color fgColor;
 
   /** Creates new form BreakpointPanel */
-  public BreakpointPanel() {
+  private BreakpointPanel() {
     initComponents();
 
-    bgColor = expressionTextField.getBackground();
+    fgColor = expressionTextField.getForeground();
 
     stoppedStateResult = GfaContext.getLookup().lookupResult(StoppedState.class);
     stoppedStateResult.addLookupListener(new LookupListener() {
@@ -36,8 +43,9 @@ public class BreakpointPanel extends JPanel {
   }
 
   private void onEvent(StoppedState stoppedState) {
-    if (stoppedState == null) {
+    if (stoppedState != null) {
       dataObject = stoppedState.getRomDataObject();
+      expressionTextField.setText(dataObject.getBreakpoint().getSourceCode());
       expressionTextField.setEnabled(true);
     }
     else {
@@ -85,11 +93,12 @@ public class BreakpointPanel extends JPanel {
 
   private void parseField() {
     try {
-      dataObject.getBreakpoint().setCondition(expressionTextField.getText());
-      expressionTextField.setForeground(bgColor);
+      dataObject.getBreakpoint().setCondition(expressionTextField.getText().trim());
+      expressionTextField.setForeground(fgColor);
+      expressionTextField.setToolTipText("Syntax ok");
     } catch (ParseException ex) {
       dataObject.getBreakpoint().clearCondition();
-      expressionTextField.setBackground(Color.RED.brighter().brighter());
+      expressionTextField.setForeground(Color.RED);
       expressionTextField.setToolTipText(ex.getMessage());
     }
   }

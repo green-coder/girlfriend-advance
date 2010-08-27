@@ -74,7 +74,6 @@ public class RomDataObject extends MultiDataObject {
         // Set its condition.
         breakpoint.setCondition(String.format("(> (time) %d)",
                 getGfaDevice().getTime().getTime() - 8));
-        //breakpoint.setCondition("(and (> pc 33554431) (< pc 50331648))");
 
         // Reset
         setGfaDeviceState(GfaDeviceState.Undefined);
@@ -98,30 +97,18 @@ public class RomDataObject extends MultiDataObject {
 
   public class Debuggable implements Node.Cookie {
     public void debug() {
-      try {
-        // Set a breakpoint.
-        getGfaDevice().getCpu().addCpuStepListener(breakpoint);
+      // Set a breakpoint.
+      getGfaDevice().getCpu().addCpuStepListener(breakpoint);
 
-        // Set its condition.
-        breakpoint.setCondition("(> (time) 8062230)");
-
-        // Reset
-        setGfaDeviceState(GfaDeviceState.Undefined);
-        getGfaDevice().reset();
-
-        // Run
-        cpuThread = new Thread(new java.lang.Runnable() {
-          @Override
-          public void run() {
-            getGfaDevice().getCpu().run();
-          }
-        });
-        setGfaDeviceState(GfaDeviceState.Running);
-        cpuThread.start();
-      }
-      catch (ParseException ex) {
-        Exceptions.printStackTrace(ex);
-      }
+      // Run
+      cpuThread = new Thread(new java.lang.Runnable() {
+        @Override
+        public void run() {
+          getGfaDevice().getCpu().run();
+        }
+      });
+      setGfaDeviceState(GfaDeviceState.Running);
+      cpuThread.start();
     }
   }
 
@@ -141,7 +128,9 @@ public class RomDataObject extends MultiDataObject {
       cpuThread = null;
       
       // Make sure that we remove the breakpoint.
-      getGfaDevice().getCpu().removeCpuStepListener(breakpoint);
+      GfaDevice device = getGfaDevice();
+      device.getCpu().removeCpuStepListener(breakpoint);
+      device.getMemory().clearListeners();
 
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
@@ -244,6 +233,10 @@ public class RomDataObject extends MultiDataObject {
 
       // Create a breakpoint.
       breakpoint = new Breakpoint(gfaDevice);
+
+      // Set its initial value.
+      try {breakpoint.setCondition("(> (time) 8062230)");}
+      catch (ParseException ex) {Exceptions.printStackTrace(ex);}
 
       // Create a cpu logguer.
       gfaDevice.getCpu().addCpuStepListener(new CpuLogger(gfaDevice));

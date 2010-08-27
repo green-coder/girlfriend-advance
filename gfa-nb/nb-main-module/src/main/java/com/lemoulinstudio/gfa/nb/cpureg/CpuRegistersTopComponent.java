@@ -60,7 +60,7 @@ final class CpuRegistersTopComponent extends TopComponent {
         r4TextField, r5TextField, r6TextField, r7TextField,
         r8TextField, r9TextField, r10TextField, r11TextField,
         r12TextField, r13TextField, r14TextField, r15TextField,
-        cpsrTextField, spsrTextField
+        cpsrTextField, spsrTextField, cpuTimeTextField
     };
 
     if (device == null) {
@@ -91,6 +91,8 @@ final class CpuRegistersTopComponent extends TopComponent {
       vCheckBox.setSelected((cpu.CPSR.get() & Arm7Tdmi.vFlagBit) != 0);
       iCheckBox.setSelected((cpu.CPSR.get() & Arm7Tdmi.iFlagBit) != 0);
       fCheckBox.setSelected((cpu.CPSR.get() & Arm7Tdmi.fFlagBit) != 0);
+
+      cpuTimeTextField.setText("" + cpu.getTime().getTime());
     }
   }
   
@@ -156,6 +158,8 @@ final class CpuRegistersTopComponent extends TopComponent {
     javax.swing.JLabel jLabel34 = new javax.swing.JLabel();
     fCheckBox = new javax.swing.JCheckBox();
     vCheckBox = new javax.swing.JCheckBox();
+    cpuTimeLabel = new javax.swing.JLabel();
+    cpuTimeTextField = new javax.swing.JTextField();
 
     org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(CpuRegistersTopComponent.class, "CpuRegistersTopComponent.jLabel1.text")); // NOI18N
 
@@ -218,6 +222,8 @@ final class CpuRegistersTopComponent extends TopComponent {
     org.openide.awt.Mnemonics.setLocalizedText(jLabel33, org.openide.util.NbBundle.getMessage(CpuRegistersTopComponent.class, "CpuRegistersTopComponent.jLabel33.text")); // NOI18N
 
     org.openide.awt.Mnemonics.setLocalizedText(jLabel34, org.openide.util.NbBundle.getMessage(CpuRegistersTopComponent.class, "CpuRegistersTopComponent.jLabel34.text")); // NOI18N
+
+    org.openide.awt.Mnemonics.setLocalizedText(cpuTimeLabel, org.openide.util.NbBundle.getMessage(CpuRegistersTopComponent.class, "CpuRegistersTopComponent.cpuTimeLabel.text")); // NOI18N
 
     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
     jPanel1.setLayout(jPanel1Layout);
@@ -299,7 +305,11 @@ final class CpuRegistersTopComponent extends TopComponent {
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
               .addComponent(jLabel31)
-              .addComponent(fCheckBox))))
+              .addComponent(fCheckBox)))
+          .addGroup(jPanel1Layout.createSequentialGroup()
+            .addComponent(cpuTimeLabel)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(cpuTimeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)))
         .addContainerGap())
     );
     jPanel1Layout.setVerticalGroup(
@@ -382,7 +392,11 @@ final class CpuRegistersTopComponent extends TopComponent {
           .addComponent(vCheckBox)
           .addComponent(zCheckBox)
           .addComponent(cCheckBox))
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(cpuTimeLabel)
+          .addComponent(cpuTimeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(22, Short.MAX_VALUE))
     );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -401,6 +415,8 @@ final class CpuRegistersTopComponent extends TopComponent {
   private javax.swing.JCheckBox cCheckBox;
   private javax.swing.JTextField codeTextField;
   private javax.swing.JTextField cpsrTextField;
+  private javax.swing.JLabel cpuTimeLabel;
+  private javax.swing.JTextField cpuTimeTextField;
   private javax.swing.JCheckBox fCheckBox;
   private javax.swing.JCheckBox iCheckBox;
   private javax.swing.JPanel jPanel1;

@@ -6,13 +6,13 @@ import com.lemoulinstudio.gfa.core.memory.MemoryInterface;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemoryObserver implements MemoryInterface {
+public class ObservedMemory implements MemoryInterface {
 
   protected MemoryInterface target; // The memory to observe.
   protected List<ReadMemoryListener> readListeners;   // The listeners of a read of the memory.
   protected List<WriteMemoryListener> writeListeners; // The listeners of a write onto the memory.
 
-  public MemoryObserver(MemoryInterface target) {
+  public ObservedMemory(MemoryInterface target) {
     this.target = target;
     readListeners = new ArrayList<ReadMemoryListener>();
     writeListeners = new ArrayList<WriteMemoryListener>();

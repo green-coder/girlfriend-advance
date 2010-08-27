@@ -11,12 +11,13 @@ public abstract class BoolMemWritten
   protected GfaMMU memory;
   protected boolean hasBeenWritten;
 
-  public BoolMemWritten(IntExpr off, GfaMMU mem) {
-    super(new ScmExpr[]{off});
-    memory = mem;
-    offset = off;
+  public BoolMemWritten(IntExpr offset, GfaMMU memory) {
+    super(new ScmExpr[] {offset});
+    this.memory = memory;
+    this.offset = offset;
+    this.hasBeenWritten = false;
+
     memory.addWriteMemoryListener(this);
-    hasBeenWritten = false;
   }
 
   public boolean evaluation() {

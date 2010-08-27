@@ -9,26 +9,36 @@ import com.lemoulinstudio.gfa.core.cpu.CpuStepListener;
 
 public class Breakpoint implements CpuStepListener {
 
-  private GfaDevice gfaDevice;
+  private GfaDevice device;
+  private String sourceCode;
   private BoolExpr conditionExpr;
 
   public Breakpoint(GfaDevice gfaDevice) {
-    this.gfaDevice = gfaDevice;
+    this.device = gfaDevice;
     clearCondition();
   }
 
   public final void setCondition(String sourceCode) throws ParseException {
-    Parser parser = new Parser(gfaDevice.getMemory(), gfaDevice.getCpu());
+    device.getMemory().clearListeners();
+    Parser parser = new Parser(device.getMemory(), device.getCpu());
     conditionExpr = parser.parse(sourceCode);
+    this.sourceCode = sourceCode;
   }
 
   public final void clearCondition() {
     conditionExpr = new BoolFalse();
+    sourceCode = "#f";
+  }
+
+  public String getSourceCode() {
+    return sourceCode;
   }
 
   public void notifyCpuStepped() {
     if (conditionExpr.evaluation())
-      gfaDevice.getCpu().requestStop();
+      device.getCpu().requestStop();
+
+    conditionExpr.clearStatus();
   }
 
 }
