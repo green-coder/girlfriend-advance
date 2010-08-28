@@ -9,18 +9,16 @@ public class ArmStateSwi extends ArmStateInstruction {
     super(regs, memory);
   }
 
-  static final protected int softwareInterrupVectorAddress = 0x00000008;
+  static final protected int SoftwareInterrupVectorAddress = 0x00000008;
   static final protected int ParameterMask = 0x00ffffff;
 
   public void execute() {
     if (!isPreconditionSatisfied()) return;
     
-    //System.out.println("swi #" + (opcode & ParameterMask));
-    
     getRegister(14, svcModeBits).set(PC);
     getRegister(17, svcModeBits).set(CPSR);
     setMode(svcModeBits);
-    PC.set(softwareInterrupVectorAddress);
+    PC.set(SoftwareInterrupVectorAddress);
     setArmState();
   }
 
