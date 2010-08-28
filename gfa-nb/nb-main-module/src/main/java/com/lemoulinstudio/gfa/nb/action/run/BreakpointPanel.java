@@ -6,6 +6,8 @@ import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
 import java.awt.Color;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -29,6 +31,20 @@ public class BreakpointPanel extends JPanel {
   /** Creates new form BreakpointPanel */
   private BreakpointPanel() {
     initComponents();
+
+    expressionTextField.getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        parseField();
+      }
+
+      public void removeUpdate(DocumentEvent e) {
+        parseField();
+      }
+
+      public void changedUpdate(DocumentEvent e) {
+        parseField();
+      }
+    });
 
     fgColor = expressionTextField.getForeground();
 
@@ -65,11 +81,6 @@ public class BreakpointPanel extends JPanel {
     expressionTextField = new javax.swing.JTextField();
 
     expressionTextField.setEnabled(false);
-    expressionTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-      public void keyTyped(java.awt.event.KeyEvent evt) {
-        expressionTextFieldKeyTyped(evt);
-      }
-    });
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -83,9 +94,6 @@ public class BreakpointPanel extends JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
-    private void expressionTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_expressionTextFieldKeyTyped
-      parseField();
-    }//GEN-LAST:event_expressionTextFieldKeyTyped
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTextField expressionTextField;
   // End of variables declaration//GEN-END:variables
