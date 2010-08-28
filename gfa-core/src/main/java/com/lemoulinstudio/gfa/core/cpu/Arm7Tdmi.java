@@ -3,8 +3,6 @@ package com.lemoulinstudio.gfa.core.cpu;
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.MemoryInterface;
 import com.lemoulinstudio.gfa.core.time.Time;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class Arm7Tdmi {
 
@@ -38,42 +36,37 @@ public abstract class Arm7Tdmi {
   public ArmReg SPSR_irq;
   public ArmReg SPSR_und;
 
-  static final public int nFlagBit  = 0x80000000; // negative or less than.
-  static final public int zFlagBit  = 0x40000000; // zero.
-  static final public int cFlagBit  = 0x20000000; // carry or borrow or extends.
-  static final public int vFlagBit  = 0x10000000; // overflow.
-  static final public int iFlagBit  = 0x00000080; // irq disable.
-  static final public int fFlagBit  = 0x00000040; // fiq disable.
-  static final public int tFlagBit  = 0x00000020; // (thumb) state bit.
+  public static final int nFlagBit  = 0x80000000; // negative or less than.
+  public static final int zFlagBit  = 0x40000000; // zero.
+  public static final int cFlagBit  = 0x20000000; // carry or borrow or extends.
+  public static final int vFlagBit  = 0x10000000; // overflow.
+  public static final int iFlagBit  = 0x00000080; // irq disable.
+  public static final int fFlagBit  = 0x00000040; // fiq disable.
+  public static final int tFlagBit  = 0x00000020; // (thumb) state bit.
 
-  static final public int modeBitsMask = 0x0000001f; // Cover all bits concerning mode.
-  static final public int usrModeBits  = 0x00000010; // User mode.
-  static final public int fiqModeBits  = 0x00000011; // FIQ mode.
-  static final public int irqModeBits  = 0x00000012; // IRQ mode.
-  static final public int svcModeBits  = 0x00000013; // Supervisor mode.
-  static final public int abtModeBits  = 0x00000017; // Abort mode.
-  static final public int undModeBits  = 0x0000001b; // Undefined mode.
-  static final public int sysModeBits  = 0x0000001f; // System mode.
+  public static final int modeBitsMask = 0x0000001f; // Cover all bits concerning mode.
+  public static final int usrModeBits  = 0x00000010; // User mode.
+  public static final int fiqModeBits  = 0x00000011; // FIQ mode.
+  public static final int irqModeBits  = 0x00000012; // IRQ mode.
+  public static final int svcModeBits  = 0x00000013; // Supervisor mode.
+  public static final int abtModeBits  = 0x00000017; // Abort mode.
+  public static final int undModeBits  = 0x0000001b; // Undefined mode.
+  public static final int sysModeBits  = 0x0000001f; // System mode.
 
-  static final protected int resetVectorAddress                = 0x00000000;
-  static final protected int undefinedInstructionVectorAddress = 0x00000004;
-  static final protected int softwareInterrupVectorAddress     = 0x00000008;
-  static final protected int prefetchAbortVectorAddress        = 0x0000000c;
-  static final protected int dataAbortVectorAddress            = 0x00000010;
-  static final protected int irqVectorAddress                  = 0x00000018;
-  static final protected int fiqVectorAddress                  = 0x0000001c;
+  public static final int resetVectorAddress                = 0x00000000;
+  public static final int undefinedInstructionVectorAddress = 0x00000004;
+  public static final int softwareInterrupVectorAddress     = 0x00000008;
+  public static final int prefetchAbortVectorAddress        = 0x0000000c;
+  public static final int dataAbortVectorAddress            = 0x00000010;
+  public static final int irqVectorAddress                  = 0x00000018;
+  public static final int fiqVectorAddress                  = 0x0000001c;
 
-  static final int REG_IE_Address  = 0x04000200;
-  static final int REG_IF_Address  = 0x04000202;
-  static final int REG_IME_Address = 0x04000208;
+  public static final int REG_IE_Address  = 0x04000200;
+  public static final int REG_IF_Address  = 0x04000202;
+  public static final int REG_IME_Address = 0x04000208;
   
-  protected List<CpuStepListener> cpuStepListeners;
-  protected List<CpuStopListener> cpuStopListeners;
-
   public Arm7Tdmi() {
     initRegisters();
-    cpuStepListeners = new ArrayList<CpuStepListener>();
-    cpuStopListeners = new ArrayList<CpuStopListener>();
   }
 
   protected ArmReg newArmReg(int v) {
@@ -253,22 +246,6 @@ public abstract class Arm7Tdmi {
 
     CPSR.set((CPSR.get() & ~modeBitsMask) | modeBits);
   }
-  
-  public void addCpuStepListener(CpuStepListener listener) {
-    cpuStepListeners.add(listener);
-  }
-
-  public void removeCpuStepListener(CpuStepListener listener) {
-    cpuStepListeners.remove(listener);
-  }
-
-  public void addCpuStopListener(CpuStopListener listener) {
-    cpuStopListeners.add(listener);
-  }
-
-  public void removeCpuStopListener(CpuStopListener listener) {
-    cpuStopListeners.remove(listener);
-  }
 
   public void reset() {
     // Set all registers to the zero value.
@@ -296,51 +273,5 @@ public abstract class Arm7Tdmi {
   }
 
   public abstract void step();
-
-//  public void breakpoint(int offset) {
-//    stopRequested = false;
-//    do {
-//      step();
-//    } while ((PC.get() != offset) && !stopRequested);
-//  }
-//
-//  public void stepOver() {
-//    breakpoint(PC.get() + getExecutionState().getInstructionSize());
-//  }
-
-  private boolean stopRequested;
-
-  public void run() {
-    stopRequested = false;
-
-    try {
-      if (cpuStepListeners.isEmpty()) {
-        while (!stopRequested)
-          step();
-      }
-      else {
-        List<CpuStepListener> cpuSteppedListenersCopy = new ArrayList<CpuStepListener>(cpuStepListeners);
-
-        while (!stopRequested) {
-          step();
-
-          for (CpuStepListener listener : cpuSteppedListenersCopy)
-            listener.notifyCpuStepped();
-        }
-      }
-    }
-    finally {
-      for (CpuStopListener listener : cpuStopListeners)
-        listener.notifyCpuStopped();
-    }
-  }
-  
-  public void requestStop() {
-    stopRequested = true;
-  }
-  
-  public boolean isStopRequested() {
-    return stopRequested;
-  }
 
 }

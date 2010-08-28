@@ -1,11 +1,10 @@
 package com.lemoulinstudio.gfa.nb.action.run;
 
-import com.lemoulinstudio.gfa.analysis.ParseException;
+import com.lemoulinstudio.gfa.analysis.Parser;
 import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
 import java.awt.Color;
-import java.awt.Component;
 import javax.swing.JPanel;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -45,7 +44,7 @@ public class BreakpointPanel extends JPanel {
   private void onEvent(StoppedState stoppedState) {
     if (stoppedState != null) {
       dataObject = stoppedState.getRomDataObject();
-      expressionTextField.setText(dataObject.getBreakpoint().getSourceCode());
+      expressionTextField.setText(dataObject.getBreakpoint());
       expressionTextField.setEnabled(true);
     }
     else {
@@ -92,14 +91,16 @@ public class BreakpointPanel extends JPanel {
   // End of variables declaration//GEN-END:variables
 
   private void parseField() {
-    try {
-      dataObject.getBreakpoint().setCondition(expressionTextField.getText().trim());
+    String text = expressionTextField.getText();
+    Parser parser = new Parser();
+
+    if (parser.isValid(text)) {
+      dataObject.setBreakpoint(text);
       expressionTextField.setForeground(fgColor);
-      expressionTextField.setToolTipText("Syntax ok");
-    } catch (ParseException ex) {
-      dataObject.getBreakpoint().clearCondition();
+    }
+    else {
+      dataObject.setBreakpoint("#f");
       expressionTextField.setForeground(Color.RED);
-      expressionTextField.setToolTipText(ex.getMessage());
     }
   }
 }

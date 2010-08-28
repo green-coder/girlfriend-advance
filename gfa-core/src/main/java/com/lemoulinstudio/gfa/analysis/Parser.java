@@ -5,25 +5,23 @@ import com.lemoulinstudio.gfa.core.cpu.ArmReg;
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.time.Time;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Parser {
 
-  protected GfaMMU memory;
-  protected ArmReg[][] allRegisters;
-  protected Time time;
-  protected List envSymb;
-  protected List envVar;
+  private Map<String, ScmExpr> environment;
+  private GfaMMU memory;
+  private ArmReg[][] allRegisters;
+  private Time time;
 
-  public Parser(GfaMMU memory, Arm7Tdmi cpu) {
-    this.memory = memory;
-    allRegisters = cpu.getRegisters();
-    time = cpu.getTime();
-
-    envSymb = new ArrayList();
-    envVar = new ArrayList();
+  private void initEnvironment() {
+    environment = new HashMap<String, ScmExpr>();
+    
     define("#t", new BoolTrue());
     define("#f", new BoolFalse());
+
     try {
       define("r0", new IntReg(getRegister("r0", null)));
       define("r1", new IntReg(getRegister("r1", null)));
@@ -46,7 +44,17 @@ public class Parser {
       define("sp", new IntReg(getRegister("sp", null)));
       define("lr", new IntReg(getRegister("lr", null)));
       define("pc", new IntReg(getRegister("pc", null)));
-    } catch (ParseException e) {
+    }
+    catch (ParseException ex) {}
+  }
+
+  public boolean isValid(String sourceCode) {
+    try {
+      parse(sourceCode, null, null, null);
+      return true;
+    }
+    catch (ParseException ex) {
+      return false;
     }
   }
 
@@ -54,13 +62,22 @@ public class Parser {
    * Translate a String into a BoolExpr object
    * witch can be used for some code analysis.
    */
-  public BoolExpr parse(String sourceCode)
+  public BoolExpr parse(String sourceCode,
+                        GfaMMU memory,
+                        ArmReg[][] allRegisters,
+                        Time time)
           throws ParseException {
-    List lLexeme = lexemeDecomposition(sourceCode);
-    if (!isWellStrutured(lLexeme)) {
+    this.memory = memory;
+    this.allRegisters = allRegisters;
+    this.time = time;
+
+    initEnvironment();
+    
+    List<String> lexemeList = lexemeDecomposition(sourceCode);
+    if (!isWellStrutured(lexemeList)) {
       throw new ParseException("The expression is not well structured.");
     }
-    Object nTree = transformIntoNTree(lLexeme);
+    Object nTree = transformIntoNTree(lexemeList);
     ScmExpr expr = constructExpr(nTree);
 
     if (expr instanceof BoolExpr) {
@@ -73,8 +90,8 @@ public class Parser {
   /**
    * Decompose the string into a List of Strings called "lexemes".
    */
-  public List lexemeDecomposition(String source) {
-    List vLex = new ArrayList();
+  private List<String> lexemeDecomposition(String source) {
+    List<String> vLex = new ArrayList<String>();
     int begin = 0;
     while (begin < source.length()) {
       char c = source.charAt(begin);
@@ -106,61 +123,54 @@ public class Parser {
    * Return true if and only if the list of String l
    * represent a well structured expression for this parser.
    */
-  protected boolean isWellStrutured(List l) {
-    if (l.isEmpty()) {
+  private boolean isWellStrutured(List<String> lexemeList) {
+    if (lexemeList.isEmpty())
       return false;
-    }
 
-    String elm = (String) l.get(0);
+    String elm = lexemeList.get(0);
 
-    if (l.size() == 1) {
+    if (lexemeList.size() == 1)
       return (!elm.equals("(") && !elm.equals(")"));
-    }
 
-    if (!elm.equals("(")) {
+    if (!elm.equals("("))
       return false;
-    }
 
     int parenthesisCount = 0;
-    for (int i = 0; i < l.size(); i++) {
-      String elm2 = (String) l.get(i);
+    for (int i = 0; i < lexemeList.size(); i++) {
+      String elm2 = (String) lexemeList.get(i);
 
       if (elm2.equals("(")) {
         parenthesisCount++;
-        if (i >= l.size() - 1) {
+        if (i >= lexemeList.size() - 1)
           return false;
-        }
-        String elm3 = (String) l.get(i + 1);
-        if (elm3.equals(")")) {
+
+        String elm3 = (String) lexemeList.get(i + 1);
+        if (elm3.equals(")"))
           return false;
-        }
-      } else if (elm2.equals(")")) {
+      }
+      else if (elm2.equals(")"))
         parenthesisCount--;
-      }
 
-      if (parenthesisCount == 0) {
-        if (i != l.size() - 1) {
+      if (parenthesisCount == 0)
+        if (i != lexemeList.size() - 1)
           return false;
-        }
-      }
     }
 
-    if (parenthesisCount != 0) {
+    if (parenthesisCount != 0)
       return false;
-    }
 
     return true;
   }
 
   /**
-   * Create a nTree from the Vector of lexeme,
+   * Create a nTree from the list of lexemes,
    * using the strings "(" and ")" as delimiters
    * of the nodes.
    */
-  protected Object transformIntoNTree(List l) {
+  private Object transformIntoNTree(List<String> lexemeList) {
     /* The list l is supposed to be well structured
     and to have at least one element. */
-    String elm = (String) l.get(0);
+    String elm = lexemeList.get(0);
 
     if (elm.equals("(")) {
       int position = 0;
@@ -168,7 +178,7 @@ public class Parser {
 
       do {
         position++;
-        String elm2 = (String) l.get(position);
+        String elm2 = lexemeList.get(position);
 
         if (elm2.equals(")")) {
           return l2;
@@ -184,7 +194,7 @@ public class Parser {
           int parenthesisCount = 1;
           do {
             position++;
-            String elm3 = (String) l.get(position);
+            String elm3 = lexemeList.get(position);
             if (elm3.equals("(")) {
               parenthesisCount++;
             } else if (elm3.equals(")")) {
@@ -198,7 +208,7 @@ public class Parser {
           paramEndPosition = position + 1;
         }
 
-        List lParam = l.subList(paramBeginPosition, paramEndPosition);
+        List<String> lParam = lexemeList.subList(paramBeginPosition, paramEndPosition);
         l2.add(transformIntoNTree(lParam));
 
       } while (true);
@@ -442,7 +452,7 @@ public class Parser {
     }
   }
 
-  protected boolean canBeDecodedAsANumber(String symbol) {
+  private boolean canBeDecodedAsANumber(String symbol) {
     try {
       Long.decode(symbol);
     } catch (NumberFormatException e) {
@@ -451,7 +461,7 @@ public class Parser {
     return true;
   }
 
-  protected String listToString(Object nTree) {
+  private String listToString(Object nTree) {
     if (nTree instanceof List) {
       List l = (List) nTree;
       String result = "(";
@@ -468,8 +478,11 @@ public class Parser {
     }
   }
 
-  protected final ArmReg getRegister(String regName, String modeName)
+  private ArmReg getRegister(String regName, String modeName)
           throws ParseException {
+    if (allRegisters == null)
+      return null;
+
     int modeNumber = Arm7Tdmi.svcModeBits;
 
     if (modeName != null) {
@@ -537,23 +550,12 @@ public class Parser {
     return allRegisters[modeNumber][regNumber];
   }
 
-  protected final void define(String symbol, ScmExpr obj) {
-    int index = envSymb.indexOf(symbol);
-
-    if (index == -1) {
-      envSymb.add(symbol);
-      envVar.add(obj);
-    } else {
-      envSymb.set(index, obj);
-    }
+  private void define(String symbol, ScmExpr value) {
+    environment.put(symbol, value);
   }
 
-  protected ScmExpr getScmExpr(String symbol) {
-    int index = envSymb.indexOf(symbol);
-    if (index == -1) {
-      return null;
-    } else {
-      return (ScmExpr) envVar.get(index);
-    }
+  private ScmExpr getScmExpr(String symbol) {
+    return environment.get(symbol);
   }
+
 }

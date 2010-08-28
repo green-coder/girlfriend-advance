@@ -17,7 +17,8 @@ public abstract class BoolMemRead
     this.offset = offset;
     this.hasBeenRead = false;
 
-    memory.addReadMemoryListener(this);
+    if (memory != null)
+      memory.addReadMemoryListener(this);
   }
 
   public boolean evaluation() {

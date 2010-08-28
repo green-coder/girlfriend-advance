@@ -17,7 +17,8 @@ public abstract class BoolMemWritten
     this.offset = offset;
     this.hasBeenWritten = false;
 
-    memory.addWriteMemoryListener(this);
+    if (memory != null)
+      memory.addWriteMemoryListener(this);
   }
 
   public boolean evaluation() {

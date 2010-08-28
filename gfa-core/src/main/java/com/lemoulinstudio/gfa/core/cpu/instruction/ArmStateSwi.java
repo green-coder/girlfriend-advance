@@ -2,6 +2,7 @@ package com.lemoulinstudio.gfa.core.cpu.instruction;
 
 import com.lemoulinstudio.gfa.core.cpu.ArmReg;
 import com.lemoulinstudio.gfa.core.memory.MemoryInterface;
+import com.lemoulinstudio.gfa.core.util.Hex;
 
 public class ArmStateSwi extends ArmStateInstruction {
 
@@ -24,7 +25,7 @@ public class ArmStateSwi extends ArmStateInstruction {
 
   public String disassemble(int offset) {
     int opcode = getOpcode(offset);
-    return "swi #" + (opcode & ParameterMask);
+    return "swi #0x" + Hex.toString(opcode & ParameterMask);
   }
 
 }

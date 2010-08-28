@@ -1,15 +1,18 @@
 package com.lemoulinstudio.gfa.nb.filetype.rom;
 
+import com.lemoulinstudio.gfa.analysis.BoolExpr;
 import com.lemoulinstudio.gfa.analysis.ParseException;
+import com.lemoulinstudio.gfa.analysis.Parser;
 import com.lemoulinstudio.gfa.core.GfaDevice;
-import com.lemoulinstudio.gfa.core.cpu.CpuStopListener;
+import com.lemoulinstudio.gfa.core.cpu.Arm7Tdmi;
+import com.lemoulinstudio.gfa.core.time.Time;
 import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponent;
 import com.lemoulinstudio.gfa.nb.screen.ScreenTopComponentFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.openide.cookies.OpenCookie;
@@ -46,14 +49,30 @@ public class RomDataObject extends MultiDataObject {
 
   public class Runnable implements Node.Cookie {
     public void run() {
-      cpuThread = new Thread(new java.lang.Runnable() {
+      // Set the state to Run.
+      setGfaDeviceState(GfaDeviceState.Running);
+
+      // Run
+      cpuRunner = new StoppableRunner() {
         @Override
         public void run() {
-          getGfaDevice().getCpu().run();
+          Arm7Tdmi cpu = getGfaDevice().getCpu();
+
+          stopRequested = false;
+          try {
+            while (!stopRequested)
+              cpu.step();
+          } catch(Exception e) {}
+
+          // Make sure that we remove the breakpoint.
+          getGfaDevice().getMemory().clearListeners();
+
+          setGfaDeviceState(GfaDeviceState.Stopped);
+          cpuRunner = null;
         }
-      });
-      setGfaDeviceState(GfaDeviceState.Running);
-      cpuThread.start();
+      };
+
+      new Thread(cpuRunner).start();
     }
   }
 
@@ -68,26 +87,28 @@ public class RomDataObject extends MultiDataObject {
   public class StepBackable implements Node.Cookie {
     public void stepBack() {
       try {
-        // Set a breakpoint.
-        getGfaDevice().getCpu().addCpuStepListener(breakpoint);
+        GfaDevice device = getGfaDevice();
 
-        // Set its condition.
-        breakpoint.setCondition(String.format("(> (time) %d)",
-                getGfaDevice().getTime().getTime() - 8));
+        // Create the scm expression.
+        Parser parser = new Parser();
+        final BoolExpr breakpointExpr = parser.parse(
+                String.format("(> (time) %d)", device.getTime().getTime() - 4 - 1),
+                device.getMemory(), device.getCpu().getRegisters(), device.getTime());
 
         // Reset
         setGfaDeviceState(GfaDeviceState.Undefined);
-        getGfaDevice().reset();
+        device.reset();
 
-        // Run
-        cpuThread = new Thread(new java.lang.Runnable() {
-          @Override
-          public void run() {
-            getGfaDevice().getCpu().run();
-          }
-        });
-        setGfaDeviceState(GfaDeviceState.Running);
-        cpuThread.start();
+        Arm7Tdmi cpu = device.getCpu();
+        try {
+          while (!breakpointExpr.evaluation())
+            cpu.step();
+        } catch(Exception e) {}
+
+        // Make sure that we remove the breakpoint.
+        getGfaDevice().getMemory().clearListeners();
+
+        setGfaDeviceState(GfaDeviceState.Stopped);
       }
       catch (ParseException ex) {
         Exceptions.printStackTrace(ex);
@@ -97,42 +118,104 @@ public class RomDataObject extends MultiDataObject {
 
   public class Debuggable implements Node.Cookie {
     public void debug() {
-      // Set a breakpoint.
-      getGfaDevice().getCpu().addCpuStepListener(breakpoint);
+      try {
+        GfaDevice device = getGfaDevice();
 
-      // Run
-      cpuThread = new Thread(new java.lang.Runnable() {
-        @Override
-        public void run() {
-          getGfaDevice().getCpu().run();
-        }
-      });
-      setGfaDeviceState(GfaDeviceState.Running);
-      cpuThread.start();
+        // Create the scm expression.
+        Parser parser = new Parser();
+        final BoolExpr breakpointExpr = parser.parse(breakpoint,
+                device.getMemory(), device.getCpu().getRegisters(), device.getTime());
+
+        // Reset
+        setGfaDeviceState(GfaDeviceState.Undefined);
+        getGfaDevice().reset();
+
+        // Set the state to Run.
+        setGfaDeviceState(GfaDeviceState.Running);
+
+        // Run
+        cpuRunner = new StoppableRunner() {
+          @Override
+          public void run() {
+            Arm7Tdmi cpu = getGfaDevice().getCpu();
+
+            stopRequested = false;
+            try {
+              while (!stopRequested && !breakpointExpr.evaluation())
+                cpu.step();
+            } catch(Exception e) {}
+
+            // Make sure that we remove the breakpoint.
+            getGfaDevice().getMemory().clearListeners();
+
+            setGfaDeviceState(GfaDeviceState.Stopped);
+            cpuRunner = null;
+          }
+        };
+
+        new Thread(cpuRunner).start();
+      }
+      catch (ParseException ex) {
+        Exceptions.printStackTrace(ex);
+      }
     }
   }
 
   public class DebugBackable implements Node.Cookie {
     public void debugBack() {
+      try {
+        GfaDevice device = getGfaDevice();
+        Arm7Tdmi cpu = device.getCpu();
+
+        // Create the scm expression.
+        Parser parser = new Parser();
+        final BoolExpr breakpointExpr = parser.parse(breakpoint,
+                device.getMemory(), device.getCpu().getRegisters(), device.getTime());
+        
+        setGfaDeviceState(GfaDeviceState.Undefined);
+
+        // We note the time now.
+        long now = cpu.getTime().getTime();
+        
+        // Reset
+        device.reset();
+
+        // We are looking for the last time where the condition was true.
+        long lastTime = -1;
+        Time time = cpu.getTime();
+        try {
+          while (time.getTime() != now) {
+            cpu.step();
+            if (breakpointExpr.evaluation())
+              lastTime = time.getTime();
+          }
+        } catch(Exception e) {}
+
+        // If we found one, we come back to it.
+        if (lastTime != -1) {
+          // Reset
+          device.reset();
+
+          while (time.getTime() != lastTime)
+            cpu.step();
+        }
+
+        // Make sure that we remove the breakpoint.
+        getGfaDevice().getMemory().clearListeners();
+
+        setGfaDeviceState(GfaDeviceState.Stopped);
+      }
+      catch (ParseException ex) {
+        Exceptions.printStackTrace(ex);
+      }
     }
   }
 
   public class Stoppable implements Node.Cookie {
     public void stop() {
-      getGfaDevice().getCpu().requestStop();
-    }
-  }
-
-  private class MyCpuStoppedListener implements CpuStopListener {
-    public void notifyCpuStopped() {
-      cpuThread = null;
-      
-      // Make sure that we remove the breakpoint.
-      GfaDevice device = getGfaDevice();
-      device.getCpu().removeCpuStepListener(breakpoint);
-      device.getMemory().clearListeners();
-
-      setGfaDeviceState(GfaDeviceState.Stopped);
+      StoppableRunner runner = cpuRunner; // avoids concurrency issues.
+      if (runner != null)
+        runner.requestStop();
     }
   }
 
@@ -157,10 +240,14 @@ public class RomDataObject extends MultiDataObject {
   private Runnable runnable = new Runnable();
   private StoppedState stoppedState = new StoppedState();
 
+  private String breakpoint = "";
+
   private GfaDeviceState gfaDeviceState = GfaDeviceState.Undefined;
-  private Thread cpuThread = null;
+  private StoppableRunner cpuRunner = null;
+  
   private Map<GfaDeviceState, List<Node.Cookie>> stateToCookies =
-          new HashMap<GfaDeviceState, List<Node.Cookie>>();
+          new EnumMap<GfaDeviceState, List<Node.Cookie>>(GfaDeviceState.class);
+          //new HashMap<GfaDeviceState, List<Node.Cookie>>();
 
   private ScreenTopComponent screenTopComponent;
 
@@ -191,7 +278,7 @@ public class RomDataObject extends MultiDataObject {
       ScreenTopComponentFactory factory =
               Lookups.forPath("Gfa/ScreenTopComponentFactory")
               .lookup(ScreenTopComponentFactory.class);
-      screenTopComponent = factory.createScreenTopComponent(RomDataObject.this);
+      screenTopComponent = factory.createScreenTopComponent(this);
     }
 
     return screenTopComponent;
@@ -219,27 +306,11 @@ public class RomDataObject extends MultiDataObject {
   }
 
   private GfaDevice gfaDevice;
-  private CpuStopListener cpuStopListener;
-  private Breakpoint breakpoint;
 
   private synchronized void ensureDeviceCreated() {
     if (gfaDevice == null) {
       // Create the device.
       gfaDevice = new GfaDevice();
-
-      // Listen when it stops.
-      cpuStopListener = new MyCpuStoppedListener();
-      gfaDevice.getCpu().addCpuStopListener(cpuStopListener);
-
-      // Create a breakpoint.
-      breakpoint = new Breakpoint(gfaDevice);
-
-      // Set its initial value.
-      try {breakpoint.setCondition("(> (time) 8062230)");}
-      catch (ParseException ex) {Exceptions.printStackTrace(ex);}
-
-      // Create a cpu logguer.
-      gfaDevice.getCpu().addCpuStepListener(new CpuLogger(gfaDevice));
 
       // Load the bios.
       gfaDevice.getMemory().loadBios("roms/bios.gba");
@@ -259,11 +330,6 @@ public class RomDataObject extends MultiDataObject {
     return gfaDevice;
   }
 
-  public Breakpoint getBreakpoint() {
-    ensureDeviceCreated();
-    return breakpoint;
-  }
-
   public synchronized void releaseResources() {
     // Stop the device if needed.
     if (getGfaDeviceState() == GfaDeviceState.Running)
@@ -274,11 +340,17 @@ public class RomDataObject extends MultiDataObject {
 
     // Release the reference to the device.
     gfaDevice = null;
-    cpuStopListener = null;
-    breakpoint = null;
 
     // Release the reference to the top component.
     screenTopComponent = null;
+  }
+
+  public String getBreakpoint() {
+    return breakpoint;
+  }
+
+  public void setBreakpoint(String breakpoint) {
+    this.breakpoint = breakpoint;
   }
 
 }
