@@ -116,8 +116,20 @@ public class RomDataObject extends MultiDataObject {
     }
   }
 
+  public class StepOverable implements Node.Cookie {
+    public void stepOver() {
+      Arm7Tdmi cpu = getGfaDevice().getCpu();
+      debuggable.debug(String.format("(= pc %d)",
+              cpu.PC.get() + cpu.getExecutionState().getInstructionSize()));
+    }
+  }
+
   public class Debuggable implements Node.Cookie {
     public void debug() {
+      debug(breakpoint);
+    }
+
+    public void debug(String breakpoint) {
       try {
         GfaDevice device = getGfaDevice();
 
@@ -231,14 +243,16 @@ public class RomDataObject extends MultiDataObject {
     Running
   }
 
-  private Resetable resetable = new Resetable();
+  private Resetable     resetable     = new Resetable();
   private DebugBackable debugBackable = new DebugBackable();
-  private StepBackable stepBackable = new StepBackable();
-  private Stoppable stoppable = new Stoppable();
-  private Steppable steppable = new Steppable();
-  private Debuggable debuggable = new Debuggable();
-  private Runnable runnable = new Runnable();
-  private StoppedState stoppedState = new StoppedState();
+  private StepBackable  stepBackable  = new StepBackable();
+  private Stoppable     stoppable     = new Stoppable();
+  private Steppable     steppable     = new Steppable();
+  private StepOverable  stepOverable  = new StepOverable();
+  private Debuggable    debuggable    = new Debuggable();
+  private Runnable      runnable      = new Runnable();
+  
+  private StoppedState  stoppedState = new StoppedState();
 
   private String breakpoint = "";
 
@@ -258,7 +272,7 @@ public class RomDataObject extends MultiDataObject {
     cookies.add(new OpenSupport());
 
     stateToCookies.put(GfaDeviceState.Undefined, Collections.<Node.Cookie>emptyList());
-    stateToCookies.put(GfaDeviceState.Stopped, Arrays.<Node.Cookie>asList(stoppedState, resetable, debugBackable, stepBackable, steppable, debuggable, runnable));
+    stateToCookies.put(GfaDeviceState.Stopped, Arrays.<Node.Cookie>asList(stoppedState, resetable, debugBackable, stepBackable, steppable, stepOverable, debuggable, runnable));
     stateToCookies.put(GfaDeviceState.Running, Arrays.<Node.Cookie>asList(resetable, stoppable));
   }
 

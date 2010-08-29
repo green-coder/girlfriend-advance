@@ -54,6 +54,15 @@
           <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StepAction"/>
           <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/step16.png"/>
         </file>
+        <file name="com-lemoulinstudio-gfa-nb-action-run-StepOverAction.instance">
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$StepOverable"/>
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="injectable" stringvalue="com.lemoulinstudio.gfa.nb.action.run.StepOverAction"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.action.run.Bundle#CTL_StepOverAction"/>
+          <attr name="iconBase" stringvalue="com/lemoulinstudio/gfa/nb/action/run/stepOver16.png"/>
+        </file>
         <file name="com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance">
           <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
           <attr name="type" stringvalue="com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject$Debuggable"/>
@@ -166,6 +175,10 @@
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
         <attr name="position" intvalue="40"/>
       </file>
+      <file name="StepOverAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepOverAction.instance"/>
+        <attr name="position" intvalue="42"/>
+      </file>
       <file name="DebugAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance"/>
         <attr name="position" intvalue="45"/>
@@ -208,6 +221,10 @@
       <file name="StepAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepAction.instance"/>
         <attr name="position" intvalue="50"/>
+      </file>
+      <file name="StepOverAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-StepOverAction.instance"/>
+        <attr name="position" intvalue="55"/>
       </file>
       <file name="DebugAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Gfa/Run/com-lemoulinstudio-gfa-nb-action-run-DebugAction.instance"/>
