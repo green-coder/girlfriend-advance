@@ -83,8 +83,21 @@
         </file>
       </folder>
       <folder name="Window">
-        <file name="com-lemoulinstudio-gfa-nb-cpureg-CpuRegistersAction.instance"/>
-        <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
+        <file name="com-lemoulinstudio-gfa-nb-cpureg-CpuRegistersAction.instance">
+          <attr name="component" methodvalue="com.lemoulinstudio.gfa.nb.cpureg.CpuRegistersTopComponent.findInstance"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.cpureg.Bundle#CTL_CpuRegistersAction"/>
+          <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance">
+          <attr name="component" methodvalue="com.lemoulinstudio.gfa.nb.disasm.DisassemblerTopComponent.findInstance"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.disasm.Bundle#CTL_DisassemblerAction"/>
+          <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+        </file>
+        <file name="com-lemoulinstudio-gfa-nb-memory-MemoryAction.instance">
+          <attr name="component" methodvalue="com.lemoulinstudio.gfa.nb.memory.MemoryTopComponent.findInstance"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.memory.Bundle#CTL_MemoryAction"/>
+          <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+        </file>
       </folder>
     </folder>
   </folder>
@@ -197,6 +210,9 @@
         <file name="DisassemblerAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-disasm-DisassemblerAction.instance"/>
         </file>
+        <file name="MemoryAction.shadow">
+          <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-memory-MemoryAction.instance"/>
+        </file>
       </folder>
     </folder>
   </folder>
@@ -261,6 +277,7 @@
     <folder name="Components">
       <file name="CpuRegistersTopComponent.settings" url="CpuRegistersTopComponentSettings.xml"/>
       <file name="DisassemblerTopComponent.settings" url="DisassemblerTopComponentSettings.xml"/>
+      <file name="MemoryTopComponent.settings" url="MemoryTopComponentSettings.xml"/>
     </folder>
     <folder name="Modes">
       <folder name="properties">
@@ -268,6 +285,7 @@
       </folder>
       <folder name="output">
         <file name="DisassemblerTopComponent.wstcref" url="DisassemblerTopComponentWstcref.xml"/>
+        <file name="MemoryTopComponent.wstcref" url="MemoryTopComponentWstcref.xml"/>
       </folder>
     </folder>
   </folder>

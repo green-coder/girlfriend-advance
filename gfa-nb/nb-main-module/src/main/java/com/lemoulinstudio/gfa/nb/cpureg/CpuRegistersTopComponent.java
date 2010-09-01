@@ -6,7 +6,6 @@ import com.lemoulinstudio.gfa.core.cpu.ArmReg;
 import com.lemoulinstudio.gfa.core.util.Hex;
 import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
-import java.io.Serializable;
 import java.util.logging.Logger;
 import javax.swing.JTextField;
 import org.openide.util.Lookup;
@@ -479,32 +478,8 @@ final class CpuRegistersTopComponent extends TopComponent {
   }
 
   @Override
-  public void componentOpened() {
-    // TODO add custom code on component opening
-  }
-
-  @Override
-  public void componentClosed() {
-    // TODO add custom code on component closing
-  }
-
-  /** replaces this in object stream */
-  @Override
-  public Object writeReplace() {
-    return new ResolvableHelper();
-  }
-
-  @Override
   protected String preferredID() {
     return PREFERRED_ID;
   }
 
-  final static class ResolvableHelper implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    public Object readResolve() {
-      return CpuRegistersTopComponent.getDefault();
-    }
-  }
 }
