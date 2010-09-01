@@ -131,6 +131,7 @@ public final class DisassemblerTopComponent extends TopComponent {
     });
 
     jTable.setSelectionBackground(java.awt.Color.pink);
+    jTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jScrollPane.setViewportView(jTable);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
