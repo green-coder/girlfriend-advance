@@ -74,7 +74,7 @@ final class CpuRegistersTopComponent extends TopComponent {
       
       for (int i = 0; i < 16; i++) {
         JTextField tf = textFields[i];
-        tf.setText(Hex.toString(cpu.currentRegisters[i].get()));
+        tf.setText(Hex.toString(cpu.getRegister(i).get()));
         tf.setEditable(false);
       }
 
