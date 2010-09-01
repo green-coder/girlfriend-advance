@@ -17,7 +17,6 @@ public abstract class Arm7Tdmi {
 
   protected ArmReg[][] allRegisters;
 
-  public ArmReg[] currentRegisters;
   public ArmReg[] usrRegisters;
   public ArmReg[] fiqRegisters;
   public ArmReg[] irqRegisters;
@@ -81,7 +80,6 @@ public abstract class Arm7Tdmi {
     abtRegisters = new ArmReg[18];
     undRegisters = new ArmReg[18];
     sysRegisters = new ArmReg[18];
-    currentRegisters = null; // need a first reset to set it up.
 
     for (int i = 0; i <= 7; i++) {
       ArmReg reg = newArmReg(0);
@@ -235,15 +233,6 @@ public abstract class Arm7Tdmi {
   }
 
   protected void setMode(int modeBits) {
-    if (modeBits == usrModeBits) currentRegisters = usrRegisters;
-    else if (modeBits == fiqModeBits) currentRegisters = fiqRegisters;
-    else if (modeBits == irqModeBits) currentRegisters = irqRegisters;
-    else if (modeBits == svcModeBits) currentRegisters = svcRegisters;
-    else if (modeBits == abtModeBits) currentRegisters = abtRegisters;
-    else if (modeBits == undModeBits) currentRegisters = undRegisters;
-    else if (modeBits == sysModeBits) currentRegisters = sysRegisters;
-    else throw new Error("Mode non-defini.");
-
     CPSR.set((CPSR.get() & ~modeBitsMask) | modeBits);
   }
 
