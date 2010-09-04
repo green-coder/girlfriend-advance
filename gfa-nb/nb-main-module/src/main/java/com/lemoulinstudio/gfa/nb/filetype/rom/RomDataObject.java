@@ -79,7 +79,8 @@ public class RomDataObject extends MultiDataObject {
   public class Steppable implements Node.Cookie {
     public void step() {
       setGfaDeviceState(GfaDeviceState.Undefined);
-      getGfaDevice().getCpu().step();
+      try {getGfaDevice().getCpu().step();}
+      catch (Exception e) {}
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
   }
@@ -89,10 +90,12 @@ public class RomDataObject extends MultiDataObject {
       try {
         GfaDevice device = getGfaDevice();
 
+        long timeToGoBackTo = Math.max(device.getTime().getTime() - 4, 0L);
+
         // Create the scm expression.
         Parser parser = new Parser();
         final BoolExpr breakpointExpr = parser.parse(
-                String.format("(> (time) %d)", device.getTime().getTime() - 4 - 1),
+                String.format("(>= (time) %d)", timeToGoBackTo),
                 device.getMemory(), device.getCpu().getRegisters(), device.getTime());
 
         // Reset
@@ -200,6 +203,7 @@ public class RomDataObject extends MultiDataObject {
             cpu.step();
             if (breakpointExpr.evaluation())
               lastTime = time.getTime();
+            breakpointExpr.clearStatus();
           }
         } catch(Exception e) {}
 
