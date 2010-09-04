@@ -252,13 +252,13 @@ public abstract class Arm7Tdmi {
     PC.set(resetVectorAddress);
     
     /* The following lines are used to boot without running the bios. */
-    /*
+    ///*
     PC.set(0x08000000);      // pas ecrit dans la doc
     CPSR.setOff(iFlagBit | fFlagBit);
+    getRegister(13, usrModeBits).set(0x03007f00); // et ca non plus
+    getRegister(13, irqModeBits).set(0x03007fa0); // et ca non plus
     getRegister(13, svcModeBits).set(0x03007fe0); // et ca non plus
-    getRegister(13, sysModeBits).set(0x03007fe0); // et ca non plus
-    getRegister(13, irqModeBits).set(0x03007fe0); // et ca non plus
-    */
+    //*/
   }
 
   public abstract void step();
