@@ -288,6 +288,14 @@ public class Parser {
           arity = 2;
           result = new BoolUGreaterThan((IntExpr) constructExpr(l.get(2)),
                   (IntExpr) constructExpr(l.get(1)));
+        } else if (f.equals(">=")) {
+          arity = 2;
+          result = new BoolUGreaterThanOrEqual((IntExpr) constructExpr(l.get(1)),
+                  (IntExpr) constructExpr(l.get(2)));
+        } else if (f.equals("<=")) {
+          arity = 2;
+          result = new BoolUGreaterThanOrEqual((IntExpr) constructExpr(l.get(2)),
+                  (IntExpr) constructExpr(l.get(1)));
         } else if (f.equals("s>")) {
           arity = 2;
           result = new BoolSGreaterThan((IntExpr) constructExpr(l.get(1)),
@@ -295,6 +303,14 @@ public class Parser {
         } else if (f.equals("s<")) {
           arity = 2;
           result = new BoolSGreaterThan((IntExpr) constructExpr(l.get(2)),
+                  (IntExpr) constructExpr(l.get(1)));
+        } else if (f.equals("s>=")) {
+          arity = 2;
+          result = new BoolSGreaterThanOrEqual((IntExpr) constructExpr(l.get(1)),
+                  (IntExpr) constructExpr(l.get(2)));
+        } else if (f.equals("s<=")) {
+          arity = 2;
+          result = new BoolSGreaterThanOrEqual((IntExpr) constructExpr(l.get(2)),
                   (IntExpr) constructExpr(l.get(1)));
         } else if (f.equals("-")) {
           arity = 2;
