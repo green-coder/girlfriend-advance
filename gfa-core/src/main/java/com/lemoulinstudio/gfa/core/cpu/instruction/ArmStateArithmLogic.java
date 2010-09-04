@@ -9,13 +9,6 @@ public abstract class ArmStateArithmLogic extends ArmStateDataProcessing {
     super(regs, memory);
   }
 
-  protected void applyOperation(int operand1, int operand2) {
-    int result = operand1 & operand2;
-    destinationRegister.set(result);
-    tmpCPSR.setBit(zFlagBit, (result == 0));
-    tmpCPSR.setBit(nFlagBit, (result < 0));
-  }
-
   public String disassemble(int offset) {
     int opcode = getOpcode(offset);
     String instru = getInstructionName() + preconditionToString(opcode);
