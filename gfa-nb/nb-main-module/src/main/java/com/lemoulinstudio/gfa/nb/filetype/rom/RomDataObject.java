@@ -1,8 +1,8 @@
 package com.lemoulinstudio.gfa.nb.filetype.rom;
 
-import com.lemoulinstudio.gfa.analysis.BoolExpr;
-import com.lemoulinstudio.gfa.analysis.ParseException;
-import com.lemoulinstudio.gfa.analysis.Parser;
+import com.lemoulinstudio.gfa.nb.breakpoint.BoolExpr;
+import com.lemoulinstudio.gfa.nb.breakpoint.ParseException;
+import com.lemoulinstudio.gfa.nb.breakpoint.Parser;
 import com.lemoulinstudio.gfa.core.GfaDevice;
 import com.lemoulinstudio.gfa.core.cpu.Arm7Tdmi;
 import com.lemoulinstudio.gfa.core.time.Time;

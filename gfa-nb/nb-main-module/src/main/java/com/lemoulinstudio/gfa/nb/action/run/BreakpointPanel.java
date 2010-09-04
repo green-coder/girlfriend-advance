@@ -1,6 +1,6 @@
 package com.lemoulinstudio.gfa.nb.action.run;
 
-import com.lemoulinstudio.gfa.analysis.Parser;
+import com.lemoulinstudio.gfa.nb.breakpoint.Parser;
 import com.lemoulinstudio.gfa.nb.GfaContext;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject;
 import com.lemoulinstudio.gfa.nb.filetype.rom.RomDataObject.StoppedState;
