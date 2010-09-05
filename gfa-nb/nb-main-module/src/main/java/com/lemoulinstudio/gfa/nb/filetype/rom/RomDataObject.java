@@ -345,7 +345,7 @@ public class RomDataObject extends MultiDataObject {
       gfaDevice.getMemory().loadBios("roms/bios.gba");
 
       // Load the rom.
-      try {gfaDevice.getMemory().loadRom(getPrimaryFile().getInputStream());}
+      try {gfaDevice.getMemory().loadRom(getPrimaryFile().getInputStream(), getPrimaryFile().getSize());}
       catch (FileNotFoundException e) {}
       catch (OutOfMemoryError oome) {} // tmp fix
 

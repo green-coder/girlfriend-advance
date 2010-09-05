@@ -4,8 +4,6 @@ import com.lemoulinstudio.gfa.core.dma.Dma;
 import com.lemoulinstudio.gfa.core.gfx.Lcd;
 import com.lemoulinstudio.gfa.core.time.Time;
 import com.lemoulinstudio.gfa.core.util.Hex;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -222,20 +220,11 @@ public class GfaMMU implements MemoryInterface {
     return true;
   }
 
-  public boolean loadRom(InputStream in) {
+  public void loadRom(InputStream in, long romSize) {
     try {
-      // Create a dynamic array with 1Mb of initial capacity.
-      ByteArrayOutputStream romByteArray = new ByteArrayOutputStream(0x100000);
-
-      byte[] fourK = new byte[4096];
-      for (int nbBytes = in.read(fourK); nbBytes >= 0; nbBytes = in.read(fourK))
-        romByteArray.write(fourK, 0, nbBytes);
-
-      int romSize = romByteArray.size();
-
-      int part1Size = Math.min(romSize, 0x01000000); // 16Mb max
+      long part1Size = Math.min(romSize, 0x01000000); // 16Mb max
       romSize -= part1Size;
-      int part2Size = Math.min(romSize, 0x01000000); // 16Mb max
+      long part2Size = Math.min(romSize, 0x01000000); // 16Mb max
       romSize -= part2Size;
 
       if (romSize > 0) // The file is too big and it's not normal: fail the load.
@@ -244,16 +233,11 @@ public class GfaMMU implements MemoryInterface {
       byte[] part1 = ((GameROM_8_16_32) memory[0x08]).createInternalArray((int) part1Size);
       byte[] part2 = ((GameROM_8_16_32) memory[0x09]).createInternalArray((int) part2Size);
 
-      ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(romByteArray.toByteArray());
-      arrayInputStream.read(part1);
-      arrayInputStream.read(part2);
-
-      return true;
+      in.read(part1);
+      in.read(part2);
     }
-    catch (IOException e) {
+    catch (Exception e) {
       System.err.println(e.getMessage());
-      e.printStackTrace();
-      return false;
     }
     finally {
       try {in.close();}
