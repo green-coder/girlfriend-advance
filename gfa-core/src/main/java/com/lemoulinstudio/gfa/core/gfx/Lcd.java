@@ -17,8 +17,8 @@ public class Lcd implements ImageProducer {
   private final DirectColorModel model;
   private final List<ImageConsumer> consumerList;
 
-  public final int xScreenSize = 240;
-  public final int yScreenSize = 160;
+  public final static int xScreenSize = 240;
+  public final static int yScreenSize = 160;
 
   private IORegisterSpace_8_16_32   ioMem; // registers
   private MemoryManagementUnit_16_32 pMem; // palette
@@ -96,9 +96,8 @@ public class Lcd implements ImageProducer {
   /**
    * Draw the line y of the screen in the mode 0 way.
    * This mode is a 8x8 tile-based mode.
-   * It have 4 backgrounds which can independantly
-   * scroll on the x and y axis.
-   * Each one can be enabled or disabled of rendering.
+   * It has 4 backgrounds which can independently scroll on the x and y axis.
+   * Each one can have its rendering enabled or disabled.
    */
   protected void drawMode0Line(int y) {
     boolean isBG0Enabled = ioMem.isBGEnabled(0);
@@ -161,106 +160,106 @@ public class Lcd implements ImageProducer {
   }
 
   /**
-   * Draw the line y of the screen in the mode 3 way.
+   * Draw the line y of the screen the mode 3 way.
    * This mode is a 16bbp bitmap mode.
    * Each pixel is encoded in a half word.
-   * Only 1 frame buffer can be use in this mode
+   * Only 1 frame buffer can be used in this mode
    * since it use all the video memory space.
    */
   protected void drawMode3Line(int yScr) {
     boolean isBG2Enabled  = ioMem.isBGEnabled(2);
-    if (!isBG2Enabled) return;
-    
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
-    
-    for (int xScr = 0; xScr < xScreenSize; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
-      short color16 = vMem.hardwareAccessLoadHalfWord((x + y * xScreenSize) << 1);
-      rawPixels[xScr + yScr * xScreenSize] = color15BitsTo24Bits(color16);
+    if (isBG2Enabled) {
+      // handle the mosaic effect
+      boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+      int xMosaic           = ioMem.getMosaicBGXSize();
+      int yMosaic           = ioMem.getMosaicBGYSize();
+      int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+
+      for (int xScr = 0; xScr < xScreenSize; xScr++) {
+        int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+        short color16 = vMem.hardwareAccessLoadHalfWord((x + y * xScreenSize) << 1);
+        rawPixels[xScr + yScr * xScreenSize] = color15BitsTo24Bits(color16);
+      }
     }
 
     if (ioMem.isSpriteEnabled())
       for (int priority = 3; priority >= 0; priority--)
-        drawSprites(y, priority);
+        drawSprites(yScr, priority);
   }
 
   /**
-   * Draw the line y of the screen in the mode 4 way.
-   * This mode is a paletted 8bbp bitmap mode.
+   * Draw the line y of the screen the mode 4 way.
+   * This mode is a palette-based 8bbp bitmap mode.
    * Each pixel is encoded in a byte.
    * In this mode, the amount of memory
-   * able the developper to use 2 frame buffer.
+   * enable the developer to use 2 frame buffer.
    */
   protected void drawMode4Line(int yScr) {
     boolean isBG2Enabled  = ioMem.isBGEnabled(2);
-    if (!isBG2Enabled) return;
-    
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+    if (isBG2Enabled) {
+      // handle the mosaic effect
+      boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+      int xMosaic           = ioMem.getMosaicBGXSize();
+      int yMosaic           = ioMem.getMosaicBGYSize();
+      int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
 
-    // Say which frame the hardware have to display.
-    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
-    
-    for (int xScr = 0; xScr < xScreenSize; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
-      int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(frameIndex + (x + y * xScreenSize));
-      short color16 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
-      rawPixels[xScr + yScr * xScreenSize] = color15BitsTo24Bits(color16);
+      // Say which frame the hardware have to display.
+      int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
+
+      for (int xScr = 0; xScr < xScreenSize; xScr++) {
+        int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+        int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(frameIndex + (x + y * xScreenSize));
+        short color16 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
+        rawPixels[xScr + yScr * xScreenSize] = color15BitsTo24Bits(color16);
+      }
     }
     
     if (ioMem.isSpriteEnabled())
       for (int priority = 3; priority >= 0; priority--)
-        drawSprites(y, priority);
+        drawSprites(yScr, priority);
   }
 
   protected void drawMode5Line(int yScr) {
-    boolean isBG2Enabled  = ioMem.isBGEnabled(2);
-    if (!isBG2Enabled) return;
-    
     // In this mode, there is only 128 horizontal lines.
     if (yScr >= 128) return;
     
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+    boolean isBG2Enabled  = ioMem.isBGEnabled(2);
+    if (isBG2Enabled) {
+      // handle the mosaic effect
+      boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+      int xMosaic           = ioMem.getMosaicBGXSize();
+      int yMosaic           = ioMem.getMosaicBGYSize();
+      int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
 
-    // Say which frame the hardware have to display.
-    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
-    
-    boolean isDoubleLine = ((yScr % 4) == 3); // shoul we double the line ?
-    yScr = (yScr * 5) / 4;
-    int dst = yScr * xScreenSize;
-    
-    for (int xScr = 0; xScr < 160; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % yMosaic) : xScr);
-      short color16 = vMem.hardwareAccessLoadHalfWord(frameIndex + ((x + y * 160) << 1));
-      int color24 = color15BitsTo24Bits(color16);
-      rawPixels[dst] = color24;
-      if (isDoubleLine) // double this pixel on the vertical axis.
-	rawPixels[dst + xScreenSize] = color24;
-      dst++;
-      
-      if ((xScr % 2) == 1) { // double this pixel on the horizontal axis.
-	rawPixels[dst] = color24;
-	if (isDoubleLine) // double this pixel on the vetical axis.
-	  rawPixels[dst + xScreenSize] = color24;
-	dst++;
+      // Says which frame the hardware have to display.
+      int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
+
+      boolean isDoubleLine = ((yScr % 4) == 3); // shoul we double the line ?
+      yScr = (yScr * 5) / 4;
+      int dst = yScr * xScreenSize;
+
+      for (int xScr = 0; xScr < 160; xScr++) {
+        int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+        short color16 = vMem.hardwareAccessLoadHalfWord(frameIndex + ((x + y * 160) << 1));
+        int color24 = color15BitsTo24Bits(color16);
+        rawPixels[dst] = color24;
+        if (isDoubleLine) // double this pixel on the vertical axis.
+          rawPixels[dst + xScreenSize] = color24;
+        dst++;
+
+        if ((xScr % 2) == 1) { // double this pixel on the horizontal axis.
+          rawPixels[dst] = color24;
+          if (isDoubleLine) // double this pixel on the vetical axis.
+            rawPixels[dst + xScreenSize] = color24;
+          dst++;
+        }
+
       }
-
     }
     
     if (ioMem.isSpriteEnabled())
       for (int priority = 3; priority >= 0; priority--)
-        drawSprites(y, priority);
+        drawSprites(yScr, priority);
   }
   
   protected void drawBackground(int y) {
@@ -662,12 +661,12 @@ public class Lcd implements ImageProducer {
   }
 
   protected int color15BitsTo24Bits(short color15) {
-    // the 15 bits format is "?bbbbbgggggrrrrr"
-    int r = ((color15 & 0x0000001f) >>> 0)  << 3;
-    int g = ((color15 & 0x000003e0) >>> 5)  << 3;
-    int b = ((color15 & 0x00007c00) >>> 10) << 3;
-    // the 32 bits format is "11111111rrrrrrrrggggggggbbbbbbbb"
-    return (0xff000000 | (r << 16) | (g << 8) | b); // Alpha channel is full value.
+    // The 15 bits format is "?bbbbbgggggrrrrr".
+    // The 24 bits format is "11111111rrrrr000ggggg000bbbbb000".
+    int r = (color15 & 0x0000001f) << 19;
+    int g = (color15 & 0x000003e0) << 6;
+    int b = (color15 & 0x00007c00) >> 7;
+    return (0xff000000 | r | g | b);
   }
 
 }

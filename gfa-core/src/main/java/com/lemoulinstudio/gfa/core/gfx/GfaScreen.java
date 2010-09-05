@@ -9,13 +9,9 @@ import javax.swing.JComponent;
 
 public class GfaScreen extends JComponent {
 
-  private Dimension fixedDimension = new Dimension(240, 160);
+  private final static Dimension fixedDimension = new Dimension(240, 160);
+  
   private final Image image;
-
-  public GfaScreen() {
-    setDoubleBuffered(false);
-    image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gfa-splash.png"));
-  }
 
   public GfaScreen(ImageProducer imageProducer) {
     setDoubleBuffered(false);
@@ -39,21 +35,6 @@ public class GfaScreen extends JComponent {
   @Override
   public Dimension getPreferredSize() {
     return fixedDimension;
-  }
-
-  @Override
-  public boolean isPreferredSizeSet() {
-    return true;
-  }
-
-  @Override
-  public boolean isMinimumSizeSet() {
-    return true;
-  }
-
-  @Override
-  public boolean isMaximumSizeSet() {
-    return true;
   }
 
   @Override
