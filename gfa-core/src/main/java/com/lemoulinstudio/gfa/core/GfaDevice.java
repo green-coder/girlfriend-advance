@@ -40,7 +40,6 @@ public class GfaDevice {
     inputSystem = new InputSystem();
     
     setupConnections();
-    reset();
   }
 
   private void setupConnections() {
@@ -67,8 +66,8 @@ public class GfaDevice {
 
   }
 
-  public void reset() {
-    getCpu().reset();
+  public void reset(boolean skipBios) {
+    getCpu().reset(skipBios);
     getMemory().reset();
     getDma0().reset();
     getDma1().reset();

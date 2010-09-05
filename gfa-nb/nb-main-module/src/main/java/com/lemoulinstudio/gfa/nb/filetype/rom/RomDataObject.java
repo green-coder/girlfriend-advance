@@ -42,7 +42,7 @@ public class RomDataObject extends MultiDataObject {
         stoppable.stop();
 
       setGfaDeviceState(GfaDeviceState.Undefined);
-      getGfaDevice().reset();
+      getGfaDevice().reset(skipBios);
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
   }
@@ -100,7 +100,7 @@ public class RomDataObject extends MultiDataObject {
 
         // Reset
         setGfaDeviceState(GfaDeviceState.Undefined);
-        device.reset();
+        device.reset(skipBios);
 
         Arm7Tdmi cpu = device.getCpu();
         try {
@@ -143,7 +143,7 @@ public class RomDataObject extends MultiDataObject {
 
         // Reset
         setGfaDeviceState(GfaDeviceState.Undefined);
-        getGfaDevice().reset();
+        getGfaDevice().reset(skipBios);
 
         // Set the state to Run.
         setGfaDeviceState(GfaDeviceState.Running);
@@ -193,7 +193,7 @@ public class RomDataObject extends MultiDataObject {
         long now = cpu.getTime().getTime();
         
         // Reset
-        device.reset();
+        device.reset(skipBios);
 
         // We are looking for the last time where the condition was true.
         long lastTime = -1;
@@ -210,7 +210,7 @@ public class RomDataObject extends MultiDataObject {
         // If we found one, we come back to it.
         if (lastTime != -1) {
           // Reset
-          device.reset();
+          device.reset(skipBios);
 
           while (time.getTime() != lastTime)
             cpu.step();
@@ -259,6 +259,7 @@ public class RomDataObject extends MultiDataObject {
   private StoppedState  stoppedState = new StoppedState();
 
   private String breakpoint = "";
+  private boolean skipBios = true;
 
   private GfaDeviceState gfaDeviceState = GfaDeviceState.Undefined;
   private StoppableRunner cpuRunner = null;
@@ -330,6 +331,9 @@ public class RomDataObject extends MultiDataObject {
       // Create the device.
       gfaDevice = new GfaDevice();
 
+      // Reset the device.
+      gfaDevice.reset(skipBios);
+
       // Load the bios.
       gfaDevice.getMemory().loadBios("roms/bios.gba");
 
@@ -369,6 +373,14 @@ public class RomDataObject extends MultiDataObject {
 
   public void setBreakpoint(String breakpoint) {
     this.breakpoint = breakpoint;
+  }
+
+  public boolean isSkipBios() {
+    return skipBios;
+  }
+
+  public void setSkipBios(boolean skipBios) {
+    this.skipBios = skipBios;
   }
 
 }

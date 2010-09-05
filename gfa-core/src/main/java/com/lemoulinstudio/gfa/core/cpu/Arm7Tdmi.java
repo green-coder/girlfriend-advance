@@ -236,7 +236,7 @@ public abstract class Arm7Tdmi {
     CPSR.set((CPSR.get() & ~modeBitsMask) | modeBits);
   }
 
-  public void reset() {
+  public void reset(boolean skipBios) {
     // Set all registers to the zero value.
     for (int i = 0; i < allRegisters.length; i++)
       if (allRegisters[i] != null)
@@ -250,15 +250,14 @@ public abstract class Arm7Tdmi {
     CPSR.setOn(iFlagBit | fFlagBit);
     setArmState();
     PC.set(resetVectorAddress);
-    
-    /* The following lines are used to boot without running the bios. */
-    ///*
-    PC.set(0x08000000);      // pas ecrit dans la doc
-    CPSR.setOff(iFlagBit | fFlagBit);
-    getRegister(13, usrModeBits).set(0x03007f00); // et ca non plus
-    getRegister(13, irqModeBits).set(0x03007fa0); // et ca non plus
-    getRegister(13, svcModeBits).set(0x03007fe0); // et ca non plus
-    //*/
+
+    if (skipBios) {
+      PC.set(0x08000000);      // pas ecrit dans la doc
+      CPSR.setOff(iFlagBit | fFlagBit);
+      getRegister(13, usrModeBits).set(0x03007f00); // et ca non plus
+      getRegister(13, irqModeBits).set(0x03007fa0); // et ca non plus
+      getRegister(13, svcModeBits).set(0x03007fe0); // et ca non plus
+    }
   }
 
   public abstract void step();
