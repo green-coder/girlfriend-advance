@@ -141,8 +141,11 @@ public abstract class ArmStateMove extends ArmStateDataProcessing {
     applyOperation(operand2);
     
     if ((opcode & SetConditionBit) != 0) {
-      if (destinationRegister == PC)
-	CPSR.set(getSPSR());
+      if (destinationRegister == PC) {
+        ArmReg spsr = getSPSR();
+        if (spsr != null)
+          CPSR.set(spsr);
+      }
       else
         CPSR.set(tmpCPSR);
     }
