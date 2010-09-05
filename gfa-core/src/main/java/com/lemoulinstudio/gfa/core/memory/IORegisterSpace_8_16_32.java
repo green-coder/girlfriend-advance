@@ -314,9 +314,9 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return (short) ((memory[offset + 1] << 8) | (0xff & memory[offset]));
   }
 
-  public void setReg16(int offset, short value) {
+  public final void setReg16(int offset, short value) {
     memory[offset] = (byte) value;
-    memory[offset + 1] = (byte) (value >>> 8);
+    memory[offset + 1] = (byte) (value >> 8);
   }
 
   public int getReg32(int offset) {
@@ -328,9 +328,9 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
 
   public void setReg32(int offset, int value) {
     memory[offset] = (byte) value;
-    memory[offset + 1] = (byte) (value >>> 8);
-    memory[offset + 2] = (byte) (value >>> 16);
-    memory[offset + 3] = (byte) (value >>> 24);
+    memory[offset + 1] = (byte) (value >> 8);
+    memory[offset + 2] = (byte) (value >> 16);
+    memory[offset + 3] = (byte) (value >> 24);
   }
 
   public final static int LCDRegisterAddress = 0x00000000; // The screen mode
@@ -360,6 +360,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static int BGXMosaicEnabledBit       = 0x0040; // mosaic effect enabled (like on SNES)
   public final static int BGXFormatPalette256Color  = 0x0080; // if set : {256 colors * 1} else {16 colors * 16}
   public final static int BGXTileMapAdressMask      = 0x1f00; // the tile map address (0x6000000 + M * 0x800)
+  public final static int BGXWrapAroundBit          = 0x2000; // if set : background repeats out of its limit else nothing displayed
   public final static int BGXFormatXNumberOfTileBit = 0x4000; // if set : horizontally {64 tiles} else {only 32}
   public final static int BGXFormatYNumberOfTileBit = 0x8000; // if set : vertically {64 tiles} else {only 32}
 
@@ -532,8 +533,6 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       default: return 128;
     }
   }
-  
-  public final static int BGXWrapAroundBit = 0x00002000;
   
   public boolean isBG2RotScalWrapAround() {
     return ((getReg16(BGFormatRegisterAddress[2]) & BGXWrapAroundBit) != 0);
