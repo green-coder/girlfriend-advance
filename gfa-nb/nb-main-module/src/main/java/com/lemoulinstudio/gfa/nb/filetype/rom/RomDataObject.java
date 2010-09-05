@@ -274,11 +274,14 @@ public class RomDataObject extends MultiDataObject {
     super(pf, loader);
 
     CookieSet cookies = getCookieSet();
+    cookies.add(this);
     cookies.add(new OpenSupport());
 
     stateToCookies.put(GfaDeviceState.Undefined, Collections.<Node.Cookie>emptyList());
     stateToCookies.put(GfaDeviceState.Stopped, Arrays.<Node.Cookie>asList(stoppedState, resetable, debugBackable, stepBackable, steppable, stepOverable, debuggable, runnable));
     stateToCookies.put(GfaDeviceState.Running, Arrays.<Node.Cookie>asList(resetable, stoppable));
+
+    setGfaDeviceState(GfaDeviceState.Undefined);
   }
 
   @Override
@@ -307,7 +310,7 @@ public class RomDataObject extends MultiDataObject {
     return gfaDeviceState;
   }
 
-  public synchronized void setGfaDeviceState(GfaDeviceState gfaDeviceState) {
+  public final synchronized void setGfaDeviceState(GfaDeviceState gfaDeviceState) {
     List<Node.Cookie> cookiesBefore = stateToCookies.get(this.gfaDeviceState);
     List<Node.Cookie> cookiesAfter = stateToCookies.get(gfaDeviceState);
 
@@ -325,6 +328,10 @@ public class RomDataObject extends MultiDataObject {
   }
 
   private GfaDevice gfaDevice;
+
+  public boolean isDeviceCreated() {
+    return gfaDevice != null;
+  }
 
   private synchronized void ensureDeviceCreated() {
     if (gfaDevice == null) {

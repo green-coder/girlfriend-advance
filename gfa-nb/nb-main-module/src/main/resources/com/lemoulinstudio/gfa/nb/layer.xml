@@ -98,6 +98,11 @@
           <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.memory.Bundle#CTL_MemoryAction"/>
           <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
         </file>
+        <file name="com-lemoulinstudio-gfa-nb-input-InputAction.instance">
+          <attr name="component" methodvalue="com.lemoulinstudio.gfa.nb.input.InputTopComponent.findInstance"/>
+          <attr name="displayName" bundlevalue="com.lemoulinstudio.gfa.nb.input.Bundle#CTL_InputAction"/>
+          <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+        </file>
       </folder>
     </folder>
   </folder>
@@ -213,6 +218,9 @@
         <file name="MemoryAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-memory-MemoryAction.instance"/>
         </file>
+        <file name="InputAction.shadow">
+          <attr name="originalFile" stringvalue="Actions/Gfa/Window/com-lemoulinstudio-gfa-nb-input-InputAction.instance"/>
+        </file>
       </folder>
     </folder>
   </folder>
@@ -278,10 +286,12 @@
       <file name="CpuRegistersTopComponent.settings" url="CpuRegistersTopComponentSettings.xml"/>
       <file name="DisassemblerTopComponent.settings" url="DisassemblerTopComponentSettings.xml"/>
       <file name="MemoryTopComponent.settings" url="MemoryTopComponentSettings.xml"/>
+      <file name="InputTopComponent.settings" url="InputTopComponentSettings.xml"/>
     </folder>
     <folder name="Modes">
       <folder name="properties">
         <file name="CpuRegistersTopComponent.wstcref" url="CpuRegistersTopComponentWstcref.xml"/>
+        <file name="InputTopComponent.wstcref" url="InputTopComponentWstcref.xml"/>
       </folder>
       <folder name="output">
         <file name="DisassemblerTopComponent.wstcref" url="DisassemblerTopComponentWstcref.xml"/>
