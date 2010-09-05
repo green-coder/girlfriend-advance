@@ -10,7 +10,7 @@
   
   <modules>
     <module>gfa-core</module>
-    <module>gfa-jse</module>
+    <!--module>gfa-jse</module-->
     <module>gfa-nb</module>
   </modules>
 
@@ -22,11 +22,11 @@
         <version>1.0-SNAPSHOT</version>
       </dependency>
 
-      <dependency>
+      <!--dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>gfa-jse</artifactId>
         <version>1.0-SNAPSHOT</version>
-      </dependency>
+      </dependency-->
       
       <dependency>
         <groupId>${project.groupId}</groupId>
