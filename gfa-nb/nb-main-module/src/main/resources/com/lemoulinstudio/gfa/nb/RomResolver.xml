@@ -3,8 +3,11 @@
 <MIME-resolver>
   <file>
     <ext name="gba"/>
+    <ext name="GBA"/>
     <ext name="agb"/>
+    <ext name="AGB"/>
     <ext name="bin"/>
+    <ext name="BIN"/>
     <resolver mime="bin/x-gba"/>
   </file>
 </MIME-resolver>
