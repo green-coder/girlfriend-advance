@@ -46,7 +46,7 @@ public class RenderTimer {
     this.dma3 = dma3;
   }
   
-  public void reset() {
+  public final void reset() {
     hValue = 0;
     vValue = 0;
     oldIsHBlank = false;
@@ -68,13 +68,13 @@ public class RenderTimer {
     ioMem.setHBlank(isHBlank);
     ioMem.setVBlank(isVBlank);
     
-    if (!oldIsHBlank && isHBlank) {
+    if (!oldIsHBlank && isHBlank && !isVBlank) {
       lcd.drawLine(vValue);
       dma0.notifyHBlank();
       dma1.notifyHBlank();
       dma2.notifyHBlank();
       dma3.notifyHBlank();
-      ioMem.genInterrupt(ioMem.hBlankInterruptBit);
+      ioMem.genInterrupt(IORegisterSpace_8_16_32.hBlankInterruptBit);
     }
     
     if (!oldIsVBlank && isVBlank) {
@@ -82,7 +82,7 @@ public class RenderTimer {
       dma1.notifyVBlank();
       dma2.notifyVBlank();
       dma3.notifyVBlank();
-      ioMem.genInterrupt(ioMem.vBlankInterruptBit);
+      ioMem.genInterrupt(IORegisterSpace_8_16_32.vBlankInterruptBit);
     }
     
     oldIsHBlank = isHBlank;
@@ -98,7 +98,7 @@ public class RenderTimer {
       ioMem.setYScanline(vValue);
       if (ioMem.isVCountMatchInterruptEnabled() &&
 	  (vValue == ioMem.getVCountSetting()))
-	  ioMem.genInterrupt(ioMem.vCountInterruptBit);
+	  ioMem.genInterrupt(IORegisterSpace_8_16_32.vCountInterruptBit);
     }
   }
 
