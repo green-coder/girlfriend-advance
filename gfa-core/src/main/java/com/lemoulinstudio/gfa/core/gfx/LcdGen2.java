@@ -161,6 +161,134 @@ public class LcdGen2 extends Lcd {
     }
   }
 
+  private void drawBGRotScalModeLine(int bgNumber, int y, int[] pixel) {
+    int mapAddress        = ioMem.getBGTileMapAddress(bgNumber);
+    int dataAddress       = ioMem.getBGTileDataAddress(bgNumber);
+    int numberOfTile      = ioMem.getBGRotScalNumberOfTile(bgNumber);
+    int numberOfTileMask  = numberOfTile - 1;
+    boolean isWrapAround  = ioMem.isBGRotScalWrapAround(bgNumber);
+    
+    // 20 bits for integers & 8 bits for decimals
+    if (y == 0) {
+      bgXOrigin[bgNumber - 2] = ioMem.getBGRotScalXOrigin(bgNumber);
+      bgYOrigin[bgNumber - 2] = ioMem.getBGRotScalYOrigin(bgNumber);
+    }
+    
+    // 8 bits for integers & 8 bits for decimals
+    int pa = ioMem.getBGRotScalPA(bgNumber);
+    int pb = ioMem.getBGRotScalPB(bgNumber);
+    int pc = ioMem.getBGRotScalPC(bgNumber);
+    int pd = ioMem.getBGRotScalPD(bgNumber);
+    
+    int xCurrentPos = bgXOrigin[bgNumber - 2];
+    int yCurrentPos = bgYOrigin[bgNumber - 2];
+    
+    for (int x = 0; x < xScreenSize; x++) {
+      // Determinate the source of pixel to display
+      int xTile = (xCurrentPos >> 8) >>> 3;
+      int yTile = (yCurrentPos >> 8) >>> 3;
+      
+      if ((isWrapAround) ||
+	  ((xTile >= 0) && (xTile < numberOfTile) &&
+	   (yTile >= 0) && (yTile < numberOfTile))) {
+	// handle the wraparound effect.
+	xTile &= numberOfTileMask;
+	yTile &= numberOfTileMask;
+	
+	int xSubTile = (xCurrentPos >> 8) & 0x07;
+	int ySubTile = (yCurrentPos >> 8) & 0x07;
+	
+	int tileNumber = 0x000000ff &
+	    vMem.hardwareAccessLoadByte(0x0000ffff &
+					(mapAddress + xTile + yTile * numberOfTile));
+	
+	int color8 = 0x000000ff &
+	    vMem.hardwareAccessLoadByte(0x0000ffff &
+					(dataAddress +
+					 tileNumber * 8*8 +
+					 xSubTile + ySubTile * 8));
+	if (color8 != 0) { // if color is zero, transparent
+	  short color15 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
+	  pixel[x + y * xScreenSize] = color15BitsTo24Bits(color15);
+	}
+      }
+      
+      xCurrentPos += pa;
+      yCurrentPos += pc;
+    }
+    
+    // Update the origin point for the next horizontal line
+    bgXOrigin[bgNumber - 2] += pb;
+    bgYOrigin[bgNumber - 2] += pd;
+  }
+
+  /**
+   * Draw the line y of the screen the mode 3 way.
+   * This mode is a 16bbp bitmap mode.
+   * Each pixel is encoded in a half word.
+   * Only 1 frame buffer can be used in this mode
+   * since it use all the video memory space.
+   */
+  private void drawMode3Line(int yScr, int[] pixel) {
+    // handle the mosaic effect
+    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+    int xMosaic           = ioMem.getMosaicBGXSize();
+    int yMosaic           = ioMem.getMosaicBGYSize();
+    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+
+    for (int xScr = 0; xScr < xScreenSize; xScr++) {
+      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+      short color16 = vMem.hardwareAccessLoadHalfWord((x + y * xScreenSize) << 1);
+      pixel[xScr] = color15BitsTo24Bits(color16);
+    }
+  }
+
+  /**
+   * Draw the line y of the screen the mode 4 way.
+   * This mode is a palette-based 8bbp bitmap mode.
+   * Each pixel is encoded in a byte.
+   * In this mode, the amount of memory
+   * enable the developer to use 2 frame buffer.
+   */
+  private void drawMode4Line(int yScr, int[] pixel) {
+    // handle the mosaic effect
+    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+    int xMosaic           = ioMem.getMosaicBGXSize();
+    int yMosaic           = ioMem.getMosaicBGYSize();
+    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+
+    // Say which frame the hardware have to display.
+    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
+
+    for (int xScr = 0; xScr < xScreenSize; xScr++) {
+      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+      int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(frameIndex + (x + y * xScreenSize));
+      short color16 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
+      pixel[xScr] = color15BitsTo24Bits(color16);
+    }
+  }
+
+  private void drawMode5Line(int yScr, int[] pixel) {
+    // In this mode, there is only 128 horizontal lines.
+    if (yScr >= 128) return;
+
+    // handle the mosaic effect
+    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
+    int xMosaic           = ioMem.getMosaicBGXSize();
+    int yMosaic           = ioMem.getMosaicBGYSize();
+    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
+
+    // Says which frame the hardware have to display.
+    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
+
+    for (int xScr = 0; xScr < 160; xScr++) {
+      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
+      short color16 = vMem.hardwareAccessLoadHalfWord(frameIndex + ((x + y * 160) << 1));
+      int color24 = color15BitsTo24Bits(color16);
+      pixel[xScr] = color24;
+    }
+  }
+
   private void drawSprites(int yScr, int priority, int[] pixel) {
     final int tileDataAddress = 0x00010000;
     int nbSprite = 128;
@@ -321,134 +449,6 @@ public class LcdGen2 extends Lcd {
 	  }
 	}
       }
-    }
-  }
-
-  private void drawBGRotScalModeLine(int bgNumber, int y, int[] pixel) {
-    int mapAddress        = ioMem.getBGTileMapAddress(bgNumber);
-    int dataAddress       = ioMem.getBGTileDataAddress(bgNumber);
-    int numberOfTile      = ioMem.getBGRotScalNumberOfTile(bgNumber);
-    int numberOfTileMask  = numberOfTile - 1;
-    boolean isWrapAround  = ioMem.isBGRotScalWrapAround(bgNumber);
-    
-    // 20 bits for integers & 8 bits for decimals
-    if (y == 0) {
-      bgXOrigin[bgNumber - 2] = ioMem.getBGRotScalXOrigin(bgNumber);
-      bgYOrigin[bgNumber - 2] = ioMem.getBGRotScalYOrigin(bgNumber);
-    }
-    
-    // 8 bits for integers & 8 bits for decimals
-    int pa = ioMem.getBGRotScalPA(bgNumber);
-    int pb = ioMem.getBGRotScalPB(bgNumber);
-    int pc = ioMem.getBGRotScalPC(bgNumber);
-    int pd = ioMem.getBGRotScalPD(bgNumber);
-    
-    int xCurrentPos = bgXOrigin[bgNumber - 2];
-    int yCurrentPos = bgYOrigin[bgNumber - 2];
-    
-    for (int x = 0; x < xScreenSize; x++) {
-      // Determinate the source of pixel to display
-      int xTile = (xCurrentPos >> 8) >>> 3;
-      int yTile = (yCurrentPos >> 8) >>> 3;
-      
-      if ((isWrapAround) ||
-	  ((xTile >= 0) && (xTile < numberOfTile) &&
-	   (yTile >= 0) && (yTile < numberOfTile))) {
-	// handle the wraparound effect.
-	xTile &= numberOfTileMask;
-	yTile &= numberOfTileMask;
-	
-	int xSubTile = (xCurrentPos >> 8) & 0x07;
-	int ySubTile = (yCurrentPos >> 8) & 0x07;
-	
-	int tileNumber = 0x000000ff &
-	    vMem.hardwareAccessLoadByte(0x0000ffff &
-					(mapAddress + xTile + yTile * numberOfTile));
-	
-	int color8 = 0x000000ff &
-	    vMem.hardwareAccessLoadByte(0x0000ffff &
-					(dataAddress +
-					 tileNumber * 8*8 +
-					 xSubTile + ySubTile * 8));
-	if (color8 != 0) { // if color is zero, transparent
-	  short color15 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
-	  pixel[x + y * xScreenSize] = color15BitsTo24Bits(color15);
-	}
-      }
-      
-      xCurrentPos += pa;
-      yCurrentPos += pc;
-    }
-    
-    // Update the origin point for the next horizontal line
-    bgXOrigin[bgNumber - 2] += pb;
-    bgYOrigin[bgNumber - 2] += pd;
-  }
-
-  /**
-   * Draw the line y of the screen the mode 3 way.
-   * This mode is a 16bbp bitmap mode.
-   * Each pixel is encoded in a half word.
-   * Only 1 frame buffer can be used in this mode
-   * since it use all the video memory space.
-   */
-  private void drawMode3Line(int yScr, int[] pixel) {
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
-
-    for (int xScr = 0; xScr < xScreenSize; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
-      short color16 = vMem.hardwareAccessLoadHalfWord((x + y * xScreenSize) << 1);
-      pixel[xScr] = color15BitsTo24Bits(color16);
-    }
-  }
-
-  /**
-   * Draw the line y of the screen the mode 4 way.
-   * This mode is a palette-based 8bbp bitmap mode.
-   * Each pixel is encoded in a byte.
-   * In this mode, the amount of memory
-   * enable the developer to use 2 frame buffer.
-   */
-  private void drawMode4Line(int yScr, int[] pixel) {
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
-
-    // Say which frame the hardware have to display.
-    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
-
-    for (int xScr = 0; xScr < xScreenSize; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
-      int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(frameIndex + (x + y * xScreenSize));
-      short color16 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
-      pixel[xScr] = color15BitsTo24Bits(color16);
-    }
-  }
-
-  private void drawMode5Line(int yScr, int[] pixel) {
-    // In this mode, there is only 128 horizontal lines.
-    if (yScr >= 128) return;
-
-    // handle the mosaic effect
-    boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
-    int xMosaic           = ioMem.getMosaicBGXSize();
-    int yMosaic           = ioMem.getMosaicBGYSize();
-    int y                 = (mosaicEnabled ? yScr - (yScr % yMosaic) : yScr);
-
-    // Says which frame the hardware have to display.
-    int frameIndex = (ioMem.isFrame1Mode() ? 0x0000a000 : 0);
-
-    for (int xScr = 0; xScr < 160; xScr++) {
-      int x = (mosaicEnabled ? xScr - (xScr % xMosaic) : xScr);
-      short color16 = vMem.hardwareAccessLoadHalfWord(frameIndex + ((x + y * 160) << 1));
-      int color24 = color15BitsTo24Bits(color16);
-      pixel[xScr] = color24;
     }
   }
 

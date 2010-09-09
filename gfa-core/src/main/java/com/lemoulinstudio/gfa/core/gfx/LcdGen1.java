@@ -93,7 +93,7 @@ public class LcdGen1 extends Lcd {
    * since it use all the video memory space.
    */
   protected void drawMode3Line(int yScr) {
-    boolean isBG2Enabled  = ioMem.isBGEnabled(2);
+    boolean isBG2Enabled = ioMem.isBGEnabled(2);
     if (isBG2Enabled) {
       // handle the mosaic effect
       boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
@@ -121,7 +121,7 @@ public class LcdGen1 extends Lcd {
    * enable the developer to use 2 frame buffer.
    */
   protected void drawMode4Line(int yScr) {
-    boolean isBG2Enabled  = ioMem.isBGEnabled(2);
+    boolean isBG2Enabled = ioMem.isBGEnabled(2);
     if (isBG2Enabled) {
       // handle the mosaic effect
       boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
@@ -149,7 +149,7 @@ public class LcdGen1 extends Lcd {
     // In this mode, there is only 128 horizontal lines.
     if (yScr >= 128) return;
     
-    boolean isBG2Enabled  = ioMem.isBGEnabled(2);
+    boolean isBG2Enabled = ioMem.isBGEnabled(2);
     if (isBG2Enabled) {
       // handle the mosaic effect
       boolean mosaicEnabled = ioMem.isBGMosaicEnabled(2);
@@ -275,7 +275,64 @@ public class LcdGen1 extends Lcd {
     }
   }
 
-  public void drawSprites(int yScr, int priority) {
+  protected void drawBGRotScalModeLine(int bgNumber, int y) {
+    int mapAddress        = ioMem.getBGTileMapAddress(bgNumber);
+    int dataAddress       = ioMem.getBGTileDataAddress(bgNumber);
+    int numberOfTile      = ioMem.getBGRotScalNumberOfTile(bgNumber);
+    int numberOfTileMask  = numberOfTile - 1;
+    boolean isWrapAround  = ioMem.isBGRotScalWrapAround(bgNumber);
+    
+    // 20 bits for integers & 8 bits for decimals
+    if (y == 0) {
+      bgXOrigin[bgNumber - 2] = ioMem.getBGRotScalXOrigin(bgNumber);
+      bgYOrigin[bgNumber - 2] = ioMem.getBGRotScalYOrigin(bgNumber);
+    }
+    
+    // 8 bits for integers & 8 bits for decimals
+    int pa = ioMem.getBGRotScalPA(bgNumber);
+    int pb = ioMem.getBGRotScalPB(bgNumber);
+    int pc = ioMem.getBGRotScalPC(bgNumber);
+    int pd = ioMem.getBGRotScalPD(bgNumber);
+    
+    int xCurrentPos = bgXOrigin[bgNumber - 2];
+    int yCurrentPos = bgYOrigin[bgNumber - 2];
+    
+    for (int x = 0; x < xScreenSize; x++) {
+      // Determinate the source of pixel to display
+      int xTile = (xCurrentPos >> 8) >>> 3;
+      int yTile = (yCurrentPos >> 8) >>> 3;
+      
+      if ((isWrapAround) ||
+	  ((xTile >= 0) && (xTile < numberOfTile) &&
+	   (yTile >= 0) && (yTile < numberOfTile))) {
+	// handle the wraparound effect.
+	xTile &= numberOfTileMask;
+	yTile &= numberOfTileMask;
+	
+	int xSubTile = (xCurrentPos >> 8) & 0x07;
+	int ySubTile = (yCurrentPos >> 8) & 0x07;
+	
+	int tileNumber = 0x00000000ff & vMem.hardwareAccessLoadByte(mapAddress + xTile + yTile * numberOfTile);
+	
+	int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(dataAddress +
+							tileNumber * 8*8 +
+							xSubTile + ySubTile * 8);
+	if (color8 != 0) { // if color is zero, transparent
+	  short color15 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
+	  rawPixels[x + y * xScreenSize] = color15BitsTo24Bits(color15);
+	}
+      }
+      
+      xCurrentPos += pa;
+      yCurrentPos += pc;
+    }
+    
+    // Update the origin point for the next horizontal line
+    bgXOrigin[bgNumber - 2] += pb;
+    bgYOrigin[bgNumber - 2] += pd;
+  }
+
+  protected void drawSprites(int yScr, int priority) {
     final int tileDataAddress = 0x00010000;
     int nbSprite = 128;
     for (int i = nbSprite - 1; i >= 0 ; i--) {
@@ -301,7 +358,7 @@ public class LcdGen1 extends Lcd {
 	  int tileNumberYIncr = (ioMem.is1DMappingMode() ?
 				 (is256Color ? xNbTile * 2 : xNbTile)
 				 : 32);
-	  
+
 	  int xRotCenter = xSize / 2;
 	  int yRotCenter = ySize / 2;
 
@@ -310,9 +367,9 @@ public class LcdGen1 extends Lcd {
 	    xSize *= 2;
 	    ySize *= 2;
 	  }
-	  
+
           if (yPos + ySize >= 256) yPos -= 256;
-          
+
 	  // (xScr, yScr) is the coordinate in the screen.
 	  if ((yScr >= yPos) && (yScr < yPos + ySize)) {
 	    // (x, y) is the coordinate in the sprite.
@@ -381,14 +438,14 @@ public class LcdGen1 extends Lcd {
 				   : 32);
 	    boolean hFlip = sMem.isHFlipEnabled(i);
 	    boolean vFlip = sMem.isVFlipEnabled(i);
-	    
+
             if (yPos >= yScreenSize) yPos -= 256;
-            
+
 	    if ((yScr >= yPos) && (yScr < yPos + yNbTile * 8)) {
 	      int y = yScr - yPos;
               if (mosaicEnabled) y -= (y % yMosaic);
 	      if (is256Color && !ioMem.is1DMappingMode()) tileBaseNumber &= 0xfffe;
-	      
+
               int xScrStart = Math.max(0, xPos);
               int xScrEnd = Math.min(xScreenSize, xPos + xNbTile * 8);
               for (int xScr = xScrStart; xScr < xScrEnd; xScr++) {
@@ -436,63 +493,6 @@ public class LcdGen1 extends Lcd {
 	}
       }
     }
-  }
-  
-  protected void drawBGRotScalModeLine(int bgNumber, int y) {
-    int mapAddress        = ioMem.getBGTileMapAddress(bgNumber);
-    int dataAddress       = ioMem.getBGTileDataAddress(bgNumber);
-    int numberOfTile      = ioMem.getBGRotScalNumberOfTile(bgNumber);
-    int numberOfTileMask  = numberOfTile - 1;
-    boolean isWrapAround  = ioMem.isBGRotScalWrapAround(bgNumber);
-    
-    // 20 bits for integers & 8 bits for decimals
-    if (y == 0) {
-      bgXOrigin[bgNumber - 2] = ioMem.getBGRotScalXOrigin(bgNumber);
-      bgYOrigin[bgNumber - 2] = ioMem.getBGRotScalYOrigin(bgNumber);
-    }
-    
-    // 8 bits for integers & 8 bits for decimals
-    int pa = ioMem.getBGRotScalPA(bgNumber);
-    int pb = ioMem.getBGRotScalPB(bgNumber);
-    int pc = ioMem.getBGRotScalPC(bgNumber);
-    int pd = ioMem.getBGRotScalPD(bgNumber);
-    
-    int xCurrentPos = bgXOrigin[bgNumber - 2];
-    int yCurrentPos = bgYOrigin[bgNumber - 2];
-    
-    for (int x = 0; x < xScreenSize; x++) {
-      // Determinate the source of pixel to display
-      int xTile = (xCurrentPos >> 8) >>> 3;
-      int yTile = (yCurrentPos >> 8) >>> 3;
-      
-      if ((isWrapAround) ||
-	  ((xTile >= 0) && (xTile < numberOfTile) &&
-	   (yTile >= 0) && (yTile < numberOfTile))) {
-	// handle the wraparound effect.
-	xTile &= numberOfTileMask;
-	yTile &= numberOfTileMask;
-	
-	int xSubTile = (xCurrentPos >> 8) & 0x07;
-	int ySubTile = (yCurrentPos >> 8) & 0x07;
-	
-	int tileNumber = 0x00000000ff & vMem.hardwareAccessLoadByte(mapAddress + xTile + yTile * numberOfTile);
-	
-	int color8 = 0x000000ff & vMem.hardwareAccessLoadByte(dataAddress +
-							tileNumber * 8*8 +
-							xSubTile + ySubTile * 8);
-	if (color8 != 0) { // if color is zero, transparent
-	  short color15 = pMem.hardwareAccessLoadHalfWord(color8 << 1);
-	  rawPixels[x + y * xScreenSize] = color15BitsTo24Bits(color15);
-	}
-      }
-      
-      xCurrentPos += pa;
-      yCurrentPos += pc;
-    }
-    
-    // Update the origin point for the next horizontal line
-    bgXOrigin[bgNumber - 2] += pb;
-    bgYOrigin[bgNumber - 2] += pd;
   }
 
 }
