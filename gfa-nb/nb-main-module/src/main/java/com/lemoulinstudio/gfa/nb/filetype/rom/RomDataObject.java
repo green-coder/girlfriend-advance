@@ -62,7 +62,9 @@ public class RomDataObject extends MultiDataObject {
           try {
             while (!stopRequested)
               cpu.step();
-          } catch(Exception e) {}
+          } catch(Exception e) {
+            Exceptions.printStackTrace(e);
+          }
 
           // Make sure that we remove the breakpoint.
           getGfaDevice().getMemory().clearListeners();
@@ -80,7 +82,7 @@ public class RomDataObject extends MultiDataObject {
     public void step() {
       setGfaDeviceState(GfaDeviceState.Undefined);
       try {getGfaDevice().getCpu().step();}
-      catch (Exception e) {}
+      catch (Exception e) {Exceptions.printStackTrace(e);}
       setGfaDeviceState(GfaDeviceState.Stopped);
     }
   }
@@ -106,7 +108,8 @@ public class RomDataObject extends MultiDataObject {
         try {
           while (!breakpointExpr.evaluation())
             cpu.step();
-        } catch(Exception e) {}
+        }
+        catch(Exception e) {Exceptions.printStackTrace(e);}
 
         // Make sure that we remove the breakpoint.
         getGfaDevice().getMemory().clearListeners();
@@ -158,7 +161,8 @@ public class RomDataObject extends MultiDataObject {
             try {
               while (!stopRequested && !breakpointExpr.evaluation())
                 cpu.step();
-            } catch(Exception e) {}
+            }
+            catch(Exception e) {Exceptions.printStackTrace(e);}
 
             // Make sure that we remove the breakpoint.
             getGfaDevice().getMemory().clearListeners();
@@ -205,7 +209,8 @@ public class RomDataObject extends MultiDataObject {
               lastTime = time.getTime();
             breakpointExpr.clearStatus();
           }
-        } catch(Exception e) {}
+        }
+        catch(Exception e) {Exceptions.printStackTrace(e);}
 
         // If we found one, we come back to it.
         if (lastTime != -1) {
