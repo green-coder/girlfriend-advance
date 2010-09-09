@@ -252,11 +252,12 @@ public abstract class Arm7Tdmi {
     PC.set(resetVectorAddress);
 
     if (skipBios) {
-      PC.set(0x08000000);      // pas ecrit dans la doc
+      PC.set(0x08000000);
+      setMode(sysModeBits);
       CPSR.setOff(iFlagBit | fFlagBit);
-      getRegister(13, usrModeBits).set(0x03007f00); // et ca non plus
-      getRegister(13, irqModeBits).set(0x03007fa0); // et ca non plus
-      getRegister(13, svcModeBits).set(0x03007fe0); // et ca non plus
+      getRegister(13, usrModeBits).set(0x03007f00);
+      getRegister(13, irqModeBits).set(0x03007fa0);
+      getRegister(13, svcModeBits).set(0x03007fe0);
     }
   }
 
