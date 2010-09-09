@@ -9,6 +9,7 @@ import com.lemoulinstudio.gfa.core.dma.Dma1;
 import com.lemoulinstudio.gfa.core.dma.Dma2;
 import com.lemoulinstudio.gfa.core.dma.Dma3;
 import com.lemoulinstudio.gfa.core.gfx.Lcd;
+import com.lemoulinstudio.gfa.core.gfx.LcdGen1;
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.time.Time;
 
@@ -36,7 +37,7 @@ public class GfaDevice {
     dma2 = new Dma2();
     dma3 = new Dma3();
     time = new Time();
-    lcd  = new Lcd();
+    lcd  = new LcdGen1();
     inputSystem = new InputSystem();
     
     setupConnections();

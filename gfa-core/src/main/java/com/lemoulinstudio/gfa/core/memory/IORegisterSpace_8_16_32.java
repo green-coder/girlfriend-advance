@@ -282,15 +282,15 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
         dma3.setCrRegister(val16);
         break;
 	
-      case BG2XOriginLAddress: lcd.updateBG2XOriginL(val16); break;
-      case BG2XOriginHAddress: lcd.updateBG2XOriginH(val16); break;
-      case BG2YOriginLAddress: lcd.updateBG2YOriginL(val16); break;
-      case BG2YOriginHAddress: lcd.updateBG2YOriginH(val16); break;
+      case BG2XOriginLAddress: lcd.updateBGXOriginL(val16, 2); break;
+      case BG2XOriginHAddress: lcd.updateBGXOriginH(val16, 2); break;
+      case BG2YOriginLAddress: lcd.updateBGYOriginL(val16, 2); break;
+      case BG2YOriginHAddress: lcd.updateBGYOriginH(val16, 2); break;
       
-      case BG3XOriginLAddress: lcd.updateBG3XOriginL(val16); break;
-      case BG3XOriginHAddress: lcd.updateBG3XOriginH(val16); break;
-      case BG3YOriginLAddress: lcd.updateBG3YOriginL(val16); break;
-      case BG3YOriginHAddress: lcd.updateBG3YOriginH(val16); break;
+      case BG3XOriginLAddress: lcd.updateBGXOriginL(val16, 3); break;
+      case BG3XOriginHAddress: lcd.updateBGXOriginH(val16, 3); break;
+      case BG3YOriginLAddress: lcd.updateBGYOriginL(val16, 3); break;
+      case BG3YOriginHAddress: lcd.updateBGYOriginH(val16, 3); break;
       
       case KeyAddress: return;
       case KeyAddress+1: return;
@@ -340,6 +340,9 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static int videoOAMHBlankBit  = 0x00000020;
   public final static int video1DMappingBit  = 0x00000040;
   public final static int videoOAMBit        = 0x00001000;
+  public final static int window0Bit         = 0x00002000;
+  public final static int window1Bit         = 0x00004000;
+  public final static int objWindowBit       = 0x00008000;
 
   public final static int[] videoBGBit = {
     0x00000100, 0x00000200, 0x00000400, 0x00000800
@@ -356,10 +359,10 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   };
 
   public final static int BGXPriorityMask           = 0x0003; // the priority of the background
-  public final static int BGXTileDataAdressMask     = 0x000c; // the tile data address (0x6000000 + S * 0x4000)
+  public final static int BGXTileDataAddressMask    = 0x000c; // the tile data address (0x6000000 + S * 0x4000)
   public final static int BGXMosaicEnabledBit       = 0x0040; // mosaic effect enabled (like on SNES)
   public final static int BGXFormatPalette256Color  = 0x0080; // if set : {256 colors * 1} else {16 colors * 16}
-  public final static int BGXTileMapAdressMask      = 0x1f00; // the tile map address (0x6000000 + M * 0x800)
+  public final static int BGXTileMapAddressMask     = 0x1f00; // the tile map address (0x6000000 + M * 0x800)
   public final static int BGXWrapAroundBit          = 0x2000; // if set : background repeats out of its limit else nothing displayed
   public final static int BGXFormatXNumberOfTileBit = 0x4000; // if set : horizontally {64 tiles} else {only 32}
   public final static int BGXFormatYNumberOfTileBit = 0x8000; // if set : vertically {64 tiles} else {only 32}
@@ -410,12 +413,12 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
 
   public int getBGTileMapAddress(int bgNumber) {
     // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileMapAdressMask) >>> 8) * 0x800;
+    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileMapAddressMask) >>> 8) * 0x800;
   }
 
   public int getBGTileDataAddress(int bgNumber) {
     // Direct Hardware Access : no need an absolute address
-    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileDataAdressMask) >>> 2) * 0x4000;
+    return /* 0x6000000 + */ ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXTileDataAddressMask) >>> 2) * 0x4000;
   }
 
   public int getBGXNumberOfTile(int bgNumber) {
@@ -444,87 +447,64 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return ((getReg16(LCDRegisterAddress) & videoOAMBit) != 0);
   }
 
+  public boolean isWindow0Enabled() {
+    return ((getReg16(LCDRegisterAddress) & window0Bit) != 0);
+  }
+
+  public boolean isWindow1Enabled() {
+    return ((getReg16(LCDRegisterAddress) & window1Bit) != 0);
+  }
+
+  public boolean isObjWindowEnabled() {
+    return ((getReg16(LCDRegisterAddress) & objWindowBit) != 0);
+  }
+
   public final static int BG2XOriginLAddress = 0x0028;
   public final static int BG2XOriginHAddress = 0x002a;
   public final static int BG2YOriginLAddress = 0x002c;
   public final static int BG2YOriginHAddress = 0x002e;
-  
-  public int getBG2RotScalXOrigin() {
-    return getReg32(BG2XOriginLAddress) & 0x0fffffff;
-  }
-  
-  public int getBG2RotScalYOrigin() {
-    return getReg32(BG2YOriginLAddress) & 0x0fffffff;
-  }
-  
-  public final static int BG2PaAddress = 0x0020;
-  public final static int BG2PbAddress = 0x0022;
-  public final static int BG2PcAddress = 0x0024;
-  public final static int BG2PdAddress = 0x0026;
-  
-  public short getBG2RotScalPA() {
-    return getReg16(BG2PaAddress);
-  }
-  
-  public short getBG2RotScalPB() {
-    return getReg16(BG2PbAddress);
-  }
-  
-  public short getBG2RotScalPC() {
-    return getReg16(BG2PcAddress);
-  }
-  
-  public short getBG2RotScalPD() {
-    return getReg16(BG2PdAddress);
-  }
-  
-  public int getBG2RotScalNumberOfTile() {
-    switch ((getReg16(BGFormatRegisterAddress[2]) &
-	     (BGXFormatXNumberOfTileBit |
-	      BGXFormatYNumberOfTileBit)) >>> 14) {
-      case 0: return 16;
-      case 1: return 32;
-      case 2: return 64;
-      default: return 128;
-    }
-  }
 
   public final static int BG3XOriginLAddress = 0x0038;
   public final static int BG3XOriginHAddress = 0x003a;
   public final static int BG3YOriginLAddress = 0x003c;
   public final static int BG3YOriginHAddress = 0x003e;
+
+  public final static int[] BGXOriginLAddress = new int[] {BG2XOriginLAddress, BG3XOriginLAddress};
+  public final static int[] BGXOriginHAddress = new int[] {BG2XOriginHAddress, BG3XOriginHAddress};
+  public final static int[] BGYOriginLAddress = new int[] {BG2YOriginLAddress, BG3YOriginLAddress};
+  public final static int[] BGYOriginHAddress = new int[] {BG2YOriginHAddress, BG3YOriginHAddress};
+
+  public int getBGRotScalXOrigin(int bgNumber) {
+    return getReg32(BGXOriginLAddress[bgNumber - 2]) & 0x0fffffff;
+  }
+
+  public int getBGRotScalYOrigin(int bgNumber) {
+    return getReg32(BGYOriginLAddress[bgNumber - 2]) & 0x0fffffff;
+  }
   
-  public int getBG3RotScalXOrigin() {
-    return getReg32(BG3XOriginLAddress) & 0x0fffffff;
-  }
-
-  public int getBG3RotScalYOrigin() {
-    return getReg32(BG3YOriginLAddress) & 0x0fffffff;
-  }
+  public final static int[] BGPaAddress = new int[] {0x0020, 0x0030};
+  public final static int[] BGPbAddress = new int[] {0x0022, 0x0032};
+  public final static int[] BGPcAddress = new int[] {0x0024, 0x0034};
+  public final static int[] BGPdAddress = new int[] {0x0026, 0x0036};
   
-  public final static int BG3PaAddress = 0x0030;
-  public final static int BG3PbAddress = 0x0032;
-  public final static int BG3PcAddress = 0x0034;
-  public final static int BG3PdAddress = 0x0036;
-  
-  public short getBG3RotScalPA() {
-    return getReg16(BG3PaAddress);
+  public short getBGRotScalPA(int bgNumber) {
+    return getReg16(BGPaAddress[bgNumber - 2]);
   }
 
-  public short getBG3RotScalPB() {
-    return getReg16(BG3PbAddress);
+  public short getBGRotScalPB(int bgNumber) {
+    return getReg16(BGPbAddress[bgNumber - 2]);
   }
 
-  public short getBG3RotScalPC() {
-    return getReg16(BG3PcAddress);
+  public short getBGRotScalPC(int bgNumber) {
+    return getReg16(BGPcAddress[bgNumber - 2]);
   }
 
-  public short getBG3RotScalPD() {
-    return getReg16(BG3PdAddress);
+  public short getBGRotScalPD(int bgNumber) {
+    return getReg16(BGPdAddress[bgNumber - 2]);
   }
 
-  public int getBG3RotScalNumberOfTile() {
-    switch ((getReg16(BGFormatRegisterAddress[3]) &
+  public int getBGRotScalNumberOfTile(int bgNumber) {
+    switch ((getReg16(BGFormatRegisterAddress[bgNumber]) &
 	     (BGXFormatXNumberOfTileBit |
 	      BGXFormatYNumberOfTileBit)) >>> 14) {
       case 0: return 16;
@@ -534,12 +514,8 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     }
   }
   
-  public boolean isBG2RotScalWrapAround() {
-    return ((getReg16(BGFormatRegisterAddress[2]) & BGXWrapAroundBit) != 0);
-  }
-
-  public boolean isBG3RotScalWrapAround() {
-    return ((getReg16(BGFormatRegisterAddress[3]) & BGXWrapAroundBit) != 0);
+  public boolean isBGRotScalWrapAround(int bgNumber) {
+    return ((getReg16(BGFormatRegisterAddress[bgNumber]) & BGXWrapAroundBit) != 0);
   }
 
   public final static int MosaicSizeRegisterAddress = 0x0000004c;
@@ -562,6 +538,127 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
 
   public int getMosaicOBJYSize() {
     return ((getReg16(MosaicSizeRegisterAddress) & MosaicRegisterOBJYMask) >>> 12) + 1;
+  }
+
+  // xPos coordinate for up left corner for window
+  public final static int[] WindowUpLeftXPosAddress = {
+    0x00000041, 0x00000043
+  };
+
+  // yPos coordinate for up left corner for window
+  public final static int[] WindowUpLeftYPosAddress = {
+    0x00000045, 0x00000047
+  };
+
+  // xPos coordinate for up left corner for window
+  public final static int[] WindowDownRightXPosAddress = {
+    0x00000040, 0x00000042
+  };
+
+  // yPos coordinate for up left corner for window
+  public final static int[] WindowDownRightYPosAddress = {
+    0x00000044, 0x00000046
+  };
+
+  public int getWindowUpLeftXPos(int windowNumber) {
+    return 0xff & memory[WindowUpLeftXPosAddress[windowNumber]];
+  }
+
+  public int getWindowUpLeftYPos(int windowNumber) {
+    return 0xff & memory[WindowUpLeftYPosAddress[windowNumber]];
+  }
+
+  public int getWindowDownRightXPos(int windowNumber) {
+    return 0xff & memory[WindowDownRightXPosAddress[windowNumber]];
+  }
+
+  public int getWindowDownRightYPos(int windowNumber) {
+    return 0xff & memory[WindowDownRightYPosAddress[windowNumber]];
+  }
+
+  public static enum WindowMode {
+    InsideWindow0(0x00000048),
+    InsideWindow1(0x00000049),
+    OutsideWindow0And1(0x0000004a),
+    ObjWindow(0x0000004b);
+
+    public final int registerAdress;
+
+    private WindowMode(int registerAdress) {
+      this.registerAdress = registerAdress;
+    }
+  }
+
+  public static enum WindowLayer {
+    BG0(0x01),
+    BG1(0x02),
+    BG2(0x04),
+    BG3(0x08),
+    Obj(0x10);
+
+    public final int bit;
+
+    private WindowLayer(int bit) {
+      this.bit = bit;
+    }
+  }
+
+  public boolean isWindowLayerEnabled(WindowMode mode, WindowLayer layer) {
+    return (memory[mode.registerAdress] & layer.bit) != 0;
+  }
+
+  public final static int WindowColorEffectFlag = 0x20;
+  
+  public boolean isWindowColorEffectEnabled(WindowMode mode) {
+    return (memory[mode.registerAdress] & WindowColorEffectFlag) != 0;
+  }
+
+  public final static int ColorEffectRegisterAddress = 0x00000050;
+
+  public static enum ColorEffectTargetLayer {
+    BG0(0x01),
+    BG1(0x02),
+    BG2(0x04),
+    BG3(0x08),
+    Obj(0x10),
+    UnicolorBG(0x20);
+
+    public final int bit;
+
+    private ColorEffectTargetLayer(int bit) {
+      this.bit = bit;
+    }
+  }
+
+  public static enum ColorEffectKind {
+    None(0x00),
+    AlphaBlending(0x40),
+    Lighter(0x80),
+    Darker(0xc0);
+
+    public static final int mask = 0xc0;
+    public static final int shift = 6;
+
+    public final int bits;
+
+    private ColorEffectKind(int bits) {
+      this.bits = bits;
+    }
+  }
+
+  public ColorEffectKind getColorEffectKind() {
+    return ColorEffectKind.values()[(memory[ColorEffectRegisterAddress] & ColorEffectKind.mask) >>> ColorEffectKind.shift];
+  }
+
+  public boolean isColorEffectTargetLayerEnabled(int targetNumber, ColorEffectTargetLayer layer) {
+    return (memory[ColorEffectRegisterAddress + targetNumber] & layer.bit) != 0;
+  }
+
+  public static final int ColorEffectCoefRegisterAddress = 0x00000052;
+  public static final int ColorEffectCoefMask            = 0x1f;
+
+  public int getColorEffectCoef(int coefficientNumber) {
+    return memory[ColorEffectCoefRegisterAddress + coefficientNumber] & ColorEffectCoefMask;
   }
 
   public final static int KeyAddress              = 0x00000130;
