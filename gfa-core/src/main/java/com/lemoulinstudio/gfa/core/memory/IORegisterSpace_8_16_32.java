@@ -61,6 +61,12 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
 
     // For now, all keys are released.
     setReg16(KeyAddress, (short) 0xffff);
+
+    // $$$ Hack: Set Pa, Pb, Pc, Pd to a correct default value.
+    setReg16(BGPaAddress[0], (short) 0x0100);
+    setReg16(BGPdAddress[0], (short) 0x0100);
+    setReg16(BGPaAddress[1], (short) 0x0100);
+    setReg16(BGPdAddress[1], (short) 0x0100);
   }
 
   public byte loadByte(int offset) {
@@ -399,6 +405,10 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return ((getReg16(LCDRegisterAddress) & videoBGBit[bgNumber]) != 0);
   }
 
+  public int getEnabledLayers() {
+    return (getReg16(LCDRegisterAddress) & 0x1f00) >>> 8;
+  }
+
   public int getBGPriority(int bgNumber) {
     return (getReg16(BGFormatRegisterAddress[bgNumber]) & BGXPriorityMask);
   }
@@ -443,7 +453,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return (getReg16(BGSCY[bgNumber]) & BGXScrollValueMask);
   }
 
-  public boolean isSpriteEnabled() {
+  public boolean isObjEnabled() {
     return ((getReg16(LCDRegisterAddress) & videoOAMBit) != 0);
   }
 
@@ -560,27 +570,27 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     0x00000044, 0x00000046
   };
 
-  public int getWindowUpLeftXPos(int windowNumber) {
+  public int getWindowXMin(int windowNumber) {
     return 0xff & memory[WindowUpLeftXPosAddress[windowNumber]];
   }
 
-  public int getWindowUpLeftYPos(int windowNumber) {
+  public int getWindowYMin(int windowNumber) {
     return 0xff & memory[WindowUpLeftYPosAddress[windowNumber]];
   }
 
-  public int getWindowDownRightXPos(int windowNumber) {
+  public int getWindowXSup(int windowNumber) {
     return 0xff & memory[WindowDownRightXPosAddress[windowNumber]];
   }
 
-  public int getWindowDownRightYPos(int windowNumber) {
+  public int getWindowYSup(int windowNumber) {
     return 0xff & memory[WindowDownRightYPosAddress[windowNumber]];
   }
 
   public static enum WindowMode {
-    InsideWindow0(0x00000048),
-    InsideWindow1(0x00000049),
-    OutsideWindow0And1(0x0000004a),
-    ObjWindow(0x0000004b);
+    InWindow0(0x00000048),
+    InWindow1(0x00000049),
+    OutsideWindows(0x0000004a),
+    InObjWindow(0x0000004b);
 
     public final int registerAdress;
 
@@ -589,22 +599,8 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     }
   }
 
-  public static enum WindowLayer {
-    BG0(0x01),
-    BG1(0x02),
-    BG2(0x04),
-    BG3(0x08),
-    Obj(0x10);
-
-    public final int bit;
-
-    private WindowLayer(int bit) {
-      this.bit = bit;
-    }
-  }
-
-  public boolean isWindowLayerEnabled(WindowMode mode, WindowLayer layer) {
-    return (memory[mode.registerAdress] & layer.bit) != 0;
+  public int getWindowLayers(WindowMode mode) {
+    return (memory[mode.registerAdress] & 0x1f);
   }
 
   public final static int WindowColorEffectFlag = 0x20;

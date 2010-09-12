@@ -6,23 +6,23 @@ public class ObjectAttributMemory_16_32 extends MemoryManagementUnit_16_32 {
     super(name, size);
   }
 
-  public final int SpritePriorityMask = 0x0c;
+  public final int ObjPriorityMask = 0x0c;
 
-  public int getSpritePriority(int spriteNumber) {
-      int base = spriteNumber * 4 * 2; // 2 is the size in byte of a halfword
-    return (memory[base + 5] & SpritePriorityMask) >>> 2;
+  public int getObjPriority(int objNumber) {
+    int base = objNumber * 4 * 2; // 2 is the size in byte of a halfword
+    return (memory[base + 5] & ObjPriorityMask) >>> 2;
   }
 
-  public final int SpriteHiSizeMask = 0x000000c0;
-  public final int SpriteLoSizeMask = 0x000000c0;
+  public final int ObjHiSizeMask = 0x000000c0;
+  public final int ObjLoSizeMask = 0x000000c0;
 
   /**
    * Return the number of tile which horizontally compose this sprite.
    */
-  public int getSpriteNumberXTile(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
-    int sizeCode = (((memory[base + 1] & SpriteHiSizeMask) >>> 4) |
-                    ((memory[base + 3] & SpriteLoSizeMask) >>> 6));
+  public int getObjXTile(int objNumber) {
+    int base = objNumber * 4 * 2;
+    int sizeCode = (((memory[base + 1] & ObjHiSizeMask) >>> 4) |
+                    ((memory[base + 3] & ObjLoSizeMask) >>> 6));
     switch (sizeCode) {
       case 0: case 8: case 9:          return 1;
       case 1: case 4: case 10:         return 2;
@@ -33,10 +33,10 @@ public class ObjectAttributMemory_16_32 extends MemoryManagementUnit_16_32 {
   }
 
   // Return the number of tile which vertically compose this sprite.
-  public int getSpriteNumberYTile(int spriteNumber) {
-    int base = spriteNumber * 8;
-    int sizeCode = (((memory[base + 1] & SpriteHiSizeMask) >>> 4) |
-                    ((memory[base + 3] & SpriteLoSizeMask) >>> 6));
+  public int getObjYTile(int objNumber) {
+    int base = objNumber * 8;
+    int sizeCode = (((memory[base + 1] & ObjHiSizeMask) >>> 4) |
+                    ((memory[base + 3] & ObjLoSizeMask) >>> 6));
     switch (sizeCode) {
       case 0: case 4: case 5:          return 1;
       case 1: case 6: case 8:          return 2;
@@ -46,78 +46,88 @@ public class ObjectAttributMemory_16_32 extends MemoryManagementUnit_16_32 {
     }
   }
 
-  public int getSpriteXPos(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public int getObjXPos(int objNumber) {
+    int base = objNumber * 4 * 2;
     return (0x000000ff & memory[base + 2]) | ((memory[base + 3] << 31) >> 23);
   }
 
-  public int getSpriteYPos(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public int getObjYPos(int objNumber) {
+    int base = objNumber * 4 * 2;
     return (0x000000ff & memory[base + 0]);
   }
 
-  public int getTileNumber(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public int getTileNumber(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 5] & 0x00000003) << 8) | (memory[base + 4] & 0x000000ff);
   }
 
-  public boolean is256Color(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean is256Color(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 1] & 0x20) != 0);
   }
 
-  public int getPal16Number(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public int getPal16Number(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 5] & 0x000000f0) >>> 4);
   }
 
-  public boolean isRotScalEnabled(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean isRotScalEnabled(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 1] & 0x01) != 0);
   }
 
-  public boolean isDoubleSizeEnabled(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean isDoubleSizeEnabled(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 1] & 0x02) != 0);
   }
 
-  public boolean isMosaicEnabled(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean isSemiTransparent(int objNumber) {
+    int base = objNumber * 4 * 2;
+    return ((memory[base + 1] & 0x0c) == 0x04);
+  }
+
+  public boolean isObjWindow(int objNumber) {
+    int base = objNumber * 4 * 2;
+    return ((memory[base + 1] & 0x0c) == 0x08);
+  }
+
+  public boolean isMosaicEnabled(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 1] & 0x10) != 0);
   }
 
-  public boolean isHFlipEnabled(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean isHFlipEnabled(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 3] & 0x10) != 0);
   }
 
-  public boolean isVFlipEnabled(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public boolean isVFlipEnabled(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 3] & 0x20) != 0);
   }
 
-  public int getRotScalIndex(int spriteNumber) {
-    int base = spriteNumber * 4 * 2;
+  public int getRotScalIndex(int objNumber) {
+    int base = objNumber * 4 * 2;
     return ((memory[base + 3] & 0x0000003e) >>> 1);
   }
 
   public short getPA(int index) {
-    int base = index * 4 * 2 * 4 + 6;
+    int base = index * 4 * 2 * 4 + 6 + 0 * 8;
     return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
 
   public short getPB(int index) {
-    int base = index * 4 * 2 * 4 + 6 + 8;
+    int base = index * 4 * 2 * 4 + 6 + 1 * 8;
     return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
 
   public short getPC(int index) {
-    int base = index * 4 * 2 * 4 + 6 + 8 + 8;
+    int base = index * 4 * 2 * 4 + 6 + 2 * 8;
     return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
   
   public short getPD(int index) {
-    int base = index * 4 * 2 * 4 + 6 + 8 + 8 + 8;
+    int base = index * 4 * 2 * 4 + 6 + 3 * 8;
     return (short) ((memory[base + 1] << 8) | (memory[base] & 0x000000ff));
   }
   

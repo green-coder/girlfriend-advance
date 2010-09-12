@@ -6,9 +6,11 @@ public class GameROM_8_16_32 extends MemoryManagementUnit_8_16_32 {
     super(name, size);
   }
   
+  @Override
   public void reset() {
   }
 
+  @Override
   protected void write(int offset, byte value) {
   }
   

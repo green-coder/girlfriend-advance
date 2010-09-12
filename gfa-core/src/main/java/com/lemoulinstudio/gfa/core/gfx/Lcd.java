@@ -4,6 +4,7 @@ import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
 import com.lemoulinstudio.gfa.core.memory.MemoryManagementUnit_16_32;
 import com.lemoulinstudio.gfa.core.memory.ObjectAttributMemory_16_32;
+import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
@@ -13,9 +14,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Lcd implements ImageProducer {
 
-  protected final int[] rawPixels;
-  private final DirectColorModel model;
+  private final ColorModel colorModel;
   private final List<ImageConsumer> consumerList;
+  protected final int[] rawPixels;
 
   public final static int xScreenSize = 240;
   public final static int yScreenSize = 160;
@@ -25,10 +26,10 @@ public abstract class Lcd implements ImageProducer {
   protected MemoryManagementUnit_16_32 vMem; // video
   protected ObjectAttributMemory_16_32 sMem; // sprite
 
-  public Lcd() {
-    rawPixels = new int[xScreenSize * yScreenSize];
-    model = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff);
+  public Lcd(ColorModel colorModel) {
+    this.colorModel = colorModel;
     consumerList = new CopyOnWriteArrayList<ImageConsumer>();
+    rawPixels = new int[xScreenSize * yScreenSize];
   }
 
   public final void addConsumer(ImageConsumer ic) {
@@ -37,7 +38,7 @@ public abstract class Lcd implements ImageProducer {
 		ic.COMPLETESCANLINES |
 		ic.SINGLEPASS |
 		ic.SINGLEFRAME);
-    ic.setColorModel(model);
+    ic.setColorModel(colorModel);
     consumerList.add(ic);
   }
 
@@ -55,7 +56,7 @@ public abstract class Lcd implements ImageProducer {
   }
 
   public final void requestTopDownLeftRightResend(ImageConsumer ic) {
-    ic.setPixels(0, 0, xScreenSize, yScreenSize, model, rawPixels, 0, xScreenSize);
+    ic.setPixels(0, 0, xScreenSize, yScreenSize, colorModel, rawPixels, 0, xScreenSize);
     ic.imageComplete(ic.SINGLEFRAMEDONE);
   }
 
@@ -95,15 +96,6 @@ public abstract class Lcd implements ImageProducer {
     bgYOrigin[bgNumber - 2] = (value << 16) | (bgYOrigin[bgNumber - 2] & 0x0000ffff);
   }
   
-  protected final int color15BitsTo24Bits(short color15) {
-    // The 15 bits format is "?bbbbbgggggrrrrr".
-    // The 24 bits format is "11111111rrrrr000ggggg000bbbbb000".
-    int r = (color15 & 0x0000001f) << 19;
-    int g = (color15 & 0x000003e0) << 6;
-    int b = (color15 & 0x00007c00) >> 7;
-    return (0xff000000 | r | g | b);
-  }
-
   public abstract void drawLine(int y);
 
 }

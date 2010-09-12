@@ -1,6 +1,12 @@
 package com.lemoulinstudio.gfa.core.gfx;
 
+import java.awt.image.DirectColorModel;
+
 public class LcdGen1 extends Lcd {
+
+  public LcdGen1() {
+    super(new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff));
+  }
 
   public void drawLine(int y) {
     if (y < yScreenSize) {
@@ -30,7 +36,7 @@ public class LcdGen1 extends Lcd {
     boolean isBG1Enabled = ioMem.isBGEnabled(1);
     boolean isBG2Enabled = ioMem.isBGEnabled(2);
     boolean isBG3Enabled = ioMem.isBGEnabled(3);
-    boolean isSPREnabled = ioMem.isSpriteEnabled();
+    boolean isSPREnabled = ioMem.isObjEnabled();
     
     int priorityBG0 = ioMem.getBGPriority(0);
     int priorityBG1 = ioMem.getBGPriority(1);
@@ -52,7 +58,7 @@ public class LcdGen1 extends Lcd {
     boolean isBG0Enabled = ioMem.isBGEnabled(0);
     boolean isBG1Enabled = ioMem.isBGEnabled(1);
     boolean isBG2Enabled = ioMem.isBGEnabled(2);
-    boolean isSPREnabled = ioMem.isSpriteEnabled();
+    boolean isSPREnabled = ioMem.isObjEnabled();
 
     int priorityBG0 = ioMem.getBGPriority(0);
     int priorityBG1 = ioMem.getBGPriority(1);
@@ -71,7 +77,7 @@ public class LcdGen1 extends Lcd {
   protected void drawMode2Line(int y) {
     boolean isBG2Enabled = ioMem.isBGEnabled(2);
     boolean isBG3Enabled = ioMem.isBGEnabled(3);
-    boolean isSPREnabled = ioMem.isSpriteEnabled();
+    boolean isSPREnabled = ioMem.isObjEnabled();
     
     int priorityBG2 = ioMem.getBGPriority(2);
     int priorityBG3 = ioMem.getBGPriority(3);
@@ -108,7 +114,7 @@ public class LcdGen1 extends Lcd {
       }
     }
 
-    if (ioMem.isSpriteEnabled())
+    if (ioMem.isObjEnabled())
       for (int priority = 3; priority >= 0; priority--)
         drawSprites(yScr, priority);
   }
@@ -140,7 +146,7 @@ public class LcdGen1 extends Lcd {
       }
     }
     
-    if (ioMem.isSpriteEnabled())
+    if (ioMem.isObjEnabled())
       for (int priority = 3; priority >= 0; priority--)
         drawSprites(yScr, priority);
   }
@@ -183,7 +189,7 @@ public class LcdGen1 extends Lcd {
       }
     }
     
-    if (ioMem.isSpriteEnabled())
+    if (ioMem.isObjEnabled())
       for (int priority = 3; priority >= 0; priority--)
         drawSprites(yScr, priority);
   }
@@ -336,18 +342,18 @@ public class LcdGen1 extends Lcd {
     final int tileDataAddress = 0x00010000;
     int nbSprite = 128;
     for (int i = nbSprite - 1; i >= 0 ; i--) {
-      if (priority == sMem.getSpritePriority(i)) {
+      if (priority == sMem.getObjPriority(i)) {
         // It is the same priority, so let's draw the sprite ...
 	boolean rotScalEnabled    = sMem.isRotScalEnabled(i);
 	boolean doubleSizeEnabled = sMem.isDoubleSizeEnabled(i);
-        int xNbTile               = sMem.getSpriteNumberXTile(i);
-        int yNbTile               = sMem.getSpriteNumberYTile(i);
+        int xNbTile               = sMem.getObjXTile(i);
+        int yNbTile               = sMem.getObjYTile(i);
 	int xSize                 = xNbTile * 8;
 	int ySize                 = yNbTile * 8;
         int paletteAddress        = 0x00000200;
 	int paletteNumber         = sMem.getPal16Number(i);
-        int xPos                  = sMem.getSpriteXPos(i);
-        int yPos                  = sMem.getSpriteYPos(i);
+        int xPos                  = sMem.getObjXPos(i);
+        int yPos                  = sMem.getObjYPos(i);
 	boolean mosaicEnabled     = sMem.isMosaicEnabled(i);
 	int xMosaic               = ioMem.getMosaicOBJXSize();
 	int yMosaic               = ioMem.getMosaicOBJYSize();
@@ -493,6 +499,15 @@ public class LcdGen1 extends Lcd {
 	}
       }
     }
+  }
+
+  private int color15BitsTo24Bits(short color15) {
+    // The 15 bits format is "?bbbbbgggggrrrrr".
+    // The 24 bits format is "11111111rrrrr000ggggg000bbbbb000".
+    int r = (color15 & 0x0000001f) << 19;
+    int g = (color15 & 0x000003e0) << 6;
+    int b = (color15 & 0x00007c00) >> 7;
+    return (0xff000000 | r | g | b);
   }
 
 }
