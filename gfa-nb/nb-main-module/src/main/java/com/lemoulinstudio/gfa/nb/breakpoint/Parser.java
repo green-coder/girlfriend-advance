@@ -280,6 +280,22 @@ public class Parser {
           } else {
             throw new ClassCastException();
           }
+        } else if (f.equals("!=")) {
+          arity = 2;
+          ScmExpr arg1 = constructExpr(l.get(1));
+          ScmExpr arg2 = constructExpr(l.get(2));
+
+          if ((arg1 instanceof BoolExpr)
+                  && (arg2 instanceof BoolExpr)) {
+            result = new BoolNotEqualBoolBool((BoolExpr) arg1,
+                    (BoolExpr) arg2);
+          } else if ((arg1 instanceof IntExpr)
+                  && (arg2 instanceof IntExpr)) {
+            result = new BoolNotEqualIntInt((IntExpr) arg1,
+                    (IntExpr) arg2);
+          } else {
+            throw new ClassCastException();
+          }
         } else if (f.equals(">")) {
           arity = 2;
           result = new BoolUGreaterThan((IntExpr) constructExpr(l.get(1)),
