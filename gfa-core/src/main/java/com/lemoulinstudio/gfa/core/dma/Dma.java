@@ -6,7 +6,7 @@ import com.lemoulinstudio.gfa.core.util.Hex;
 
 public class Dma {
 
-  protected String name;
+  private final int dmaNumber;
 
   protected int src;
   protected int dst;
@@ -20,11 +20,10 @@ public class Dma {
 
   protected GfaMMU mem;
   protected IORegisterSpace_8_16_32 ioMem;
-  protected short interruptBit;
   protected int countMaxValue;
 
-  public Dma(String name) {
-    this.name = name;
+  public Dma(int dmaNumber) {
+    this.dmaNumber = dmaNumber;
 
     src = 0;
     dst = 0;
@@ -99,10 +98,10 @@ public class Dma {
 
   public void setCrRegister(short val) {
     cr = val;
-    dmaEnabled = ((cr & DMAXCrEnabledBit) != 0);
-    irqEnabled = ((cr & DMAXCrIRQBit) != 0);
+    dmaEnabled    = ((cr & DMAXCrEnabledBit) != 0);
+    irqEnabled    = ((cr & DMAXCrIRQBit) != 0);
     repeatEnabled = ((cr & DMAXCrRepeatBit) != 0);
-    startMode = (cr & DMAXCrStartModeMask);
+    startMode     = (cr & DMAXCrStartModeMask);
 
     if (dmaEnabled && (startMode == startModeImmediatly)) {
       blit();
@@ -158,7 +157,7 @@ public class Dma {
       dst = oldDst;
 
     if (irqEnabled)
-      ioMem.genInterrupt(interruptBit); // generate an interrupt.
+      ioMem.genInterrupt(IORegisterSpace_8_16_32.dmaInterruptBit[dmaNumber]); // generate an interrupt.
   }
 
   public void notifyVBlank() {
@@ -196,9 +195,10 @@ public class Dma {
     startMode     = 0;
   }
 
+  @Override
   public String toString() {
     return ("["
-            + name
+            + "dma" + dmaNumber
             + " src = " + Hex.toString(src)
             + " dst = " + Hex.toString(dst)
             + " count = " + Hex.toString(count)

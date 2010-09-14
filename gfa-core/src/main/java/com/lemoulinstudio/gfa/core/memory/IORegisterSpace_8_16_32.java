@@ -88,26 +88,23 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   }
 
   public void storeByte(int offset, byte value) {
-    write(offset, value);
+    write8(offset, value);
   }
 
   public void storeHalfWord(int offset, short value) {
     offset &= 0xfffffffe;
-    write(offset, (byte) value);
-    write(offset + 1, (byte) (value >> 8));
+    write16(offset, value);
   }
 
   public void storeWord(int offset, int value) {
     offset &= 0xfffffffc;
-    write(offset, (byte) value);
-    write(offset + 1, (byte) (value >> 8));
-    write(offset + 2, (byte) (value >> 16));
-    write(offset + 3, (byte) (value >> 24));
+    write16(offset, (short) value);
+    write16(offset + 2, (short) (value >> 16));
   }
 
   public byte swapByte(int offset, byte value) {
     byte result = read(offset);
-    write(offset, value);
+    write8(offset, value);
     return result;
   }
 
@@ -115,8 +112,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     offset &= 0xfffffffe;
     short result = (short) ((read(offset + 1) << 8) |
                              read(offset));
-    write(offset, (byte) value);
-    write(offset + 1, (byte) (value >> 8));
+    write16(offset, value);
     return result;
   }
 
@@ -126,10 +122,8 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
                   ((0xff & read(offset + 2)) << 16) |
                   ((0xff & read(offset + 1)) << 8)  |
                    (0xff & read(offset)));
-    write(offset, (byte) value);
-    write(offset + 1, (byte) (value >> 8));
-    write(offset + 2, (byte) (value >> 16));
-    write(offset + 3, (byte) (value >> 24));
+    write16(offset, (short) value);
+    write16(offset + 2, (short) (value >> 16));
     return result;
   }
 
@@ -202,17 +196,17 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return memory[offset];
   }
 
-  protected void write(int offset, byte value) {
+  protected void write8(int offset, byte value) {
     offset = getInternalOffset(offset);
 
     int off16 = offset & 0xfffffffe; // Offset aligned on halfWords.
     int off8  = offset & 1;          // The rest of alignment.
-    
+
     short val16 = getReg16(off16);
-    
+
     if (off8 == 0) val16 = (short) ((val16 & 0x0000ff00) | (value & 0x000000ff));
     else val16 = (short) ((val16 & 0x000000ff) | ((value & 0x000000ff) << 8));
-    
+
     switch (off16) {
       case Timer0DataAdress: timer0.setTime(val16); break;
       case Timer1DataAdress: timer1.setTime(val16); break;
@@ -287,17 +281,17 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
         else val16 = (short) ((val16 & 0xff) | (value << 8));
         dma3.setCrRegister(val16);
         break;
-	
+
       case BG2XOriginLAddress: lcd.updateBGXOriginL(val16, 2); break;
       case BG2XOriginHAddress: lcd.updateBGXOriginH(val16, 2); break;
       case BG2YOriginLAddress: lcd.updateBGYOriginL(val16, 2); break;
       case BG2YOriginHAddress: lcd.updateBGYOriginH(val16, 2); break;
-      
+
       case BG3XOriginLAddress: lcd.updateBGXOriginL(val16, 3); break;
       case BG3XOriginHAddress: lcd.updateBGXOriginH(val16, 3); break;
       case BG3YOriginLAddress: lcd.updateBGYOriginL(val16, 3); break;
       case BG3YOriginHAddress: lcd.updateBGYOriginH(val16, 3); break;
-      
+
       case KeyAddress: return;
       case KeyAddress+1: return;
 
@@ -309,11 +303,81 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case IERegisterAddress:
 	//System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
 	break;
-      
+
       default:
     }
-    
+
     memory[offset] = value;
+  }
+
+  protected void write16(int offset, short value) {
+    offset = getInternalOffset(offset);
+
+    switch (offset) {
+      case Timer0DataAdress: timer0.setTime(value); break;
+      case Timer1DataAdress: timer1.setTime(value); break;
+      case Timer2DataAdress: timer2.setTime(value); break;
+      case Timer3DataAdress: timer3.setTime(value); break;
+
+      case Timer0CrAdress: updateTimerState(timer0, value); break;
+      case Timer1CrAdress: updateTimerState(timer1, value); break;
+      case Timer2CrAdress: updateTimerState(timer2, value); break;
+      case Timer3CrAdress: updateTimerState(timer3, value); break;
+
+      case DMA0SrcLAddress: dma0.setSrcLRegister(value); break;
+      case DMA0SrcHAddress: dma0.setSrcHRegister(value); break;
+      case DMA0DstLAddress: dma0.setDstLRegister(value); break;
+      case DMA0DstHAddress: dma0.setDstHRegister(value); break;
+      case DMA0SizeAddress: dma0.setCountRegister(value); break;
+      case DMA0CrAddress:   dma0.setCrRegister(value); break;
+
+      case DMA1SrcLAddress: dma1.setSrcLRegister(value); break;
+      case DMA1SrcHAddress: dma1.setSrcHRegister(value); break;
+      case DMA1DstLAddress: dma1.setDstLRegister(value); break;
+      case DMA1DstHAddress: dma1.setDstHRegister(value); break;
+      case DMA1SizeAddress: dma1.setCountRegister(value); break;
+      case DMA1CrAddress:   dma1.setCrRegister(value); break;
+
+      case DMA2SrcLAddress: dma2.setSrcLRegister(value); break;
+      case DMA2SrcHAddress: dma2.setSrcHRegister(value); break;
+      case DMA2DstLAddress: dma2.setDstLRegister(value); break;
+      case DMA2DstHAddress: dma2.setDstHRegister(value); break;
+      case DMA2SizeAddress: dma2.setCountRegister(value); break;
+      case DMA2CrAddress:   dma2.setCrRegister(value); break;
+
+      case DMA3SrcLAddress: dma3.setSrcLRegister(value); break;
+      case DMA3SrcHAddress: dma3.setSrcHRegister(value); break;
+      case DMA3DstLAddress: dma3.setDstLRegister(value); break;
+      case DMA3DstHAddress: dma3.setDstHRegister(value); break;
+      case DMA3SizeAddress: dma3.setCountRegister(value); break;
+      case DMA3CrAddress:   dma3.setCrRegister(value); break;
+
+      case BG2XOriginLAddress: lcd.updateBGXOriginL(value, 2); break;
+      case BG2XOriginHAddress: lcd.updateBGXOriginH(value, 2); break;
+      case BG2YOriginLAddress: lcd.updateBGYOriginL(value, 2); break;
+      case BG2YOriginHAddress: lcd.updateBGYOriginH(value, 2); break;
+
+      case BG3XOriginLAddress: lcd.updateBGXOriginL(value, 3); break;
+      case BG3XOriginHAddress: lcd.updateBGXOriginH(value, 3); break;
+      case BG3YOriginLAddress: lcd.updateBGYOriginL(value, 3); break;
+      case BG3YOriginHAddress: lcd.updateBGYOriginH(value, 3); break;
+
+      case KeyAddress: return;
+
+      case IFRegisterAddress:
+	//System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
+	memory[offset] &= ~value;
+	return;
+
+      case IERegisterAddress:
+	//System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
+	break;
+
+      default:
+    }
+
+    memory[offset] = (byte) value;
+    memory[offset + 1] = (byte) (value >> 8);
   }
 
   public short getReg16(int offset) {
@@ -611,21 +675,6 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
 
   public final static int ColorEffectRegisterAddress = 0x00000050;
 
-  public static enum ColorEffectTargetLayer {
-    BG0(0x01),
-    BG1(0x02),
-    BG2(0x04),
-    BG3(0x08),
-    Obj(0x10),
-    UnicolorBG(0x20);
-
-    public final int bit;
-
-    private ColorEffectTargetLayer(int bit) {
-      this.bit = bit;
-    }
-  }
-
   public static enum ColorEffectKind {
     None(0x00),
     AlphaBlending(0x40),
@@ -646,15 +695,16 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     return ColorEffectKind.values()[(memory[ColorEffectRegisterAddress] & ColorEffectKind.mask) >>> ColorEffectKind.shift];
   }
 
-  public boolean isColorEffectTargetLayerEnabled(int targetNumber, ColorEffectTargetLayer layer) {
-    return (memory[ColorEffectRegisterAddress + targetNumber] & layer.bit) != 0;
+  public int getColorEffectTargetLayerEnabled(int targetNumber) {
+    return memory[ColorEffectRegisterAddress + targetNumber] & 0x1f;
   }
 
   public static final int ColorEffectCoefRegisterAddress = 0x00000052;
   public static final int ColorEffectCoefMask            = 0x1f;
 
   public int getColorEffectCoef(int coefficientNumber) {
-    return memory[ColorEffectCoefRegisterAddress + coefficientNumber] & ColorEffectCoefMask;
+    int coef = memory[ColorEffectCoefRegisterAddress + coefficientNumber] & ColorEffectCoefMask;
+    return Math.min(coef, 16);
   }
 
   public final static int KeyAddress              = 0x00000130;
@@ -736,10 +786,10 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static short timer2InterruptBit = 0x0020;
   public final static short timer3InterruptBit = 0x0040;
   public final static short commInterruptBit   = 0x0080;
-  public final static short dma0InterruptBit   = 0x0100;
-  public final static short dma1InterruptBit   = 0x0200;
-  public final static short dma2InterruptBit   = 0x0400;
-  public final static short dma3InterruptBit   = 0x0800;
+
+  public final static short dmaInterruptBit[]
+          = new short[] {0x0100, 0x0200, 0x0400, 0x0800};
+
   public final static short keyInterruptBit    = 0x1000;
   //public final static short unknownButUsedBit  = 0x2000;
   

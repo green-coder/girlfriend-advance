@@ -1,23 +1,23 @@
 package com.lemoulinstudio.gfa.core.dma;
 
-import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
-
 public class Dma0 extends Dma {
 
   public Dma0() {
-    super("dma0");
-    interruptBit = IORegisterSpace_8_16_32.dma0InterruptBit;
+    super(0);
     countMaxValue = 0x00004000;
   }
 
+  @Override
   public void setSrcHRegister(short srcH) {
     src = (src & 0x0000ffff) | ((srcH & 0x07ff) << 16);
   }
 
+  @Override
   public void setDstHRegister(short dstH) {
     dst = (dst & 0x0000ffff) | ((dstH & 0x07ff) << 16);
   }
 
+  @Override
   public void setCountRegister(short count) {
     this.count = (short) (count & 0x3fff);
   }
