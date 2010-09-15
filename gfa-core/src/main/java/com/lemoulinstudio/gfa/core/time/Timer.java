@@ -14,20 +14,13 @@ public class Timer {
   private boolean irqEnabled;     // If true, throw an IRQ when an overflow occurs.
   private boolean timerEnabled;   // If false, the timer is halted.
 
-  private String timerName; // For debug purpose : to know where the IRQ come from.
-  private short interruptBit;
+  private int timerNumber;
   private IORegisterSpace_8_16_32 ioMem;
 
   public Timer(Timer nextTimer, int timerNumber) {
     this.nextTimer = nextTimer;
-    timerName = "timer" + timerNumber;
-    switch (timerNumber) {
-      case 0:  interruptBit = IORegisterSpace_8_16_32.timer0InterruptBit; break;
-      case 1:  interruptBit = IORegisterSpace_8_16_32.timer1InterruptBit; break;
-      case 2:  interruptBit = IORegisterSpace_8_16_32.timer2InterruptBit; break;
-      case 3:  interruptBit = IORegisterSpace_8_16_32.timer3InterruptBit; break;
-      default: throw new Error("time number incorrect.");
-    }
+    this.timerNumber = timerNumber;
+
     reset();
   }
 
@@ -35,7 +28,7 @@ public class Timer {
     ioMem = (IORegisterSpace_8_16_32) memory.getMemoryBank(4);
   }
   
-  public void reset() {
+  public final void reset() {
     value          = 0;
     rest           = 0;
     period         = 1;
@@ -66,7 +59,7 @@ public class Timer {
           value &= 0xffff;
 
           if (irqEnabled)
-	      ioMem.genInterrupt(interruptBit);
+            ioMem.genInterrupt(IORegisterSpace_8_16_32.timerInterruptBit[timerNumber]);
         }
         // do something
       }

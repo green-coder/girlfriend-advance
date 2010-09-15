@@ -218,26 +218,134 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case Timer2CrAdress: updateTimerState(timer2, val16); break;
       case Timer3CrAdress: updateTimerState(timer3, val16); break;
 
-      case DMA0SrcLAddress: dma0.setSrcLRegister(val16); break;
-      case DMA0SrcHAddress: dma0.setSrcHRegister(val16); break;
-      case DMA0DstLAddress: dma0.setDstLRegister(val16); break;
-      case DMA0DstHAddress: dma0.setDstHRegister(val16); break;
-      case DMA0SizeAddress: dma0.setCountRegister(val16); break;
-      case DMA0CrAddress:   dma0.setCrRegister(val16); break;
+      case DMA0SrcLAddress:
+        val16 = dma0.getSrcLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setSrcLRegister(val16);
+        break;
 
-      case DMA1SrcLAddress: dma1.setSrcLRegister(val16); break;
-      case DMA1SrcHAddress: dma1.setSrcHRegister(val16); break;
-      case DMA1DstLAddress: dma1.setDstLRegister(val16); break;
-      case DMA1DstHAddress: dma1.setDstHRegister(val16); break;
-      case DMA1SizeAddress: dma1.setCountRegister(val16); break;
-      case DMA1CrAddress:   dma1.setCrRegister(val16); break;
+      case DMA0SrcHAddress:
+        val16 = dma0.getSrcHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setSrcHRegister(val16);
+        break;
 
-      case DMA2SrcLAddress: dma2.setSrcLRegister(val16); break;
-      case DMA2SrcHAddress: dma2.setSrcHRegister(val16); break;
-      case DMA2DstLAddress: dma2.setDstLRegister(val16); break;
-      case DMA2DstHAddress: dma2.setDstHRegister(val16); break;
-      case DMA2SizeAddress: dma2.setCountRegister(val16); break;
-      case DMA2CrAddress:   dma2.setCrRegister(val16); break;
+      case DMA0DstLAddress:
+        val16 = dma0.getDstLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setDstLRegister(val16);
+        break;
+
+      case DMA0DstHAddress:
+        val16 = dma0.getDstHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setDstHRegister(val16);
+        break;
+
+      case DMA0SizeAddress:
+        val16 = dma0.getCountRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setCountRegister(val16);
+        break;
+
+      case DMA0CrAddress:
+        val16 = dma0.getCrRegister();
+        //System.out.println("val16 = " + Hex.toString(val16));
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma0.setCrRegister(val16);
+        break;
+
+      case DMA1SrcLAddress:
+        val16 = dma1.getSrcLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setSrcLRegister(val16);
+        break;
+
+      case DMA1SrcHAddress:
+        val16 = dma1.getSrcHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setSrcHRegister(val16);
+        break;
+
+      case DMA1DstLAddress:
+        val16 = dma1.getDstLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setDstLRegister(val16);
+        break;
+
+      case DMA1DstHAddress:
+        val16 = dma1.getDstHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setDstHRegister(val16);
+        break;
+
+      case DMA1SizeAddress:
+        val16 = dma1.getCountRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setCountRegister(val16);
+        break;
+
+      case DMA1CrAddress:
+        val16 = dma1.getCrRegister();
+        //System.out.println("val16 = " + Hex.toString(val16));
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma1.setCrRegister(val16);
+        break;
+
+      case DMA2SrcLAddress:
+        val16 = dma2.getSrcLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setSrcLRegister(val16);
+        break;
+
+      case DMA2SrcHAddress:
+        val16 = dma2.getSrcHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setSrcHRegister(val16);
+        break;
+
+      case DMA2DstLAddress:
+        val16 = dma2.getDstLRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setDstLRegister(val16);
+        break;
+
+      case DMA2DstHAddress:
+        val16 = dma2.getDstHRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setDstHRegister(val16);
+        break;
+
+      case DMA2SizeAddress:
+        val16 = dma2.getCountRegister();
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setCountRegister(val16);
+        break;
+
+      case DMA2CrAddress:
+        val16 = dma2.getCrRegister();
+        //System.out.println("val16 = " + Hex.toString(val16));
+        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
+        else val16 = (short) ((val16 & 0xff) | (value << 8));
+        dma2.setCrRegister(val16);
+        break;
 
       case DMA3SrcLAddress:
         val16 = dma3.getSrcLRegister();
@@ -781,13 +889,13 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static short vBlankInterruptBit = 0x0001;
   public final static short hBlankInterruptBit = 0x0002;
   public final static short vCountInterruptBit = 0x0004;
-  public final static short timer0InterruptBit = 0x0008;
-  public final static short timer1InterruptBit = 0x0010;
-  public final static short timer2InterruptBit = 0x0020;
-  public final static short timer3InterruptBit = 0x0040;
+  
+  public final static short[] timerInterruptBit
+          = new short[] {0x0008, 0x0010, 0x0020, 0x0040};
+  
   public final static short commInterruptBit   = 0x0080;
 
-  public final static short dmaInterruptBit[]
+  public final static short[] dmaInterruptBit
           = new short[] {0x0100, 0x0200, 0x0400, 0x0800};
 
   public final static short keyInterruptBit    = 0x1000;
