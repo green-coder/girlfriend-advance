@@ -144,10 +144,6 @@ public class RomDataObject extends MultiDataObject {
         final BoolExpr breakpointExpr = parser.parse(breakpoint,
                 device.getMemory(), device.getCpu().getRegisters(), device.getTime());
 
-        // Reset
-        setGfaDeviceState(GfaDeviceState.Undefined);
-        getGfaDevice().reset(skipBios);
-
         // Set the state to Run.
         setGfaDeviceState(GfaDeviceState.Running);
 
