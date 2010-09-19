@@ -2,21 +2,18 @@ package com.lemoulinstudio.gfa.core.dma;
 
 import com.lemoulinstudio.gfa.core.memory.GfaMMU;
 import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
+import com.lemoulinstudio.gfa.core.memory.var.Mem16Var;
+import com.lemoulinstudio.gfa.core.memory.var.Mem32Var;
 import com.lemoulinstudio.gfa.core.util.Hex;
 
 public class Dma {
 
   private final int dmaNumber;
 
-  protected int src;
-  protected int dst;
-  protected short count;
-  protected short cr;
-
-  protected boolean dmaEnabled;
-  protected boolean irqEnabled;
-  protected boolean repeatEnabled;
-  protected int startMode;
+  protected Mem32Var src;
+  protected Mem32Var dst;
+  protected Mem16Var count;
+  protected Mem16Var cr;
 
   protected GfaMMU mem;
   protected IORegisterSpace_8_16_32 ioMem;
@@ -24,65 +21,11 @@ public class Dma {
 
   public Dma(int dmaNumber) {
     this.dmaNumber = dmaNumber;
-
-    src = 0;
-    dst = 0;
-    count = 0;
-    cr = 0;
-
-    dmaEnabled = false;
-    irqEnabled = false;
-    repeatEnabled = false;
-    startMode = 0;
   }
 
   public void connectToMemory(GfaMMU memory) {
     this.mem = memory;
     ioMem = (IORegisterSpace_8_16_32) memory.getMemoryBank(4);
-  }
-
-  public short getSrcLRegister() {
-    return (short) src;
-  }
-
-  public short getSrcHRegister() {
-    return (short) (src >>> 16);
-  }
-
-  public short getDstLRegister() {
-    return (short) dst;
-  }
-
-  public short getDstHRegister() {
-    return (short) (dst >>> 16);
-  }
-
-  public short getCountRegister() {
-    return count;
-  }
-
-  public short getCrRegister() {
-    return cr;
-  }
-
-  public void setSrcLRegister(short srcL) {
-    src = (src & 0xffff0000) | (0x0000ffff & srcL);
-  }
-
-  public void setSrcHRegister(short srcH) {
-    src = (src & 0x0000ffff) | ((int) srcH << 16);
-  }
-
-  public void setDstLRegister(short dstL) {
-    dst = (dst & 0xffff0000) | (0x0000ffff & dstL);
-  }
-
-  public void setDstHRegister(short dstH) {
-    dst = (dst & 0x0000ffff) | ((int) dstH << 16);
-  }
-
-  public void setCountRegister(short count) {
-    this.count = count;
   }
 
   public final int DMAXCrEnabledBit    = 0x8000;
@@ -96,31 +39,28 @@ public class Dma {
   public final int startModeVBlank     = 0x1000;
   public final int startModeHBlank     = 0x2000;
 
-  public void setCrRegister(short val) {
-    cr = val;
-    dmaEnabled    = ((cr & DMAXCrEnabledBit) != 0);
-    irqEnabled    = ((cr & DMAXCrIRQBit) != 0);
-    repeatEnabled = ((cr & DMAXCrRepeatBit) != 0);
-    startMode     = (cr & DMAXCrStartModeMask);
-
-    if (dmaEnabled && (startMode == startModeImmediatly)) {
+  public void notifyCrModified() {
+    short crValue = cr.getValue();
+    if (((crValue & DMAXCrEnabledBit) != 0) &&
+        ((crValue & DMAXCrStartModeMask) == startModeImmediatly)) {
       blit();
-      cr &= ~DMAXCrEnabledBit; // Disable the dma.
-      dmaEnabled = false;
+      cr.setValue((short) (crValue & ~DMAXCrEnabledBit));
     }
   }
 
   protected void blit() {
+    short crValue = cr.getValue();
+
     // Size in byte of each element to be copied.
-    int dataSize = (((cr & DMAXCrWidthBit) == 0) ? 2 : 4);
+    int dataSize = (((crValue & DMAXCrWidthBit) == 0) ? 2 : 4);
 
     // Number of elements to be copied.
-    int unsignedCount = count & 0xffff;
+    int unsignedCount = count.getValue() & 0xffff;
     if (unsignedCount == 0) unsignedCount = countMaxValue;
 
     // Set the increment of the source pointer.
     int toAddToSrc;
-    switch (cr & DMAXCrSrcModeMask) {
+    switch (crValue & DMAXCrSrcModeMask) {
       case 0x0000: toAddToSrc =  dataSize; break;
       case 0x0080: toAddToSrc = -dataSize; break;
       case 0x0100: toAddToSrc =  0;        break;
@@ -129,54 +69,60 @@ public class Dma {
 
     // Set the increment of the destination pointer.
     int toAddToDst;
-    int oldDst = dst;
-    switch (cr & DMAXCrDstModeMask) {
+    switch (crValue & DMAXCrDstModeMask) {
       case 0x0000: toAddToDst =  dataSize; break;
       case 0x0020: toAddToDst = -dataSize; break;
       case 0x0040: toAddToDst =  0;        break;
       default:     toAddToDst =  dataSize; break;
     }
 
+    int srcValue = src.getValue();
+    int dstValue = dst.getValue();
+    int oldDst = dstValue;
+    
     // Process the copy
-    if ((cr & DMAXCrWidthBit) == 0) { // if the copy is 16bits-based
+    if ((crValue & DMAXCrWidthBit) == 0) { // if the copy is 16bits-based
       for (int i = 0; i < unsignedCount; i++) {
-        mem.storeHalfWord(dst, mem.loadHalfWord(src));
-        src += toAddToSrc;
-        dst += toAddToDst;
+        mem.storeHalfWord(dstValue, mem.loadHalfWord(srcValue));
+        srcValue += toAddToSrc;
+        dstValue += toAddToDst;
       }
     }
     else { // else, the copy is 32bits-based
       for (int i = 0; i < unsignedCount; i++) {
-        mem.storeWord(dst, mem.loadWord(src));
-        src += toAddToSrc;
-        dst += toAddToDst;
+        mem.storeWord(dstValue, mem.loadWord(srcValue));
+        srcValue += toAddToSrc;
+        dstValue += toAddToDst;
       }
     }
 
-    if ((cr & DMAXCrDstModeMask) == 0x0060) // dst incr&reload
-      dst = oldDst;
+    src.setValue(srcValue);
+    dst.setValue(dstValue);
 
-    if (irqEnabled)
+    if ((crValue & DMAXCrDstModeMask) == 0x0060) // dst incr&reload
+      dst.setValue(oldDst);
+
+    if ((crValue & DMAXCrIRQBit) != 0)
       ioMem.genInterrupt(IORegisterSpace_8_16_32.dmaInterruptBit[dmaNumber]); // generate an interrupt.
   }
 
   public void notifyVBlank() {
-    if (dmaEnabled && (startMode == startModeVBlank)) {
+    short crValue = cr.getValue();
+    if (((crValue & DMAXCrEnabledBit) != 0) &&
+        ((crValue & DMAXCrStartModeMask) == startModeVBlank)) {
       blit();
-      if (!repeatEnabled) {
-        cr &= ~DMAXCrEnabledBit; // Disable the dma.
-        dmaEnabled = false;
-      }
+      if ((crValue & DMAXCrRepeatBit) == 0)
+        cr.setValue((short) (crValue & ~DMAXCrEnabledBit));
     }
   }
 
   public void notifyHBlank() {
-    if (dmaEnabled && (startMode == startModeHBlank)) {
+    short crValue = cr.getValue();
+    if (((crValue & DMAXCrEnabledBit) != 0) &&
+        ((crValue & DMAXCrStartModeMask) == startModeHBlank)) {
       blit();
-      if (!repeatEnabled) {
-        cr &= ~DMAXCrEnabledBit; // Disable the dma.
-        dmaEnabled = false;
-      }
+      if ((crValue & DMAXCrRepeatBit) == 0)
+        cr.setValue((short) (crValue & ~DMAXCrEnabledBit));
     }
   }
 
@@ -184,25 +130,20 @@ public class Dma {
    * Called when the user reset gfa.
    */
   public void reset() {
-    src   = 0;
-    dst   = 0;
-    count = 0;
-    cr    = 0;
-
-    dmaEnabled    = false;
-    irqEnabled    = false;
-    repeatEnabled = false;
-    startMode     = 0;
+    src.setValue(0);
+    dst.setValue(0);
+    count.setValue((short) 0);
+    cr.setValue((short) 0);
   }
 
   @Override
   public String toString() {
     return ("["
             + "dma" + dmaNumber
-            + " src = " + Hex.toString(src)
-            + " dst = " + Hex.toString(dst)
-            + " count = " + Hex.toString(count)
-            + " cr = " + Hex.toString(cr)
+            + " src = " + Hex.toString(src.getValue())
+            + " dst = " + Hex.toString(dst.getValue())
+            + " count = " + Hex.toString(count.getValue())
+            + " cr = " + Hex.toString(cr.getValue())
             + "]");
   }
   

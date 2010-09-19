@@ -163,34 +163,6 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case Timer1DataAdress: setReg16(off16, timer1.getTime()); break;
       case Timer2DataAdress: setReg16(off16, timer2.getTime()); break;
       case Timer3DataAdress: setReg16(off16, timer3.getTime()); break;
-
-      case DMA0SrcLAddress: setReg16(off16, dma0.getSrcLRegister()); break;
-      case DMA0SrcHAddress: setReg16(off16, dma0.getSrcHRegister()); break;
-      case DMA0DstLAddress: setReg16(off16, dma0.getDstLRegister()); break;
-      case DMA0DstHAddress: setReg16(off16, dma0.getDstHRegister()); break;
-      case DMA0SizeAddress: setReg16(off16, dma0.getCountRegister()); break;
-      case DMA0CrAddress:   setReg16(off16, dma0.getCrRegister()); break;
-
-      case DMA1SrcLAddress: setReg16(off16, dma1.getSrcLRegister()); break;
-      case DMA1SrcHAddress: setReg16(off16, dma1.getSrcHRegister()); break;
-      case DMA1DstLAddress: setReg16(off16, dma1.getDstLRegister()); break;
-      case DMA1DstHAddress: setReg16(off16, dma1.getDstHRegister()); break;
-      case DMA1SizeAddress: setReg16(off16, dma1.getCountRegister()); break;
-      case DMA1CrAddress:   setReg16(off16, dma1.getCrRegister()); break;
-
-      case DMA2SrcLAddress: setReg16(off16, dma2.getSrcLRegister()); break;
-      case DMA2SrcHAddress: setReg16(off16, dma2.getSrcHRegister()); break;
-      case DMA2DstLAddress: setReg16(off16, dma2.getDstLRegister()); break;
-      case DMA2DstHAddress: setReg16(off16, dma2.getDstHRegister()); break;
-      case DMA2SizeAddress: setReg16(off16, dma2.getCountRegister()); break;
-      case DMA2CrAddress:   setReg16(off16, dma2.getCrRegister()); break;
-
-      case DMA3SrcLAddress: setReg16(off16, dma3.getSrcLRegister()); break;
-      case DMA3SrcHAddress: setReg16(off16, dma3.getSrcHRegister()); break;
-      case DMA3DstLAddress: setReg16(off16, dma3.getDstLRegister()); break;
-      case DMA3DstHAddress: setReg16(off16, dma3.getDstHRegister()); break;
-      case DMA3SizeAddress: setReg16(off16, dma3.getCountRegister()); break;
-      case DMA3CrAddress:   setReg16(off16, dma3.getCrRegister()); break;
     }
 
     return memory[offset];
@@ -207,6 +179,22 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     if (off8 == 0) val16 = (short) ((val16 & 0x0000ff00) | (value & 0x000000ff));
     else val16 = (short) ((val16 & 0x000000ff) | ((value & 0x000000ff) << 8));
 
+    if (off16 == IFRegisterAddress) {
+      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
+      memory[offset] &= ~value;
+      return;
+    }
+
+//    if (off16 == IERegisterAddress) {
+//      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
+//      break;
+//    }
+
+    if (off16 == KeyAddress)
+      return;
+
+    memory[offset] = value;
+    
     switch (off16) {
       case Timer0DataAdress: timer0.setTime(val16); break;
       case Timer1DataAdress: timer1.setTime(val16); break;
@@ -218,177 +206,10 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case Timer2CrAdress: updateTimerState(timer2, val16); break;
       case Timer3CrAdress: updateTimerState(timer3, val16); break;
 
-      case DMA0SrcLAddress:
-        val16 = dma0.getSrcLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setSrcLRegister(val16);
-        break;
-
-      case DMA0SrcHAddress:
-        val16 = dma0.getSrcHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setSrcHRegister(val16);
-        break;
-
-      case DMA0DstLAddress:
-        val16 = dma0.getDstLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setDstLRegister(val16);
-        break;
-
-      case DMA0DstHAddress:
-        val16 = dma0.getDstHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setDstHRegister(val16);
-        break;
-
-      case DMA0SizeAddress:
-        val16 = dma0.getCountRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setCountRegister(val16);
-        break;
-
-      case DMA0CrAddress:
-        val16 = dma0.getCrRegister();
-        //System.out.println("val16 = " + Hex.toString(val16));
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma0.setCrRegister(val16);
-        break;
-
-      case DMA1SrcLAddress:
-        val16 = dma1.getSrcLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setSrcLRegister(val16);
-        break;
-
-      case DMA1SrcHAddress:
-        val16 = dma1.getSrcHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setSrcHRegister(val16);
-        break;
-
-      case DMA1DstLAddress:
-        val16 = dma1.getDstLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setDstLRegister(val16);
-        break;
-
-      case DMA1DstHAddress:
-        val16 = dma1.getDstHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setDstHRegister(val16);
-        break;
-
-      case DMA1SizeAddress:
-        val16 = dma1.getCountRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setCountRegister(val16);
-        break;
-
-      case DMA1CrAddress:
-        val16 = dma1.getCrRegister();
-        //System.out.println("val16 = " + Hex.toString(val16));
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma1.setCrRegister(val16);
-        break;
-
-      case DMA2SrcLAddress:
-        val16 = dma2.getSrcLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setSrcLRegister(val16);
-        break;
-
-      case DMA2SrcHAddress:
-        val16 = dma2.getSrcHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setSrcHRegister(val16);
-        break;
-
-      case DMA2DstLAddress:
-        val16 = dma2.getDstLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setDstLRegister(val16);
-        break;
-
-      case DMA2DstHAddress:
-        val16 = dma2.getDstHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setDstHRegister(val16);
-        break;
-
-      case DMA2SizeAddress:
-        val16 = dma2.getCountRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setCountRegister(val16);
-        break;
-
-      case DMA2CrAddress:
-        val16 = dma2.getCrRegister();
-        //System.out.println("val16 = " + Hex.toString(val16));
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma2.setCrRegister(val16);
-        break;
-
-      case DMA3SrcLAddress:
-        val16 = dma3.getSrcLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setSrcLRegister(val16);
-        break;
-
-      case DMA3SrcHAddress:
-        val16 = dma3.getSrcHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setSrcHRegister(val16);
-        break;
-
-      case DMA3DstLAddress:
-        val16 = dma3.getDstLRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setDstLRegister(val16);
-        break;
-
-      case DMA3DstHAddress:
-        val16 = dma3.getDstHRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setDstHRegister(val16);
-        break;
-
-      case DMA3SizeAddress:
-        val16 = dma3.getCountRegister();
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setCountRegister(val16);
-        break;
-
-      case DMA3CrAddress:
-        val16 = dma3.getCrRegister();
-        //System.out.println("val16 = " + Hex.toString(val16));
-        if (off8 == 0) val16 = (short) ((val16 & 0xff00) | (0xff & value));
-        else val16 = (short) ((val16 & 0xff) | (value << 8));
-        dma3.setCrRegister(val16);
-        break;
+      case DMA0CrAddress: dma0.notifyCrModified(); break;
+      case DMA1CrAddress: dma1.notifyCrModified(); break;
+      case DMA2CrAddress: dma2.notifyCrModified(); break;
+      case DMA3CrAddress: dma3.notifyCrModified(); break;
 
       case BG2XOriginLAddress: lcd.updateBGXOriginL(val16, 2); break;
       case BG2XOriginHAddress: lcd.updateBGXOriginH(val16, 2); break;
@@ -399,28 +220,29 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case BG3XOriginHAddress: lcd.updateBGXOriginH(val16, 3); break;
       case BG3YOriginLAddress: lcd.updateBGYOriginL(val16, 3); break;
       case BG3YOriginHAddress: lcd.updateBGYOriginH(val16, 3); break;
-
-      case KeyAddress: return;
-      case KeyAddress+1: return;
-
-      case IFRegisterAddress:
-	//System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
-	memory[offset] &= ~value;
-	return;
-
-      case IERegisterAddress:
-	//System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
-	break;
-
-      default:
     }
-
-    memory[offset] = value;
   }
 
   protected void write16(int offset, short value) {
     offset = getInternalOffset(offset);
 
+    if (offset == IFRegisterAddress) {
+      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
+      memory[offset] &= ~value;
+      return;
+    }
+
+//    if (offset == IERegisterAddress) {
+//      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
+//      break;
+//    }
+
+    if (offset == KeyAddress)
+      return;
+
+    memory[offset] = (byte) value;
+    memory[offset + 1] = (byte) (value >> 8);
+    
     switch (offset) {
       case Timer0DataAdress: timer0.setTime(value); break;
       case Timer1DataAdress: timer1.setTime(value); break;
@@ -432,33 +254,10 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case Timer2CrAdress: updateTimerState(timer2, value); break;
       case Timer3CrAdress: updateTimerState(timer3, value); break;
 
-      case DMA0SrcLAddress: dma0.setSrcLRegister(value); break;
-      case DMA0SrcHAddress: dma0.setSrcHRegister(value); break;
-      case DMA0DstLAddress: dma0.setDstLRegister(value); break;
-      case DMA0DstHAddress: dma0.setDstHRegister(value); break;
-      case DMA0SizeAddress: dma0.setCountRegister(value); break;
-      case DMA0CrAddress:   dma0.setCrRegister(value); break;
-
-      case DMA1SrcLAddress: dma1.setSrcLRegister(value); break;
-      case DMA1SrcHAddress: dma1.setSrcHRegister(value); break;
-      case DMA1DstLAddress: dma1.setDstLRegister(value); break;
-      case DMA1DstHAddress: dma1.setDstHRegister(value); break;
-      case DMA1SizeAddress: dma1.setCountRegister(value); break;
-      case DMA1CrAddress:   dma1.setCrRegister(value); break;
-
-      case DMA2SrcLAddress: dma2.setSrcLRegister(value); break;
-      case DMA2SrcHAddress: dma2.setSrcHRegister(value); break;
-      case DMA2DstLAddress: dma2.setDstLRegister(value); break;
-      case DMA2DstHAddress: dma2.setDstHRegister(value); break;
-      case DMA2SizeAddress: dma2.setCountRegister(value); break;
-      case DMA2CrAddress:   dma2.setCrRegister(value); break;
-
-      case DMA3SrcLAddress: dma3.setSrcLRegister(value); break;
-      case DMA3SrcHAddress: dma3.setSrcHRegister(value); break;
-      case DMA3DstLAddress: dma3.setDstLRegister(value); break;
-      case DMA3DstHAddress: dma3.setDstHRegister(value); break;
-      case DMA3SizeAddress: dma3.setCountRegister(value); break;
-      case DMA3CrAddress:   dma3.setCrRegister(value); break;
+      case DMA0CrAddress: dma0.notifyCrModified(); break;
+      case DMA1CrAddress: dma1.notifyCrModified(); break;
+      case DMA2CrAddress: dma2.notifyCrModified(); break;
+      case DMA3CrAddress: dma3.notifyCrModified(); break;
 
       case BG2XOriginLAddress: lcd.updateBGXOriginL(value, 2); break;
       case BG2XOriginHAddress: lcd.updateBGXOriginH(value, 2); break;
@@ -469,23 +268,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
       case BG3XOriginHAddress: lcd.updateBGXOriginH(value, 3); break;
       case BG3YOriginLAddress: lcd.updateBGYOriginL(value, 3); break;
       case BG3YOriginHAddress: lcd.updateBGYOriginH(value, 3); break;
-
-      case KeyAddress: return;
-
-      case IFRegisterAddress:
-	//System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
-	memory[offset] &= ~value;
-	return;
-
-      case IERegisterAddress:
-	//System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
-	break;
-
-      default:
     }
-
-    memory[offset] = (byte) value;
-    memory[offset + 1] = (byte) (value >> 8);
   }
 
   public short getReg16(int offset) {
