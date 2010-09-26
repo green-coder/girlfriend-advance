@@ -179,16 +179,15 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     if (off8 == 0) val16 = (short) ((val16 & 0x0000ff00) | (value & 0x000000ff));
     else val16 = (short) ((val16 & 0x000000ff) | ((value & 0x000000ff) << 8));
 
-    if (off16 == IFRegisterAddress) {
-      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
-      memory[offset] &= ~value;
+    if (offset == IERegisterAddress + 1) {
+      memory[offset] = (byte) (value & 0x3f);
       return;
     }
 
-//    if (off16 == IERegisterAddress) {
-//      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
-//      break;
-//    }
+    if (off16 == IFRegisterAddress) {
+      memory[offset] &= ~value;
+      return;
+    }
 
     if (off16 == KeyAddress)
       return;
@@ -226,16 +225,19 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   protected void write16(int offset, short value) {
     offset = getInternalOffset(offset);
 
-    if (offset == IFRegisterAddress) {
-      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
-      memory[offset] &= ~value;
+    if (offset == IERegisterAddress) {
+      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
+      memory[offset] = (byte) value;
+      memory[offset + 1] = (byte) ((value >> 8) & 0x3f);
       return;
     }
 
-//    if (offset == IERegisterAddress) {
-//      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
-//      break;
-//    }
+    if (offset == IFRegisterAddress) {
+      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
+      memory[offset] &= ~value;
+      memory[offset + 1] &= ~(value >> 8);
+      return;
+    }
 
     if (offset == KeyAddress)
       return;
@@ -309,9 +311,13 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     0x00000100, 0x00000200, 0x00000400, 0x00000800
   };
 
-  public final static int DispSrAddress     = 0x00000004;
-  public final static int DispSrInVBlankBit = 0x00000001;
-  public final static int DispSrInHBlankBit = 0x00000002;
+  public final static int DispSrAddress              = 0x00000004;
+  public final static int DispSrInVBlankBit          = 0x0001;
+  public final static int DispSrInHBlankBit          = 0x0002;
+  public final static int DispSrVCountBit            = 0x0004;
+  public final static int DispSrInVBlankIntEnableBit = 0x0008;
+  public final static int DispSrInHBlankIntEnableBit = 0x0010;
+  public final static int DispSrVCountIntEnableBit   = 0x0020;
 
   public final static int LCYRegisterAddress = 0x00000006; // Current Y of the raytrace
 
@@ -638,31 +644,45 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     timer.setTimerEnabled((val16 & TimerXCrEnabledBit) != 0);
   }
 
-  public void setVBlank(boolean b) {
+  public void setIsVBlank(boolean b) {
     short val = getReg16(DispSrAddress);
     if (b) val |= DispSrInVBlankBit;
     else val &= ~DispSrInVBlankBit;
     setReg16(DispSrAddress, val);
   }
 
-  public void setHBlank(boolean b) {
+  public void setIsHBlank(boolean b) {
     short val = getReg16(DispSrAddress);
     if (b) val |= DispSrInHBlankBit;
     else val &= ~DispSrInHBlankBit;
     setReg16(DispSrAddress, val);
   }
 
-  public int getVCountSetting() {
+  public void setIsVCountMatch(boolean b) {
+    short val = getReg16(DispSrAddress);
+    if (b) val |= DispSrVCountBit;
+    else val &= ~DispSrVCountBit;
+    setReg16(DispSrAddress, val);
+  }
+
+  public int getVCountValue() {
     return getReg16(DispSrAddress) >>> 8;
   }
 
-  public boolean isVCountMatchInterruptEnabled() {
-    return ((getReg16(DispSrAddress) & 0x0020) != 0);
+  public boolean isHBlankInterruptEnabled() {
+    return ((getReg16(DispSrAddress) & DispSrInHBlankIntEnableBit) != 0);
   }
 
-  public void setYScanline(int vValue) {
-    //System.out.println("YScanline.set(" + vValue + ");");
-    memory[LCYRegisterAddress] = (byte) vValue;
+  public boolean isVBlankInterruptEnabled() {
+    return ((getReg16(DispSrAddress) & DispSrInVBlankIntEnableBit) != 0);
+  }
+
+  public boolean isVCountInterruptEnabled() {
+    return ((getReg16(DispSrAddress) & DispSrVCountIntEnableBit) != 0);
+  }
+
+  public void setYScanline(int value) {
+    memory[LCYRegisterAddress] = (byte) value;
   }
   
   public final static int IERegisterAddress  = 0x00000200;
@@ -684,18 +704,12 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static short keyInterruptBit    = 0x1000;
   //public final static short unknownButUsedBit  = 0x2000;
   
-  private boolean isInterruptMasterEnabled() {
+  public boolean isInterruptMasterEnabled() {
     return ((memory[IMERegisterAddress] & 0x01) != 0);
   }
 
-  protected boolean isInterruptEnabled(short interruptBit) {
-    return ((getReg16(IERegisterAddress) & interruptBit) != 0);
-  }
-
   public void genInterrupt(short interruptBit) {
-    if (isInterruptMasterEnabled())
-      setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) |
-              (getReg16(IERegisterAddress) & interruptBit)));
+    setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) | interruptBit));
   }
 
   public int getInternalOffset(int offset) {

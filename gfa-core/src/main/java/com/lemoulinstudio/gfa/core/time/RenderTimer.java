@@ -7,10 +7,6 @@ import com.lemoulinstudio.gfa.core.memory.IORegisterSpace_8_16_32;
 
 public class RenderTimer {
 
-  private int hValue;
-  private int vValue;
-  private boolean oldIsHBlank;
-  private boolean oldIsVBlank;
   private IORegisterSpace_8_16_32 ioMem;
   private Lcd lcd;
   private Dma dma0;
@@ -18,6 +14,12 @@ public class RenderTimer {
   private Dma dma2;
   private Dma dma3;
 
+  private int xDisplay;
+  private int yDisplay;
+  private boolean oldIsInHBlank;
+  private boolean oldIsInVBlank;
+  private boolean oldIsVCountMatch;
+  
   public RenderTimer() {
     reset();
   }
@@ -47,59 +49,70 @@ public class RenderTimer {
   }
   
   public final void reset() {
-    hValue = 0;
-    vValue = 0;
-    oldIsHBlank = false;
-    oldIsVBlank = false;
+    xDisplay = 0;
+    yDisplay = 0;
+    oldIsInHBlank = false;
+    oldIsInVBlank = false;
+    oldIsVCountMatch = false;
   }
 
-  /*
-   public int getTime() {
-    return vValue;
-   }
-   */
-
   public void addTime(int nbCycles) {
-    hValue += nbCycles;
+    // Update hValue and vValue.
+    xDisplay += nbCycles;
 
-    boolean isHBlank = (hValue >= 240 * 4);
-    boolean isVBlank = (vValue >= 160);
+    if (xDisplay >= 308 * 4) {
+      xDisplay -= 308 * 4;
+      
+      yDisplay++;
+      if (yDisplay >= 228)
+        yDisplay = 0;
 
-    ioMem.setHBlank(isHBlank);
-    ioMem.setVBlank(isVBlank);
-    
-    if (!oldIsHBlank && isHBlank && !isVBlank) {
-      lcd.drawLine(vValue);
+      ioMem.setYScanline(yDisplay);
+    }
+
+    // Update the bits of the display status.
+    boolean isInHBlank = (xDisplay >= 240 * 4);
+    boolean isInVBlank = (yDisplay >= 160);
+    boolean isVCountMatch = (yDisplay == ioMem.getVCountValue());
+    ioMem.setIsHBlank(isInHBlank);
+    ioMem.setIsVBlank(isInVBlank);
+    ioMem.setIsVCountMatch(isVCountMatch);
+
+    // Check if it is time to draw a line.
+    if (!oldIsInHBlank && isInHBlank && !isInVBlank)
+      lcd.drawLine(yDisplay);
+
+    // Handle the trigger of the DMAs and the HBlank interrupt.
+    if (!oldIsInHBlank && isInHBlank && !isInVBlank) {
       dma0.notifyHBlank();
       dma1.notifyHBlank();
       dma2.notifyHBlank();
       dma3.notifyHBlank();
-      ioMem.genInterrupt(IORegisterSpace_8_16_32.hBlankInterruptBit);
+
+      if (ioMem.isHBlankInterruptEnabled())
+        ioMem.genInterrupt(IORegisterSpace_8_16_32.hBlankInterruptBit);
     }
-    
-    if (!oldIsVBlank && isVBlank) {
+
+    // Handle the trigger of the DMAs and the VBlank interrupt.
+    if (!oldIsInVBlank && isInVBlank) {
       dma0.notifyVBlank();
       dma1.notifyVBlank();
       dma2.notifyVBlank();
       dma3.notifyVBlank();
-      ioMem.genInterrupt(IORegisterSpace_8_16_32.vBlankInterruptBit);
+
+      if (ioMem.isVBlankInterruptEnabled())
+        ioMem.genInterrupt(IORegisterSpace_8_16_32.vBlankInterruptBit);
     }
+
+    // Handle the trigger of the VCount interrupt.
+    if (!oldIsVCountMatch && isVCountMatch)
+      if (ioMem.isVCountInterruptEnabled())
+        ioMem.genInterrupt(IORegisterSpace_8_16_32.vCountInterruptBit);
+
     
-    oldIsHBlank = isHBlank;
-    oldIsVBlank = isVBlank;
-
-    if (hValue >= 308 * 4) {
-      hValue -= 308 * 4;
-      
-      vValue++;
-      if (vValue >= 228)
-        vValue = 0;
-
-      ioMem.setYScanline(vValue);
-      if (ioMem.isVCountMatchInterruptEnabled() &&
-	  (vValue == ioMem.getVCountSetting()))
-	  ioMem.genInterrupt(IORegisterSpace_8_16_32.vCountInterruptBit);
-    }
+    oldIsInHBlank = isInHBlank;
+    oldIsInVBlank = isInVBlank;
+    oldIsVCountMatch = isVCountMatch;
   }
 
 }
