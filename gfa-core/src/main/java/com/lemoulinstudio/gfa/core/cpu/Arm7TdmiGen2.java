@@ -29,9 +29,7 @@ public class Arm7TdmiGen2 extends Arm7Tdmi {
 
     // Handle IRQ
     if (!CPSR.isBitSet(iFlagBit) &&
-	((memory.loadByte(REG_IME_Address) & 1) != 0) &&
-	((memory.loadHalfWord(REG_IE_Address) & memory.loadHalfWord(REG_IF_Address)) != 0))
-    {
+	(memory.loadHalfWord(REG_IF_Address)) != 0) {
       getRegister(14, irqModeBits).set(PC.get() + 4); // LR <- PC + 4
       SPSR_irq.set(CPSR);     // SPSR_irq <- CPSR
       setMode(irqModeBits);   // CPSR changed to mode irq

@@ -684,7 +684,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static short keyInterruptBit    = 0x1000;
   //public final static short unknownButUsedBit  = 0x2000;
   
-  protected boolean isInterruptMasterEnabled() {
+  private boolean isInterruptMasterEnabled() {
     return ((memory[IMERegisterAddress] & 0x01) != 0);
   }
 
@@ -693,20 +693,9 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   }
 
   public void genInterrupt(short interruptBit) {
-    /*
-    if (isInterruptMasterEnabled() &&
-	isInterruptEnabled(interruptBit))
-    {
-      System.out.print("genInterrupt(" + Hex.toString(interruptBit) + ");");
-      System.out.println(" SET !");
-      setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) | interruptBit));
-    }
-    else
-      System.out.println(" failed .... IE=" + Hex.toString(getReg16(IERegisterAddress)) + "... IME=" + isInterruptMasterEnabled());
-    */
-
-    setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) |
-                                        (getReg16(IERegisterAddress) & interruptBit)));
+    if (isInterruptMasterEnabled())
+      setReg16(IFRegisterAddress, (short) (getReg16(IFRegisterAddress) |
+              (getReg16(IERegisterAddress) & interruptBit)));
   }
 
   public int getInternalOffset(int offset) {
