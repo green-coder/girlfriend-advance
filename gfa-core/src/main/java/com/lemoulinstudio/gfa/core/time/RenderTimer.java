@@ -83,11 +83,13 @@ public class RenderTimer {
       lcd.drawLine(yDisplay);
 
     // Handle the trigger of the DMAs and the HBlank interrupt.
-    if (!oldIsInHBlank && isInHBlank && !isInVBlank) {
-      dma0.notifyHBlank();
-      dma1.notifyHBlank();
-      dma2.notifyHBlank();
-      dma3.notifyHBlank();
+    if (!oldIsInHBlank && isInHBlank) {
+      if (!isInVBlank) {
+        dma0.notifyHBlank();
+        dma1.notifyHBlank();
+        dma2.notifyHBlank();
+        dma3.notifyHBlank();
+      }
 
       if (ioMem.isHBlankInterruptEnabled())
         ioMem.genInterrupt(IORegisterSpace_8_16_32.hBlankInterruptBit);
