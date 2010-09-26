@@ -155,8 +155,9 @@ public class RomDataObject extends MultiDataObject {
 
             stopRequested = false;
             try {
-              while (!stopRequested && !breakpointExpr.evaluation())
+              do {
                 cpu.step();
+              }  while (!stopRequested && !breakpointExpr.evaluation());
             }
             catch(Exception e) {Exceptions.printStackTrace(e);}
 
