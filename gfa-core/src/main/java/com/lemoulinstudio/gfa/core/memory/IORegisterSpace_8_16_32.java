@@ -70,58 +70,67 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   }
 
   public byte loadByte(int offset) {
-    return read(offset);
+    offset = getInternalOffset(offset);
+    return memory[offset];
   }
 
   public short loadHalfWord(int offset) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffe;
-    return (short) ((read(offset + 1) << 8) |
-                    (0xff & read(offset)));
+    return (short) ((memory[offset + 1] << 8) |
+                    (0xff & memory[offset]));
   }
 
   public int loadWord(int offset) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffc;
-    return ((read(offset + 3) << 24) |
-            ((0xff & read(offset + 2)) << 16) |
-            ((0xff & read(offset + 1)) <<  8) |
-             (0xff & read(offset)));
+    return ((memory[offset + 3] << 24) |
+            ((0xff & memory[offset + 2]) << 16) |
+            ((0xff & memory[offset + 1]) <<  8) |
+             (0xff & memory[offset]));
   }
 
   public void storeByte(int offset, byte value) {
+    offset = getInternalOffset(offset);
     write8(offset, value);
   }
 
   public void storeHalfWord(int offset, short value) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffe;
     write16(offset, value);
   }
 
   public void storeWord(int offset, int value) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffc;
     write16(offset, (short) value);
     write16(offset + 2, (short) (value >> 16));
   }
 
   public byte swapByte(int offset, byte value) {
-    byte result = read(offset);
+    offset = getInternalOffset(offset);
+    byte result = memory[offset];
     write8(offset, value);
     return result;
   }
 
   public short swapHalfWord(int offset, short value) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffe;
-    short result = (short) ((read(offset + 1) << 8) |
-                             read(offset));
+    short result = (short) ((memory[offset + 1] << 8) |
+                            (0xff & memory[offset]));
     write16(offset, value);
     return result;
   }
 
   public int swapWord(int offset, int value) {
+    offset = getInternalOffset(offset);
     offset &= 0xfffffffc;
-    int result = ((read(offset + 3) << 24) |
-                  ((0xff & read(offset + 2)) << 16) |
-                  ((0xff & read(offset + 1)) << 8)  |
-                   (0xff & read(offset)));
+    int result = ((memory[offset + 3] << 24) |
+                  ((0xff & memory[offset + 2]) << 16) |
+                  ((0xff & memory[offset + 1]) << 8)  |
+                   (0xff & memory[offset]));
     write16(offset, (short) value);
     write16(offset + 2, (short) (value >> 16));
     return result;
@@ -155,22 +164,7 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static int DMA3SizeAddress = 0x000000dc;
   public final static int DMA3CrAddress   = 0x000000de;
 
-  protected byte read(int offset) {
-    offset = getInternalOffset(offset);
-    int off16 = offset & 0xfffffffe; // Offset aligned on halfWords.
-    switch (off16) {
-      case Timer0DataAdress: setReg16(off16, timer0.getTime()); break;
-      case Timer1DataAdress: setReg16(off16, timer1.getTime()); break;
-      case Timer2DataAdress: setReg16(off16, timer2.getTime()); break;
-      case Timer3DataAdress: setReg16(off16, timer3.getTime()); break;
-    }
-
-    return memory[offset];
-  }
-
-  protected void write8(int offset, byte value) {
-    offset = getInternalOffset(offset);
-
+  private void write8(int offset, byte value) {
     int off16 = offset & 0xfffffffe; // Offset aligned on halfWords.
     int off8  = offset & 1;          // The rest of alignment.
 
@@ -195,15 +189,15 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     memory[offset] = value;
     
     switch (off16) {
-      case Timer0DataAdress: timer0.setTime(val16); break;
-      case Timer1DataAdress: timer1.setTime(val16); break;
-      case Timer2DataAdress: timer2.setTime(val16); break;
-      case Timer3DataAdress: timer3.setTime(val16); break;
+      case Timer0DataAdress: timer0.data.setValue(val16); break;
+      case Timer1DataAdress: timer1.data.setValue(val16); break;
+      case Timer2DataAdress: timer2.data.setValue(val16); break;
+      case Timer3DataAdress: timer3.data.setValue(val16); break;
 
-      case Timer0CrAdress: updateTimerState(timer0, val16); break;
-      case Timer1CrAdress: updateTimerState(timer1, val16); break;
-      case Timer2CrAdress: updateTimerState(timer2, val16); break;
-      case Timer3CrAdress: updateTimerState(timer3, val16); break;
+      case Timer0CrAdress: timer0.cr.setValue(val16); break;
+      case Timer1CrAdress: timer1.cr.setValue(val16); break;
+      case Timer2CrAdress: timer2.cr.setValue(val16); break;
+      case Timer3CrAdress: timer3.cr.setValue(val16); break;
 
       case DMA0CrAddress: dma0.notifyCrModified(); break;
       case DMA1CrAddress: dma1.notifyCrModified(); break;
@@ -222,18 +216,14 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     }
   }
 
-  protected void write16(int offset, short value) {
-    offset = getInternalOffset(offset);
-
+  private void write16(int offset, short value) {
     if (offset == IERegisterAddress) {
-      //System.out.println("Write dans IE " + Hex.toString(offset) + " : " + Hex.toString(value));
       memory[offset] = (byte) value;
       memory[offset + 1] = (byte) ((value >> 8) & 0x3f);
       return;
     }
 
     if (offset == IFRegisterAddress) {
-      //System.out.println("Write dans IF " + Hex.toString(offset) + " : " + Hex.toString(value));
       memory[offset] &= ~value;
       memory[offset + 1] &= ~(value >> 8);
       return;
@@ -246,15 +236,15 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
     memory[offset + 1] = (byte) (value >> 8);
     
     switch (offset) {
-      case Timer0DataAdress: timer0.setTime(value); break;
-      case Timer1DataAdress: timer1.setTime(value); break;
-      case Timer2DataAdress: timer2.setTime(value); break;
-      case Timer3DataAdress: timer3.setTime(value); break;
+      case Timer0DataAdress: timer0.data.setValue(value); break;
+      case Timer1DataAdress: timer1.data.setValue(value); break;
+      case Timer2DataAdress: timer2.data.setValue(value); break;
+      case Timer3DataAdress: timer3.data.setValue(value); break;
 
-      case Timer0CrAdress: updateTimerState(timer0, value); break;
-      case Timer1CrAdress: updateTimerState(timer1, value); break;
-      case Timer2CrAdress: updateTimerState(timer2, value); break;
-      case Timer3CrAdress: updateTimerState(timer3, value); break;
+      case Timer0CrAdress: timer0.cr.setValue(value); break;
+      case Timer1CrAdress: timer1.cr.setValue(value); break;
+      case Timer2CrAdress: timer2.cr.setValue(value); break;
+      case Timer3CrAdress: timer3.cr.setValue(value); break;
 
       case DMA0CrAddress: dma0.notifyCrModified(); break;
       case DMA1CrAddress: dma1.notifyCrModified(); break;
@@ -297,18 +287,18 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   }
 
   public final static int LCDRegisterAddress = 0x00000000; // The screen mode
-  public final static int videoModeMask      = 0x00000007;
-  public final static int videoCGBModeBit    = 0x00000008;
-  public final static int videoFramBufSelBit = 0x00000010;
-  public final static int videoOAMHBlankBit  = 0x00000020;
-  public final static int video1DMappingBit  = 0x00000040;
-  public final static int videoOAMBit        = 0x00001000;
-  public final static int window0Bit         = 0x00002000;
-  public final static int window1Bit         = 0x00004000;
-  public final static int objWindowBit       = 0x00008000;
+  public final static int videoModeMask      = 0x0007;
+  public final static int videoCGBModeBit    = 0x0008;
+  public final static int videoFramBufSelBit = 0x0010;
+  public final static int videoOAMHBlankBit  = 0x0020;
+  public final static int video1DMappingBit  = 0x0040;
+  public final static int videoOAMBit        = 0x1000;
+  public final static int window0Bit         = 0x2000;
+  public final static int window1Bit         = 0x4000;
+  public final static int objWindowBit       = 0x8000;
 
   public final static int[] videoBGBit = {
-    0x00000100, 0x00000200, 0x00000400, 0x00000800
+    0x0100, 0x0200, 0x0400, 0x0800
   };
 
   public final static int DispSrAddress              = 0x00000004;
@@ -622,27 +612,18 @@ public class IORegisterSpace_8_16_32 extends MemoryManagementUnit {
   public final static int Timer2DataAdress = 0x00000108;
   public final static int Timer3DataAdress = 0x0000010c;
 
+  public final static int[] TimerDataAdress = new int[] {
+    Timer0DataAdress, Timer1DataAdress, Timer2DataAdress, Timer3DataAdress
+  };
+
   public final static int Timer0CrAdress     = 0x00000102;
   public final static int Timer1CrAdress     = 0x00000106;
   public final static int Timer2CrAdress     = 0x0000010a;
   public final static int Timer3CrAdress     = 0x0000010e;
-  public final static int TimerXCrFreqMask   = 0x00000003;
-  public final static int TimerXCrCascadeBit = 0x00000004;
-  public final static int TimerXCrIRQBit     = 0x00000040;
-  public final static int TimerXCrEnabledBit = 0x00000080;
 
-  protected void updateTimerState(Timer timer, short val16) {
-    switch (val16 & TimerXCrFreqMask) {
-      case 0: timer.setPeriod(1); break;
-      case 1: timer.setPeriod(64); break;
-      case 2: timer.setPeriod(256); break;
-      case 3: timer.setPeriod(1024); break;
-    }
-
-    timer.setCascadeEnabled((val16 & TimerXCrCascadeBit) != 0);
-    timer.setIRQEnabled((val16 & TimerXCrIRQBit) != 0);
-    timer.setTimerEnabled((val16 & TimerXCrEnabledBit) != 0);
-  }
+  public final static int[] TimerCrAdress = new int[] {
+    Timer0CrAdress, Timer1CrAdress, Timer2CrAdress, Timer3CrAdress
+  };
 
   public void setIsVBlank(boolean b) {
     short val = getReg16(DispSrAddress);

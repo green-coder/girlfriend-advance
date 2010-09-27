@@ -18,7 +18,7 @@ public class Time {
   public RenderTimer renderTimer;
 
   public Time() {
-    timer3 = new Timer(null,   3); // The timer 3 isn't chained to another timer.
+    timer3 = new Timer(null,   3); // The timer 3 is not chained to another timer.
     timer2 = new Timer(timer3, 2); // The timer 2 is chained to the timer 3.
     timer1 = new Timer(timer2, 1); // The timer 1 is chained to the timer 2.
     timer0 = new Timer(timer1, 0); // The timer 0 is chained to the timer 1.

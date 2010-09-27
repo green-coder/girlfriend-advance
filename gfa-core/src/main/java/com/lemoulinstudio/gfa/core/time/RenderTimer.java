@@ -21,7 +21,6 @@ public class RenderTimer {
   private boolean oldIsVCountMatch;
   
   public RenderTimer() {
-    reset();
   }
 
   public void connectToMemory(GfaMMU memory) {

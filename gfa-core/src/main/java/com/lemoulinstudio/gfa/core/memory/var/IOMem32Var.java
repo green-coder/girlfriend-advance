@@ -6,20 +6,20 @@ public class IOMem32Var implements Mem32Var {
 
   private IORegisterSpace_8_16_32 ioMem;
   private int address;
-  private int setterMask;
+  private int mask;
 
-  public IOMem32Var(IORegisterSpace_8_16_32 ioMem, int address, int setterMask) {
+  public IOMem32Var(IORegisterSpace_8_16_32 ioMem, int address, int mask) {
     this.ioMem = ioMem;
     this.address = address;
-    this.setterMask = setterMask;
+    this.mask = mask;
   }
 
   public int getValue() {
-    return ioMem.getReg32(address);
+    return ioMem.getReg32(address) & mask;
   }
 
   public void setValue(int value) {
-    ioMem.setReg32(address, value & setterMask);
+    ioMem.setReg32(address, value & mask);
   }
 
 }

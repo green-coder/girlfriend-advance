@@ -6,20 +6,20 @@ public class IOMem16Var implements Mem16Var {
 
   private IORegisterSpace_8_16_32 ioMem;
   private int address;
-  private short setterMask;
+  private short mask;
 
-  public IOMem16Var(IORegisterSpace_8_16_32 ioMem, int address, short setterMask) {
+  public IOMem16Var(IORegisterSpace_8_16_32 ioMem, int address, short mask) {
     this.ioMem = ioMem;
     this.address = address;
-    this.setterMask = setterMask;
+    this.mask = mask;
   }
 
   public short getValue() {
-    return ioMem.getReg16(address);
+    return (short) (ioMem.getReg16(address) & mask);
   }
 
   public void setValue(short value) {
-    ioMem.setReg16(address, (short) (value & setterMask));
+    ioMem.setReg16(address, (short) (value & mask));
   }
 
 }
