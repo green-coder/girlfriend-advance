@@ -196,14 +196,15 @@ public class RomDataObject extends MultiDataObject {
         // Reset
         device.reset(skipBios);
 
-        // We are looking for the last time where the condition was true.
+        // We are looking for the last time the condition was true.
         long lastTime = -1;
         Time time = cpu.getTime();
         try {
-          while (time.getTime() != now) {
+          while (time.getTime() < now) {
             cpu.step();
             if (breakpointExpr.evaluation())
-              lastTime = time.getTime();
+              if (time.getTime() < now)
+                lastTime = time.getTime();
             breakpointExpr.clearStatus();
           }
         }
